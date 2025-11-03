@@ -1,0 +1,28 @@
+<form class="sign">
+  <div class="_2in1">
+    <input type="text" placeholder="Name" />
+    <input type="text" placeholder="Family" />
+  </div>
+
+  <div class="num">
+    <select id="countryCode">
+      <option value="+1">🇺🇸 +1</option>
+      <option value="+44">🇬🇧 +44</option>
+      <option value="+20">🇪🇬 +20</option>
+      <option value="+966">🇸🇦 +966</option>
+      <option value="+971">🇦🇪 +971</option>
+      <!-- أضف بقية الدول حسب الحاجة -->
+    </select>
+    <input type="text" placeholder="Number" />
+  </div>
+
+  <input type="email" placeholder="Email" />
+  <input type="password" placeholder="Password" />
+
+  <div class="buttonContainer">
+    <button type="submit" class="signup-btn btn">SignUp</button>
+    <a href="#" id="switch-to-login" class="login-link" (click)="switchToLogin($event)"
+      >I have an account</a
+    >
+  </div>
+</form>
