@@ -15,8 +15,6 @@
   > .externalNav {
     grid-area: nav;
 
-    background-color: rgb(141, 143, 143);
-
     @include mediafast(mini-mobile, mobile, tablet) {
       @include flex(row, space-between, center);
     }
@@ -62,7 +60,7 @@
           .services {
             .st0 {
               fill: none;
-              stroke: #000000;
+
               stroke-width: 2;
               stroke-linecap: round;
               stroke-linejoin: round;
@@ -70,14 +68,14 @@
             }
             .st1 {
               fill: none;
-              stroke: #000000;
+
               stroke-width: 2;
               stroke-linecap: round;
               stroke-linejoin: round;
             }
             .st2 {
               fill: none;
-              stroke: #000000;
+
               stroke-width: 2;
               stroke-linecap: round;
               stroke-linejoin: round;
@@ -92,7 +90,7 @@
             white-space: normal; /* يسمح بانتقال السطر بين الكلمات فقط */
             overflow-wrap: normal; /* يمنع كسر الكلمات الطويلة */
             word-break: normal; /* يمنع كسر الكلمة نفسها */
-            color: black;
+
             font-size: smaller;
             text-decoration: none;
 
@@ -127,7 +125,7 @@
           white-space: normal; /* يسمح بانتقال السطر بين الكلمات فقط */
           overflow-wrap: normal; /* يمنع كسر الكلمات الطويلة */
           word-break: normal; /* يمنع كسر الكلمة نفسها */
-          color: black;
+
           font-size: smaller;
           text-decoration: none;
 
@@ -147,23 +145,18 @@
         display: none;
       }
     }
-
-    li:hover {
-      background-color: rgb(194, 191, 191);
-    }
   }
   > .innerContainer {
     @include mediafast(mini-mobile, mobile, tablet) {
     }
 
     @include mediafast(big-tablet, mini-laptop, laptop, desktop) {
-      margin: 0.5rem 0.5rem 0.5rem 0;
-      border-radius: 1rem;
+      margin: 0.5rem 0.5rem 0 0;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
     }
 
     grid-area: con;
-
-    background-color: rgb(141, 143, 143);
 
     > .innerNav {
       height: 3rem;
@@ -172,7 +165,7 @@
       @include flex(row, space-between, center);
       > .search-container {
         height: 100%;
-        background-color: white;
+
         border-radius: 0.5rem;
         width: 30%;
         @include flex(row, space-between, center);
@@ -183,6 +176,7 @@
           border: none;
           border-radius: 0.5rem;
           padding: 0.5rem;
+          background-color: transparent;
         }
         > .search-input:focus {
           border: none;
@@ -193,7 +187,7 @@
           @include flex(row, center, center);
           border-radius: 0.5rem;
           border: none;
-          background-color: white;
+          background-color: transparent;
           padding: 0.2rem;
 
           height: 100%;
@@ -201,7 +195,6 @@
 
           > svg {
             border-radius: 0.5rem;
-
             height: 100%;
             aspect-ratio: 1/1;
           }
@@ -219,14 +212,21 @@
           text-align: center;
           line-height: 2rem;
           text-decoration: none;
-          color: #000000;
-          background-color: azure;
         }
         .in {
         }
         .up {
         }
       }
+    }
+
+    .contentBox {
+      width: 100%;
+      height: calc(100% - 3rem);
+
+      border-bottom-left-radius: 1rem;
+      border-bottom-right-radius: 1rem;
+      padding: 0.5rem;
     }
   }
 }

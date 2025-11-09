@@ -3,10 +3,23 @@ import { LayoutComponent } from './LayoutComponent/Layout.component';
 import { Auth } from './auth/auth.component';
 import { Login } from './auth/login/login';
 import { Sign } from './auth/sign/sign';
+import { LMS } from './lms/lms';
+import { HOME } from './home/home';
+import { ServicesSection } from './services-section/services-section';
+import { FreeLancing } from './free-lancing/free-lancing';
 
 export const routes: Routes = [
-  { path: '', component: LayoutComponent }, // الصفحة الرئيسية
-
+  {
+    path: '',
+    component: LayoutComponent,
+    children: [
+      { path: 'home', component: HOME },
+      { path: 'lms', component: LMS },
+      { path: 'services-section', component: ServicesSection },
+      { path: 'free-lancing', component: FreeLancing },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+    ],
+  },
   {
     path: 'auth',
     component: Auth,
@@ -16,6 +29,5 @@ export const routes: Routes = [
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
   },
-
-  { path: '**', redirectTo: '' }, // أي مسار خاطئ يرجع إلى الرئيسية
+  { path: '**', redirectTo: '' },
 ];

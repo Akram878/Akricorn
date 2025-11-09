@@ -10,7 +10,7 @@
       @media (min-width: $min) and (max-width: $max) {
         @content;
       }
-    } 
+    }
   }
 }
 
@@ -24,12 +24,7 @@
   }
 }
 
-@mixin flex(
-  $direction,
-  $justify,
-  $align,
-  $wrap: nowrap
-) {
+@mixin flex($direction, $justify, $align, $wrap: nowrap) {
   display: flex;
   flex-direction: $direction;
   justify-content: $justify;

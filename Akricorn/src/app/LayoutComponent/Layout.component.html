@@ -1,7 +1,7 @@
 <!-- container for use grid systeam cause i dont like use it on body -->
 <div class="externalContainer">
   <!-- first div for nav bar -->
-  <nav class="externalNav">
+  <nav class="externalNav bg-gradient">
     <div class="logo">
       <svg
         class="icon"
@@ -17,7 +17,6 @@
       >
         <style type="text/css">
           .st0 {
-            fill: #333333;
           }
         </style>
         <path
@@ -37,28 +36,31 @@
 
     <div class="navigationButtons">
       <ul>
-        <li>
-          <a href="">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <li class="libtn bg-gradient-darken">
+          <a href="" [routerLink]="'/home'">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="stroke">
               <path
                 d="M2 12.2039C2 9.91549 2 8.77128 2.5192 7.82274C3.0384 6.87421 3.98695 6.28551 5.88403 5.10813L7.88403 3.86687C9.88939 2.62229 10.8921 2 12 2C13.1079 2 14.1106 2.62229 16.116 3.86687L18.116 5.10812C20.0131 6.28551 20.9616 6.87421 21.4808 7.82274C22 8.77128 22 9.91549 22 12.2039V13.725C22 17.6258 22 19.5763 20.8284 20.7881C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.7881C2 19.5763 2 17.6258 2 13.725V12.2039Z"
-                stroke="black"
                 stroke-width="1.5"
               />
-              <path d="M15 18H9" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M15 18H9" stroke-width="1.5" stroke-linecap="round" />
             </svg>
             home</a
           >
         </li>
-        <li>
-          <a href="">
-            <svg viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <li class="libtn bg-gradient-darken">
+          <a href="" [routerLink]="'/lms'">
+            <svg
+              viewBox="0 0 192 192"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              class="stroke"
+            >
               <path
                 d="M5.999 60.165V93.79M101.97 80l.005 54.095m-51.128-56.35c-.265 18.528 0 37.687 0 56.35m103.151 0V79.999c-.107-28.355-51.575-28.715-52.024 0 .133-7.346-3.623-14.21-9.867-18.032m5.382-7.212-8.97-8.565 24.667-20.286A222.577 222.577 0 0 0 6 60.164h32.29v15.327c21.841 5.004 42.561 3.44 59.2-20.736z"
                 class="a"
                 style="
                   fill: none;
-                  stroke: #000000;
                   stroke-width: 12;
                   stroke-linecap: round;
                   stroke-linejoin: round;
@@ -70,10 +72,10 @@
             LMS</a
           >
         </li>
-        <li>
-          <a href="">
+        <li class="libtn bg-gradient-darken">
+          <a href="" [routerLink]="'/services-section'">
             <svg
-              class="services"
+              class="services stroke"
               version="1.1"
               id="Icons"
               xmlns="http://www.w3.org/2000/svg"
@@ -98,9 +100,10 @@
             Services
           </a>
         </li>
-        <li>
-          <a href="">
+        <li class="libtn bg-gradient-darken">
+          <a href="" [routerLink]="'free-lancing'">
             <svg
+              class="fill"
               id="Layer_1"
               data-name="Layer 1"
               xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +112,6 @@
               <defs>
                 <style>
                   .cls-1 {
-                    fill: #000000;
                   }
                 </style>
               </defs>
@@ -126,15 +128,14 @@
     </div>
 
     <div class="setbtn">
-      <li>
-        <a href="">
+      <li class="libtn bg-gradient-darken">
+        <a href="#" (click)="openSettings($event)">
           <svg
+            class="fill"
             xmlns="http://www.w3.org/2000/svg"
             shape-rendering="geometricPrecision"
             text-rendering="geometricPrecision"
             image-rendering="optimizeQuality"
-            fill-rule="evenodd"
-            clip-rule="evenodd"
             viewBox="0 0 487 511.954"
           >
             <path
@@ -150,15 +151,14 @@
     <div class="burger">---</div>
   </nav>
 
-  <div class="innerContainer">
+  <div class="innerContainer bg-primary">
     <nav class="innerNav">
       <div class="search-container">
         <input type="text" class="search-input" placeholder="Search" />
         <button class="search-button">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 24 24" class="stroke" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M11 6C13.7614 6 16 8.23858 16 11M16.6588 16.6549L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
-              stroke="#000000"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -172,6 +172,9 @@
         <a href="#" class="up" [routerLink]="'/auth/register'">Sign up</a>
       </div>
     </nav>
-    <div class="contentBox"></div>
+    <div class="contentBox">
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>
+<app-settings *ngIf="showSettings" (closeModal)="closeSettings()"></app-settings>

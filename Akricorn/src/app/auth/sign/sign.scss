@@ -62,16 +62,35 @@
 
     > button {
       padding: 0.5rem;
-      margin: 0.25rem;
+      margin: 0.25rem 0.25rem 0 0;
       border-radius: 0.25rem;
       border-color: transparent;
-      background-color: cadetblue;
-      color: azure;
     }
     > a {
       font-size: x-small;
       text-decoration: none;
-      color: rgb(102, 101, 101);
     }
+  }
+
+  .policy-container {
+    @include mediafast(mini-mobile, mobile, tablet) {
+      @include flex(row, center, center);
+    }
+    @include mediafast(big-tablet, mini-laptop, laptop, desktop) {
+      @include flex(row, flex-start, center);
+    }
+
+    width: 100%;
+    font-size: x-small;
+    .checkbox {
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+  }
+}
+
+.signup-btn {
+  &:disabled {
+    background-color: darken(#53575a44, 30%); // 30% أغمق
+    cursor: not-allowed;
   }
 }

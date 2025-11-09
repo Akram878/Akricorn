@@ -1,0 +1,95 @@
+@use '../../scss/base/mixins' as *;
+
+.LMS {
+  height: 100%;
+  width: 100%;
+
+  @include grid-system(
+    1fr 1fr 1fr,
+    1fr 1fr 1fr 1fr,
+    'Courses Tools myLMS' 'myCourses learningPlans myLMS' 'Library Groups  myLMS'
+      'Library Groups  myLMS'
+  );
+
+  > div {
+    margin: 0.5rem;
+    padding: 1rem;
+    // background-image: url(../../../public/image/backgrounds/janko-ferlic-sfL_QOnmy00-unsplash.jpg);
+
+    p {
+      font-size: small;
+      font-weight: normal;
+    }
+    h5 {
+      margin: 0.5rem;
+      font-size: small;
+      font-weight: bold;
+    }
+    img {
+      width: 50px;
+      height: 50px;
+    }
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 2rem;
+    font-weight: bold;
+
+    letter-spacing: 1px;
+
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      //   background: linear-gradient(120deg, rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    &:hover {
+      transform: scale(1.03);
+    }
+
+    &:hover::before {
+      opacity: 1;
+      animation: moveBackground 6s linear infinite;
+    }
+  }
+
+  .Library {
+    .subtitle {
+      @include flex(row, center, center);
+    }
+    grid-area: Library;
+    @include flex(column, space-evenly, center);
+  }
+  .Tools {
+    grid-area: Tools;
+  }
+  .Groups {
+    .subtitle {
+      @include flex(row, center, center);
+    }
+    grid-area: Library;
+    @include flex(column, space-evenly, center);
+    grid-area: Groups;
+  }
+  .Courses {
+    grid-area: Courses;
+  }
+  .MyCourses {
+    grid-area: myCourses;
+  }
+  .MyLMS {
+    grid-area: myLMS;
+  }
+}

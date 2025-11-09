@@ -1,28 +1,37 @@
-<form class="sign">
+<form class="sign" (ngSubmit)="signup()">
   <div class="_2in1">
-    <input type="text" placeholder="Name" />
-    <input type="text" placeholder="Family" />
+    <input type="text" placeholder="Name" [(ngModel)]="name" name="name" />
+    <input type="text" placeholder="Family" [(ngModel)]="family" name="family" />
   </div>
 
   <div class="num">
-    <select id="countryCode">
+    <select id="countryCode" [(ngModel)]="countryCode" name="countryCode">
       <option value="+1">🇺🇸 +1</option>
       <option value="+44">🇬🇧 +44</option>
       <option value="+20">🇪🇬 +20</option>
       <option value="+966">🇸🇦 +966</option>
       <option value="+971">🇦🇪 +971</option>
-      <!-- أضف بقية الدول حسب الحاجة -->
     </select>
-    <input type="text" placeholder="Number" />
+    <input type="text" placeholder="Number" [(ngModel)]="number" name="number" />
   </div>
 
-  <input type="email" placeholder="Email" />
-  <input type="password" placeholder="Password" />
+  <input type="email" placeholder="Email" [(ngModel)]="email" name="email" />
+  <input type="password" placeholder="Password" [(ngModel)]="password" name="password" />
 
   <div class="buttonContainer">
-    <button type="submit" class="signup-btn btn">SignUp</button>
-    <a href="#" id="switch-to-login" class="login-link" (click)="switchToLogin($event)"
-      >I have an account</a
-    >
+    <button type="submit" class="signup-btn btn" [disabled]="!acceptedPolicy">SignUp</button>
+
+    <a href="#" class="login-link txtna" (click)="switchToLogin($event)"> I have an account </a>
+  </div>
+
+  <div class="policy-container">
+    <input
+      class="checkbox"
+      type="checkbox"
+      id="privacyPolicy"
+      [(ngModel)]="acceptedPolicy"
+      name="acceptedPolicy"
+    />
+    <label for="privacyPolicy"> I agree to the <a href="#">Privacy Policy</a> </label>
   </div>
 </form>

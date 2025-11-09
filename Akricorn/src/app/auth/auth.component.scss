@@ -18,7 +18,7 @@
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background-color: rgb(205, 206, 206);
+
     padding: 0.5rem;
     width: 2.5rem;
     height: 2.5rem;
@@ -32,8 +32,6 @@
   > .regBox {
     border-radius: 1rem;
     padding: 1rem;
-
-    background-color: rgb(205, 206, 206);
 
     @include mediafast(big-tablet, mini-laptop, laptop, desktop) {
       @include grid-system(
@@ -74,7 +72,6 @@
       p {
         margin: 0.5rem;
         font-size: x-small;
-        color: rgb(102, 101, 101);
       }
       > .altIcons {
         a {

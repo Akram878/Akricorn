@@ -1,16 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+@use './scss/base/theme' as *;
+@use './scss/utilities/utilities' as *;
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 html,
 body {
   height: 100%;
   width: 100%;
-  position: relative;
-}
-:root {
-  font-size: 16px;
-  font-family: sans-serif;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
