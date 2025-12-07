@@ -1,0 +1,90 @@
+<div class="lms-library-page">
+  <div class="lms-library-page__header">
+    <div class="lms-library-page__breadcrumb">
+      <span>LMS</span>
+      <span>/</span>
+      <span class="active">Library</span>
+    </div>
+
+    <h2>Digital Library</h2>
+    <p>
+      Explore a selection of digital books. This page now displays real books from the backend
+      instead of demo items.
+    </p>
+  </div>
+
+  <!-- Top bar: search + filter -->
+  <div class="lms-library-page__topbar">
+    <div class="lms-library-page__search">
+      <input type="text" placeholder="Search by title (not active yet)" />
+    </div>
+
+    <div class="lms-library-page__filter">
+      <label>Category:</label>
+      <select>
+        <option>All</option>
+        <option disabled>Software Engineering</option>
+        <option disabled>Computer Science</option>
+        <option disabled>Databases</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Books List -->
+  <div class="lms-library-list">
+    <article class="lms-book-row hovershadow" *ngFor="let b of books; trackBy: trackByBookId">
+      <!-- Cover -->
+      <div class="lms-book-row__cover">
+        <div class="lms-book-row__cover-art">
+          <span>📘</span>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="lms-book-row__content">
+        <header class="lms-book-row__header">
+          <div>
+            <h3 class="lms-book-row__title">{{ b.title }}</h3>
+
+            <!-- بدل author من الديمو نضع description -->
+            <p class="lms-book-row__author">
+              {{ b.description }}
+            </p>
+          </div>
+
+          <!-- level (كلمة ثابتة حتى لا يتأثر الديزاين) -->
+          <span class="lms-book-row__level">Digital Book</span>
+        </header>
+
+        <!-- Meta (الديزاين الأصلي محفوظ) -->
+        <div class="lms-book-row__meta">
+          <span>Online resource</span>
+          <span>Unlimited pages</span>
+          <span class="lms-book-row__tag">E-Book</span>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="lms-book-row__footer">
+        <div class="lms-book-row__price">
+          <span class="label">Price</span>
+          <span class="value">{{ b.price | number : '1.2-2' }} $</span>
+        </div>
+
+        <!-- If a file exists -->
+        <a
+          *ngIf="b.fileUrl"
+          [href]="b.fileUrl"
+          target="_blank"
+          rel="noopener"
+          class="lms-secondary-btn"
+        >
+          Open file
+        </a>
+
+        <!-- If no file -->
+        <button *ngIf="!b.fileUrl" class="lms-secondary-btn" disabled>No file yet</button>
+      </footer>
+    </article>
+  </div>
+</div>

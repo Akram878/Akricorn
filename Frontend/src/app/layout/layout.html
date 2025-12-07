@@ -1,0 +1,202 @@
+<div class="layout">
+  <!-- Top navigation bar -->
+  <nav [class.nav--open]="isMobileNavOpen">
+    <div class="brand">
+      <a [routerLink]="'/home'" class="brand">
+        <div class="logo">
+          <svg class="logo__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 134 155">
+            <defs>
+              <!-- تدرج ذهبي -->
+              <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fff2c4" />
+                <stop offset="40%" stop-color="#f5d48a" />
+                <stop offset="75%" stop-color="#e2b764" />
+                <stop offset="100%" stop-color="#c89233" />
+              </linearGradient>
+
+              <!-- ظل ناعم -->
+              <filter id="goldShadow" x="-10%" y="-10%" width="140%" height="140%">
+                <feDropShadow
+                  dx="0"
+                  dy="4"
+                  stdDeviation="6"
+                  flood-color="#000000"
+                  flood-opacity="0.65"
+                />
+              </filter>
+            </defs>
+
+            <g
+              fill="url(#goldGradient)"
+              stroke="#fff2c4"
+              stroke-width="2"
+              filter="url(#goldShadow)"
+            >
+              <path
+                d="M70.3,114.4c-0.8,23,15.4,37,17.4,38.6c-2.6,0.1-18.5,0.8-30.9-11.6
+         c-9.8-9.8-11.3-21.7-11.6-25.1c-0.1-1.8-0.7-19.2,13.5-30.9
+         c13.3-10.9,28.8-8.1,30.9-7.7C87.4,79.3,71.1,91.9,70.3,114.4z"
+              />
+              <path
+                d="M132.4,52.5c-15.6-22.6-39.8-34.3-61.9-30c-3.9,0.8-21.4,5-31.9,20.6
+         c-1.7,2.6-6.6,10.1-7.5,20.6c-0.6,7.1,0.8,12.9,1.9,16.9
+         c2.7,10.2,5.9,12.3,7.5,18.8c1.3,5.5,1.4,14-5.6,26.3
+         c-3.5-2.1-27.2-17-31.9-46.9c-3.7-24,6.4-47.7,24.4-61.9
+         C51-1.9,85.2-1.9,108,15C125.2,27.6,130.7,45.7,132.4,52.5z"
+              />
+            </g>
+          </svg>
+        </div>
+        <div class="brand__text">AKRICORN</div>
+      </a>
+    </div>
+
+    <!-- Main navigation (desktop / tablet) -->
+    <div class="Navigation_buttons">
+      <a
+        [routerLink]="'/home'"
+        routerLinkActive="is-active"
+        class="main-nav__link"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="isMobileNavOpen = false"
+      >
+        Home
+      </a>
+
+      <a
+        [routerLink]="'/lms'"
+        routerLinkActive="is-active"
+        class="main-nav__link"
+        (click)="isMobileNavOpen = false"
+      >
+        LMS
+      </a>
+
+      <a
+        [routerLink]="'/services-section'"
+        routerLinkActive="is-active"
+        class="main-nav__link"
+        (click)="isMobileNavOpen = false"
+      >
+        Services
+      </a>
+
+      <a
+        [routerLink]="'/free-lancing'"
+        routerLinkActive="is-active"
+        class="main-nav__link"
+        (click)="isMobileNavOpen = false"
+      >
+        Freelancing
+      </a>
+    </div>
+
+    <!-- Auth + settings -->
+    <div class="header-auth">
+      <!-- لو مش مسجّل -->
+      <ng-container *ngIf="!isLoggedIn; else loggedInDesktop">
+        <a [routerLink]="'/auth/login'" class="btn-h" (click)="isMobileNavOpen = false">Sign</a>
+      </ng-container>
+
+      <!-- لو مسجّل: زر واحد فقط Profile يفتح مودال -->
+      <ng-template #loggedInDesktop>
+        <button type="button" class="btn-h" (click)="openProfileModal($event)">Profile</button>
+      </ng-template>
+    </div>
+
+    <!-- زر التوغل (هامبرغر) يظهر فقط في الشاشات الصغيرة بواسطة الـ SCSS -->
+    <button
+      type="button"
+      class="nav-toggle"
+      (click)="toggleMobileNav()"
+      aria-label="Toggle navigation"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <!-- Main content area -->
+  <main class="layout__main">
+    <section class="layout__inner">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="lms-footer">
+    <div class="lms-footer__container">
+      <div class="lms-footer__col lms-footer__brand">
+        <h3>Mathematics & Universe</h3>
+        <p>Infinity • Geometry • Computation</p>
+      </div>
+
+      <div class="lms-footer__col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">My Courses</a></li>
+          <li><a href="#">Library</a></li>
+        </ul>
+      </div>
+
+      <div class="lms-footer__col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">YouTube</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Support</a></li>
+        </ul>
+      </div>
+
+      <div class="lms-footer__col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="#">Email</a></li>
+          <li><a href="#">Telegram</a></li>
+          <li><a href="#">Discord</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lms-footer__bottom">
+      <span>© 2025 Infinity Academy · All Rights Reserved</span>
+    </div>
+  </footer>
+</div>
+
+<!-- Profile modal overlay -->
+<div class="profile-modal-backdrop" *ngIf="showProfileModal" (click)="closeProfileModal()">
+  <div class="profile-modal" (click)="$event.stopPropagation()">
+    <div class="profile-modal__header">
+      <h2 class="profile-modal__title">Profile</h2>
+      <button
+        type="button"
+        class="profile-modal__close"
+        (click)="closeProfileModal()"
+        aria-label="Close"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="profile-modal__body">
+      <!-- البروفايل الكامل -->
+      <app-profile></app-profile>
+    </div>
+
+    <div class="profile-modal__footer">
+      <button
+        type="button"
+        class="profile-modal__logout"
+        (click)="onLogout($event); closeProfileModal()"
+      >
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<app-settings *ngIf="showSettings" (closeModal)="closeSettings()"></app-settings>

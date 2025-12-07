@@ -1,0 +1,210 @@
+@use '../../../scss/base/mixins' as *;
+@use '../../../scss/base/variables' as *;
+
+// Emerald velvet
+$emerald-900: #020f0c; // خلفية شبه سوداء مائلة للأخضر
+$emerald-800: #021813;
+$emerald-700: #08342a;
+$emerald-600: #0e4334;
+
+// Gold (للنصوص والأزرار)
+$gold-100: #fff4cf;
+$gold-200: #f9e0a2;
+$gold-300: #f0cb7a;
+$gold-400: #d9a74a;
+$gold-500: #b9822f;
+
+.Home {
+  padding: 5rem;
+  width: 100%;
+  height: 100%;
+
+  .Large_brochure {
+    .Brochure {
+      @include flex(row, space-between, center);
+      gap: 1rem;
+
+      flex-wrap: wrap;
+      .dis {
+        border-left: 0.2rem solid #d3be80;
+        padding-left: 0.5rem;
+        flex-grow: 1;
+        // flex-grow: 1;
+        .Brochure_text {
+          h1 {
+            font-family: 'Cormorant Garamond Bold', serif;
+            font-weight: 100;
+            font-size: 3.5rem;
+            // width: 30rem;
+
+            @include mediafast(mini-mobile, mobile, tablet) {
+              font-size: 2.5rem;
+            }
+          }
+          p {
+          }
+        }
+        .Brochure_Links {
+          a {
+            display: inline-block;
+            margin: 1rem 0;
+            border-radius: 0.3rem;
+            color: hsl(168deg 78.95% 3.73%);
+            padding: 0.75rem;
+            background: linear-gradient(
+              180deg,
+              hsl(45deg 48.78% 67.84%) 0%,
+              hsl(43.33deg 46.96% 54.9%) 40%,
+              #c89445 100%
+            );
+          }
+        }
+      }
+    }
+  }
+
+  .Small_brochure {
+    @include flex(row, center, center);
+    gap: 5rem;
+    flex-wrap: wrap;
+    margin-top: 5rem;
+    .Brochure {
+      flex-grow: 1;
+      .dis {
+        border-left: 0.2rem solid #d3be80;
+        padding-left: 0.5rem;
+        .Brochure_text {
+          h1 {
+            font-family: 'Cormorant Garamond Bold', serif;
+            font-weight: 100;
+          }
+          p {
+          }
+        }
+        .Brochure_Links {
+          a {
+            display: inline-block;
+            margin: 1rem 0;
+            border-radius: 0.3rem;
+            color: hsl(168deg 78.95% 3.73%);
+            padding: 0.75rem;
+            background: linear-gradient(
+              180deg,
+              hsl(45deg 48.78% 67.84%) 0%,
+              hsl(43.33deg 46.96% 54.9%) 40%,
+              #c89445 100%
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+/* البطاقة المخملية + شكل الثقب الأسود */
+.hero-velvet-plate {
+  flex-grow: 1;
+  width: 30rem;
+  height: 20rem;
+
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  // التدرج المخملي الأساسي
+  background: radial-gradient(circle at 0% 0%, lighten($emerald-700, 6%) 0%, transparent 45%),
+    radial-gradient(circle at 100% 100%, $emerald-700 0%, $emerald-900 55%),
+    linear-gradient(135deg, $emerald-900 0%, $emerald-800 40%, $emerald-700 100%);
+
+  // إحساس مخملي + عمق
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+
+  padding: 1.5rem;
+  backdrop-filter: blur(2px);
+
+  // في الكروت الصغيرة نريد نسخة مصغرة أنيقة
+  &.featured-courses__image {
+    width: 10rem;
+    height: 7rem;
+    padding: 0;
+  }
+}
+
+.hero-velvet-plate__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero-velvet-plate__content {
+  position: relative;
+  z-index: 1;
+}
+
+.featured-courses {
+  margin-top: 2.5rem;
+
+  &__header {
+    margin-bottom: 1.75rem;
+  }
+
+  &__title {
+    font-family: 'Cormorant Garamond Bold', serif;
+    font-size: 1.5rem;
+    margin: 0 0 0.35rem;
+    color: #f5dca0; // ذهبي ناعم شبيه بالصورة
+  }
+
+  &__subtitle {
+  }
+
+  &__body {
+    width: 100%;
+    @include flex(row, flex-start, center);
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  &__card {
+    padding: 0.75rem;
+    flex-grow: 1;
+    border: 1px solid hsl(165, 93%, 11%);
+    border-radius: 0.5rem;
+
+    .featured-courses__image {
+      width: 10rem;
+      height: 10rem;
+    }
+
+    .featured-courses__body {
+      @include flex(column, flex-start, flex-start);
+
+      .featured-courses__name {
+        font-family: 'Cormorant Garamond Bold', serif;
+        width: 10rem;
+      }
+
+      .featured-courses__meta {
+        width: 10rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  h1 {
+    font-size: 1rem;
+    font-weight: 200;
+  }
+  .Home {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .home {
+    padding: 1rem;
+  }
+}

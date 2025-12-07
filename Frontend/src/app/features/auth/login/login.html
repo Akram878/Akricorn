@@ -1,0 +1,18 @@
+<form class="login" #loginForm="ngForm" (ngSubmit)="login(loginForm)" novalidate>
+  <!-- Email -->
+  <input type="email" placeholder="Email" [(ngModel)]="email" name="email" />
+
+  <!-- Password -->
+  <input type="password" placeholder="Password" [(ngModel)]="password" name="password" />
+
+  <!-- Buttons -->
+  <div class="buttonContainer">
+    <button type="submit" class="btn" [disabled]="loading">
+      {{ loading ? 'Loading...' : 'Login' }}
+    </button>
+
+    <a href="#" class="login-link txtna" (click)="switchToRegister($event)">
+      I don't have an account
+    </a>
+  </div>
+</form>

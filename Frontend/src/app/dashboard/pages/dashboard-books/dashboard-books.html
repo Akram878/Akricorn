@@ -1,0 +1,157 @@
+<div class="dashboard-books">
+  <!-- الهيدر + زر إضافة جديد -->
+  <div class="header-row">
+    <div class="header-row__title">
+      <h2>Books</h2>
+      <span class="header-row__subtitle">
+        Manage library books (create, edit, enable/disable, delete).
+      </span>
+    </div>
+
+    <div class="header-row__actions">
+      <button type="button" class="btn-primary btn-round" (click)="openCreateForm()">+</button>
+      <button type="button" class="btn-secondary" (click)="loadBooks()">Reload</button>
+    </div>
+  </div>
+
+  <!-- الرسائل العامة -->
+  <div class="status error" *ngIf="error">{{ error }}</div>
+  <div class="status" *ngIf="isLoading">Loading...</div>
+
+  <!-- جدول الكتب -->
+  <table *ngIf="!isLoading && books.length > 0" class="books-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th style="width: 18%">Title</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>File</th>
+        <th>Active</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let b of books">
+        <td>{{ b.id }}</td>
+        <td>{{ b.title }}</td>
+        <td class="description-cell">
+          {{ b.description }}
+        </td>
+        <td>{{ b.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
+        <td>
+          <a *ngIf="b.fileUrl" [href]="b.fileUrl" target="_blank">Open</a>
+          <span *ngIf="!b.fileUrl">-</span>
+        </td>
+        <td>
+          <span [class.badge-active]="b.isActive" [class.badge-inactive]="!b.isActive">
+            {{ b.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td class="actions-cell">
+          <button class="btn-small" (click)="onEdit(b)">Edit</button>
+          <button class="btn-secondary" (click)="onToggle(b)">
+            {{ b.isActive ? 'Disable' : 'Enable' }}
+          </button>
+          <button class="btn-danger" (click)="onDelete(b)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!isLoading && books.length === 0" class="status">No books found yet.</div>
+
+  <!-- ✅ مودال عائم لإضافة/تعديل كتاب -->
+  <div class="modal-backdrop" *ngIf="showForm" (click)="resetForm()">
+    <div class="modal-card bg-secondary" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3 class="form-title">
+            {{ editMode ? 'Edit Book' : 'Create New Book' }}
+          </h3>
+          <p class="form-subtitle">
+            {{ editMode ? 'Update the book details.' : 'Add a new resource to Akricorn library.' }}
+          </p>
+        </div>
+
+        <button type="button" class="icon-btn" (click)="resetForm()" aria-label="Close">×</button>
+      </div>
+
+      <form [formGroup]="bookForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <!-- العنوان -->
+          <div class="form-field">
+            <label for="title">Title</label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="e.g. Discrete Mathematics for CS Students"
+            />
+            <div
+              class="field-error"
+              *ngIf="bookForm.get('title')?.invalid && bookForm.get('title')?.touched"
+            >
+              Title is required.
+            </div>
+          </div>
+
+          <!-- السعر -->
+          <div class="form-field">
+            <label for="price">Price</label>
+            <input id="price" type="number" formControlName="price" min="0" step="0.01" />
+            <div class="field-hint">Set 0 for free resources.</div>
+          </div>
+
+          <!-- الحالة -->
+          <div class="form-field checkbox-field">
+            <label>
+              <input type="checkbox" formControlName="isActive" />
+              Active (visible in LMS library)
+            </label>
+          </div>
+
+          <!-- رابط الملف -->
+          <div class="form-field full-width">
+            <label for="fileUrl">File URL</label>
+            <input
+              id="fileUrl"
+              type="text"
+              formControlName="fileUrl"
+              placeholder="https://example.com/book.pdf"
+            />
+            <div class="field-hint">Direct link to PDF or resource file (can be local later).</div>
+          </div>
+
+          <!-- الوصف -->
+          <div class="form-field full-width">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              rows="3"
+              formControlName="description"
+              placeholder="Short description of the book..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="bookForm.invalid || isSaving">
+            {{
+              isSaving
+                ? editMode
+                  ? 'Saving...'
+                  : 'Creating...'
+                : editMode
+                ? 'Save Changes'
+                : 'Create Book'
+            }}
+          </button>
+
+          <button type="button" class="btn-secondary" (click)="resetForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

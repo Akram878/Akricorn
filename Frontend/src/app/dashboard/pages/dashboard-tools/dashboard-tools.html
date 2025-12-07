@@ -1,0 +1,50 @@
+<div class="dashboard-tools">
+  <div class="header-row">
+    <h2>Tools</h2>
+    <button class="btn-primary" (click)="loadTools()">Reload</button>
+  </div>
+
+  <div class="status" *ngIf="isLoading">Loading...</div>
+  <div class="status error" *ngIf="error">{{ error }}</div>
+
+  <table *ngIf="!isLoading && tools.length > 0" class="tools-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Url</th>
+        <th>Category</th>
+        <th>Active</th>
+        <th>Order</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let t of tools">
+        <td>{{ t.id }}</td>
+        <td>{{ t.name }}</td>
+        <td class="description-cell">{{ t.description }}</td>
+        <td>
+          <a [href]="t.url" target="_blank">Open</a>
+        </td>
+        <td>{{ t.category }}</td>
+        <td>
+          <span [class.badge-active]="t.isActive" [class.badge-inactive]="!t.isActive">
+            {{ t.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td>{{ t.displayOrder }}</td>
+        <td>
+          <button class="btn-secondary" (click)="onToggle(t)">
+            {{ t.isActive ? 'Disable' : 'Enable' }}
+          </button>
+          <button class="btn-danger" (click)="onDelete(t)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!isLoading && tools.length === 0" class="status">No tools found.</div>
+</div>

@@ -1,0 +1,31 @@
+@use './scss/base/theme' as *;
+@use './scss/utilities/utilities' as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  // background: linear-gradient(145deg, rgb(0 29 22) 0%, rgb(1 24 16) 60%, rgb(0 18 12) 100%);
+  background: radial-gradient(
+    circle at top left,
+    #0b3a2a 0%,
+    #031b14 40%,
+    #02130f 70%,
+    #010806 100%
+  );
+  color: #f5e9d4;
+  a {
+    color: hsl(42.67deg 88.24% 80%);
+    text-decoration: none;
+  }
+  h1 {
+    color: hsl(42.67deg 88.24% 80%);
+  }
+}

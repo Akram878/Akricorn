@@ -1,0 +1,266 @@
+@use '../../scss/base/mixins' as *;
+@use '../../scss/base/variables' as *;
+
+.layout {
+  width: 100%;
+
+  nav {
+    background-color: #041e16;
+    padding: 1rem 3rem;
+    border-bottom: 1px solid hsl(165.6deg 96.82% 8.08%);
+    @include flex(row, space-between, center);
+    position: relative; // عشان المنيو المنسدلة تتموضع تحته
+
+    .brand {
+      @include flex(row, center, center);
+      gap: 0.1rem;
+
+      .logo {
+        .logo__icon {
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+
+      .brand__text {
+        font-family: 'Cormorant Garamond Bold', serif;
+        font-weight: 100;
+        font-size: x-large;
+      }
+    }
+
+    .Navigation_buttons {
+      margin-left: auto;
+      @include flex(row, flex-end, center);
+      gap: 0.5rem;
+
+      a {
+        padding: 0.5rem 1.5rem;
+      }
+    }
+
+    .header-auth {
+      margin-left: 1rem;
+
+      .btn-h {
+        padding: 0.5rem 1.5rem;
+        border: 0.1rem solid hsl(165, 93%, 11%);
+        background-color: transparent;
+        color: hsl(42.67deg 88.24% 80%);
+        border-radius: 0.3rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: hsl(165, 93%, 11%);
+        }
+      }
+    }
+
+    /* زر التوغل (هامبرغر) */
+    .nav-toggle {
+      display: none; // ديفولت: مخفي على كل الشاشات
+      margin-left: 0.75rem;
+
+      width: 2.3rem;
+      height: 2.3rem;
+      border-radius: 0.4rem;
+      border: 1px solid hsl(165, 93%, 11%);
+      background-color: transparent;
+
+      @include flex(column, center, center);
+      gap: 0.25rem;
+      cursor: pointer;
+
+      span {
+        display: block;
+        width: 60%;
+        height: 2px;
+        border-radius: 999px;
+        background-color: hsl(42.67deg 88.24% 80%);
+        transition: transform 0.18s ease, opacity 0.18s ease;
+      }
+    }
+
+    /* حالة الفتح: nav--open يأتي من [class.nav--open] في الـ HTML */
+    &.nav--open {
+      .Navigation_buttons {
+        max-height: 400px;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .nav-toggle {
+        span:nth-child(1) {
+          transform: translateY(4px) rotate(45deg);
+        }
+        span:nth-child(2) {
+          opacity: 0;
+        }
+        span:nth-child(3) {
+          transform: translateY(-4px) rotate(-45deg);
+        }
+      }
+    }
+  }
+
+  /* ================================
+   FOOTER DESIGN
+   ================================ */
+
+  .lms-footer {
+    margin-top: 2.5rem;
+    padding: 2.5rem 1.5rem 1rem 1.5rem;
+    background: #041e16;
+
+    border-top: 1px solid hsl(165.6, 96.82%, 8.08%);
+
+    .lms-footer__container {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    h3,
+    h4 {
+      font-family: 'Cormorant Garamond Bold', serif;
+      color: #f5c96a;
+      margin-bottom: 0.8rem;
+      font-weight: 700;
+    }
+
+    .lms-footer__brand h3 {
+      font-size: 1.4rem;
+      letter-spacing: 0.6px;
+    }
+
+    .lms-footer__brand p {
+      font-size: 0.95rem;
+      opacity: 0.85;
+    }
+
+    .lms-footer__col {
+      min-width: 160px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin: 0.3rem 0;
+
+        a {
+          color: rgba(245, 201, 106, 0.85);
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: 0.25s;
+          position: relative;
+
+          &:hover {
+            color: #f5c96a;
+            padding-left: 4px;
+          }
+        }
+      }
+    }
+
+    .lms-footer__bottom {
+      margin-top: 2.2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(245, 201, 106, 0.2);
+      text-align: center;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+  }
+
+  /* ================================
+   Responsive
+   ================================ */
+
+  /* منيو موبايل / تابلت */
+  @media (max-width: 900px) {
+    nav {
+      padding: 0.75rem 1.25rem;
+      column-gap: 0.75rem;
+
+      .Navigation_buttons {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+
+        margin-left: 0;
+        padding: 0.5rem 1.25rem 0.75rem 1.25rem;
+
+        background-color: #041e16;
+        border-bottom: 1px solid hsl(165.6deg 96.82% 8.08%);
+        border-top: 1px solid hsl(165.6deg 96.82% 8.08%);
+
+        @include flex(column, flex-start, flex-start);
+        gap: 0.25rem;
+
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+        overflow: hidden;
+        transition: max-height 0.22s ease, opacity 0.22s ease;
+
+        a {
+          width: 100%;
+          padding: 0.55rem 0;
+        }
+      }
+
+      .header-auth {
+        margin-left: auto;
+        @include flex(row, flex-end, center);
+
+        .btn-h {
+          padding: 0.4rem 1rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      .nav-toggle {
+        display: flex; // يظهر في الموبايل
+      }
+    }
+
+    .lms-footer__container {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  /* شاشات أصغر: تضييق المسافات */
+  @media (max-width: 600px) {
+    nav {
+      padding: 0.6rem 0.9rem;
+
+      .brand .brand__text {
+        font-size: 1.1rem;
+      }
+
+      .header-auth .btn-h {
+        padding: 0.35rem 0.8rem;
+        font-size: 0.8rem;
+      }
+
+      .nav-toggle {
+        width: 2.1rem;
+        height: 2.1rem;
+      }
+    }
+  }
+}
+
+/* ضمان اختفاء زر التوغل على الشاشات الأكبر من 900px كطبقة أمان إضافية */
+@media (min-width: 901px) {
+  .layout nav .nav-toggle {
+    display: none !important;
+  }
+}

@@ -1,0 +1,130 @@
+<div class="lms-courses-page">
+  <!-- Header -->
+  <div class="lms-courses-page__header">
+    <div class="lms-courses-page__breadcrumb">
+      <span>LMS</span>
+      <span>/</span>
+      <span class="active">My courses</span>
+    </div>
+
+    <h2>My courses</h2>
+    <p>
+      Here you can see the courses you have already purchased. Use the filters to focus on specific
+      categories or minimum hours.
+    </p>
+  </div>
+
+  <!-- Topbar filters (فقط الساعات + الفئات) -->
+  <div class="lms-courses-page__topbar">
+    <div class="lms-courses-page__filters">
+      <!-- Min hours -->
+      <div class="lms-filter-field">
+        <label class="lms-filter-field__label">Min hours</label>
+        <input
+          type="number"
+          class="lms-filter-input"
+          placeholder="e.g. 5"
+          [(ngModel)]="minHours"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+
+      <!-- Category -->
+      <div class="lms-filter-field">
+        <label class="lms-filter-field__label">Category</label>
+        <select class="lms-filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
+          <option value="all">All</option>
+          <option *ngFor="let cat of categories" [value]="cat">
+            {{ cat }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- زر Reset بسيط -->
+    <div class="lms-courses-page__sort">
+      <button type="button" class="lms-primary-btn" (click)="resetFilters()">Reset filters</button>
+    </div>
+  </div>
+
+  <!-- Grid of my courses -->
+  <div
+    class="lms-courses-grid"
+    *ngIf="!isLoading && !error && filteredMyCourses.length > 0; else loadingOrEmpty"
+  >
+    <article class="lms-course-card" *ngFor="let c of filteredMyCourses; trackBy: trackByCourseId">
+      <header class="lms-course-card__header">
+        <div class="lms-course-card__title-block">
+          <h3 class="lms-course-card__title">
+            {{ c.title }}
+          </h3>
+          <p class="lms-course-card__subtitle">
+            {{ c.description }}
+          </p>
+        </div>
+
+        <!-- level حسب الـ category (نفس نظام الكورسات العامة) -->
+        <span
+          class="lms-course-card__level"
+          [ngClass]="{
+            'lms-course-card__level--beginner': c.category === 'Beginner',
+            'lms-course-card__level--intermediate': c.category === 'Intermediate',
+            'lms-course-card__level--advanced': c.category === 'Advanced'
+          }"
+        >
+          {{ c.category || 'General' }}
+        </span>
+      </header>
+
+      <div class="lms-course-card__body">
+        <div class="lms-course-card__meta">
+          <span>
+            <span>⏱</span>
+            <span>{{ c.hours || 0 }} h</span>
+          </span>
+
+          <span>
+            <span>📚</span>
+            <span>{{ c.pathTitle || 'No path' }}</span>
+          </span>
+
+          <span>
+            <span>🗓</span>
+            <span>
+              Purchased:
+              {{ c.purchasedAt | date : 'mediumDate' }}
+            </span>
+          </span>
+        </div>
+
+        <div class="lms-course-card__tag">My course</div>
+      </div>
+
+      <footer class="lms-course-card__footer">
+        <div class="lms-course-card__price">
+          <span class="lms-course-card__price-label">Price paid</span>
+          <span class="lms-course-card__price-value"> {{ c.price | number : '1.2-2' }} $ </span>
+        </div>
+
+        <button type="button" class="lms-primary-btn" (click)="openCourse(c)">
+          Open course (soon)
+        </button>
+      </footer>
+    </article>
+  </div>
+
+  <ng-template #loadingOrEmpty>
+    <div class="lms-courses-page__state" *ngIf="isLoading">Loading your courses...</div>
+
+    <div
+      class="lms-courses-page__state lms-courses-page__state--empty"
+      *ngIf="!isLoading && !error && filteredMyCourses.length === 0"
+    >
+      You don't have any courses yet or no course matches the selected filters.
+    </div>
+
+    <div class="lms-courses-page__state lms-courses-page__state--error" *ngIf="!isLoading && error">
+      {{ error }}
+    </div>
+  </ng-template>
+</div>

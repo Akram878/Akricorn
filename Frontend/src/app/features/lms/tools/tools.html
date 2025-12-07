@@ -1,0 +1,56 @@
+<div class="lms-tools-page">
+  <div class="lms-tools-page__header">
+    <div class="lms-tools-page__breadcrumb">
+      <span>LMS</span>
+      <span>/</span>
+      <span class="active">Tools</span>
+    </div>
+
+    <h2>Student Tools</h2>
+    <p>
+      A set of demo tools that simulate utilities students might use: coding playgrounds, quiz
+      builders, and study planners.
+    </p>
+  </div>
+
+  <div class="lms-tools-grid">
+    <article class="lms-tool-card hovershadow" *ngFor="let t of demoTools">
+      <header class="lms-tool-card__header">
+        <div class="lms-tool-card__icon">
+          <span *ngIf="t.category === 'Coding'">💻</span>
+          <span *ngIf="t.category === 'Assessment'">📝</span>
+          <span *ngIf="t.category === 'Productivity'">🗓️</span>
+          <span
+            *ngIf="
+              t.category !== 'Coding' &&
+              t.category !== 'Assessment' &&
+              t.category !== 'Productivity'
+            "
+          >
+            🛠
+          </span>
+        </div>
+        <div class="lms-tool-card__title-block">
+          <h3 class="lms-tool-card__title">{{ t.name }}</h3>
+          <p class="lms-tool-card__subtitle">{{ t.description }}</p>
+        </div>
+      </header>
+
+      <div class="lms-tool-card__meta">
+        <span class="category">{{ t.category }}</span>
+        <span class="tag">{{ t.tag }}</span>
+        <span
+          class="status"
+          [class.status--beta]="t.status === 'Beta'"
+          [class.status--stable]="t.status === 'Stable'"
+        >
+          {{ t.status }}
+        </span>
+      </div>
+
+      <footer class="lms-tool-card__footer">
+        <button type="button" class="lms-primary-btn">Open tool (Demo)</button>
+      </footer>
+    </article>
+  </div>
+</div>

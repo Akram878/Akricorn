@@ -1,0 +1,44 @@
+<div class="lms-path-page">
+  <div class="lms-path-page__header">
+    <div class="lms-path-page__breadcrumb">
+      <span>LMS</span>
+      <span>/</span>
+      <span class="active">Learning Paths</span>
+    </div>
+
+    <h2>Learning Paths</h2>
+    <p>
+      Structured roadmaps that connect multiple courses into a coherent progression for each skill
+      area.
+    </p>
+  </div>
+
+  <div class="lms-path-list">
+    <article class="lms-path-card hovershadow" *ngFor="let p of demoPaths">
+      <header class="lms-path-card__header">
+        <div>
+          <h3 class="lms-path-card__title">{{ p.title }}</h3>
+          <p class="lms-path-card__subtitle">{{ p.subtitle }}</p>
+        </div>
+        <span class="lms-path-card__level">{{ p.level }}</span>
+      </header>
+
+      <div class="lms-path-card__meta">
+        <span>🧭 Focus: {{ p.focusArea }}</span>
+        <span>📚 {{ p.coursesCount }} courses</span>
+        <span>⏱ ~{{ p.estimatedWeeks }} weeks</span>
+      </div>
+
+      <div class="lms-path-card__progress">
+        <div class="lms-path-card__progress-bar">
+          <div class="lms-path-card__progress-fill"></div>
+        </div>
+        <span class="hint">Demo progress indicator (static)</span>
+      </div>
+
+      <footer class="lms-path-card__footer">
+        <button type="button" class="lms-primary-btn">View path details (Demo)</button>
+      </footer>
+    </article>
+  </div>
+</div>

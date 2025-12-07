@@ -154,7 +154,6 @@ D:\Akricorn\Backend\obj\Debug\net8.0\Backend.AssemblyInfo.cs
 D:\Akricorn\Backend\obj\Debug\net8.0\Backend.csproj.CoreCompileInputs.cache
 D:\Akricorn\Backend\obj\Debug\net8.0\Backend.MvcApplicationPartsAssemblyInfo.cs
 D:\Akricorn\Backend\obj\Debug\net8.0\Backend.MvcApplicationPartsAssemblyInfo.cache
-D:\Akricorn\Backend\obj\Debug\net8.0\Backend.sourcelink.json
 D:\Akricorn\Backend\obj\Debug\net8.0\rjimswa.dswa.cache.json
 D:\Akricorn\Backend\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
 D:\Akricorn\Backend\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
@@ -163,10 +162,12 @@ D:\Akricorn\Backend\obj\Debug\net8.0\staticwebassets.build.json
 D:\Akricorn\Backend\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\Akricorn\Backend\obj\Debug\net8.0\staticwebassets.development.json
 D:\Akricorn\Backend\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-D:\Akricorn\Backend\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\Akricorn\Backend\obj\Debug\net8.0\Backend.csproj.Up2Date
 D:\Akricorn\Backend\obj\Debug\net8.0\Backend.dll
 D:\Akricorn\Backend\obj\Debug\net8.0\refint\Backend.dll
 D:\Akricorn\Backend\obj\Debug\net8.0\Backend.pdb
 D:\Akricorn\Backend\obj\Debug\net8.0\Backend.genruntimeconfig.cache
 D:\Akricorn\Backend\obj\Debug\net8.0\ref\Backend.dll
+D:\Akricorn\Backend\obj\Debug\net8.0\Backend.sourcelink.json
+D:\Akricorn\Backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Akricorn\Backend\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

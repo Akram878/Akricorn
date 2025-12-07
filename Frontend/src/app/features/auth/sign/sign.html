@@ -1,0 +1,325 @@
+<div class="sign-wrapper">
+  <!-- صندوق التسجيل -->
+  <form class="sign" #signForm="ngForm" (ngSubmit)="signup(signForm)" novalidate>
+    <!-- Name + Family -->
+    <div class="field-row">
+      <!-- NAME -->
+      <div
+        class="field"
+        [class.field-invalid]="nameCtrl.invalid && (nameCtrl.touched || signForm.submitted)"
+      >
+        <input
+          type="text"
+          placeholder="Name"
+          [(ngModel)]="name"
+          name="name"
+          #nameCtrl="ngModel"
+          required
+          minlength="2"
+          maxlength="30"
+          pattern="^[A-Za-zА-Яа-яЁё\u0600-\u06FF\\s']+$"
+        />
+
+        <!-- أيقونة الخطأ -->
+        <div
+          class="field-icon"
+          *ngIf="nameCtrl.invalid && (nameCtrl.touched || signForm.submitted)"
+        >
+          !
+          <div class="field-tooltip">
+            <span *ngIf="nameCtrl.errors?.['required']"> Name is required. </span>
+            <span *ngIf="nameCtrl.errors?.['minlength']"> Name is too short. </span>
+            <span *ngIf="nameCtrl.errors?.['pattern']"> Name must contain letters only. </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAMILY -->
+      <div
+        class="field"
+        [class.field-invalid]="familyCtrl.invalid && (familyCtrl.touched || signForm.submitted)"
+      >
+        <input
+          type="text"
+          placeholder="Family"
+          [(ngModel)]="family"
+          name="family"
+          #familyCtrl="ngModel"
+          required
+          minlength="2"
+          maxlength="30"
+          pattern="^[A-Za-zА-Яа-яЁё\u0600-\u06FF\\s']+$"
+        />
+
+        <div
+          class="field-icon"
+          *ngIf="familyCtrl.invalid && (familyCtrl.touched || signForm.submitted)"
+        >
+          !
+          <div class="field-tooltip">
+            <span *ngIf="familyCtrl.errors?.['required']"> Family name is required. </span>
+            <span *ngIf="familyCtrl.errors?.['minlength']"> Family name is too short. </span>
+            <span *ngIf="familyCtrl.errors?.['pattern']">
+              Family name must contain letters only.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone -->
+    <div class="field-row">
+      <!-- COUNTRY CODE -->
+      <div
+        class="field compact key"
+        [class.field-invalid]="codeCtrl.invalid && (codeCtrl.touched || signForm.submitted)"
+      >
+        <select
+          id="countryCode"
+          [(ngModel)]="countryCode"
+          name="countryCode"
+          #codeCtrl="ngModel"
+          required
+        >
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+20">🇪🇬 +20</option>
+          <option value="+966">🇸🇦 +966</option>
+          <option value="+971">🇦🇪 +971</option>
+        </select>
+
+        <div
+          class="field-icon"
+          *ngIf="codeCtrl.invalid && (codeCtrl.touched || signForm.submitted)"
+        >
+          !
+          <div class="field-tooltip">
+            <span>Country code is required.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- NUMBER -->
+      <div
+        class="field number"
+        [class.field-invalid]="numberCtrl.invalid && (numberCtrl.touched || signForm.submitted)"
+      >
+        <input
+          type="text"
+          placeholder="Number"
+          [(ngModel)]="number"
+          name="number"
+          #numberCtrl="ngModel"
+          required
+          pattern="^[0-9]{7,15}$"
+        />
+
+        <div
+          class="field-icon"
+          *ngIf="numberCtrl.invalid && (numberCtrl.touched || signForm.submitted)"
+        >
+          !
+          <div class="field-tooltip">
+            <span *ngIf="numberCtrl.errors?.['required']"> Phone number is required. </span>
+            <span *ngIf="numberCtrl.errors?.['pattern']">
+              Only digits allowed (7–15 characters).
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div
+      class="field"
+      [class.field-invalid]="emailCtrl.invalid && (emailCtrl.touched || signForm.submitted)"
+    >
+      <input
+        type="email"
+        placeholder="Email"
+        [(ngModel)]="email"
+        name="email"
+        #emailCtrl="ngModel"
+        required
+        email
+      />
+
+      <div
+        class="field-icon"
+        *ngIf="emailCtrl.invalid && (emailCtrl.touched || signForm.submitted)"
+      >
+        !
+        <div class="field-tooltip">
+          <span *ngIf="emailCtrl.errors?.['required']"> Email is required. </span>
+          <span *ngIf="emailCtrl.errors?.['email']"> Please enter a valid email address. </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- City + Date of birth (صف واحد) -->
+    <div class="field-row">
+      <!-- City -->
+      <div
+        class="field"
+        [class.field-invalid]="cityCtrl.invalid && (cityCtrl.touched || signForm.submitted)"
+      >
+        <input
+          type="text"
+          placeholder="City"
+          [(ngModel)]="city"
+          name="city"
+          #cityCtrl="ngModel"
+          required
+          minlength="2"
+          maxlength="50"
+          pattern="^[A-Za-zА-Яа-яЁё\u0600-\u06FF\\s'-]+$"
+        />
+
+        <div
+          class="field-icon"
+          *ngIf="cityCtrl.invalid && (cityCtrl.touched || signForm.submitted)"
+        >
+          !
+          <div class="field-tooltip">
+            <span *ngIf="cityCtrl.errors?.['required']"> City is required. </span>
+            <span *ngIf="cityCtrl.errors?.['minlength']"> City name is too short. </span>
+            <span *ngIf="cityCtrl.errors?.['pattern']"> City must contain letters only. </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date of birth -->
+      <div
+        class="field"
+        [class.field-invalid]="
+          birthDateCtrl.invalid && (birthDateCtrl.touched || signForm.submitted)
+        "
+      >
+        <input
+          type="date"
+          placeholder="Date of birth"
+          [(ngModel)]="birthDate"
+          name="birthDate"
+          #birthDateCtrl="ngModel"
+          required
+        />
+
+        <div
+          class="field-icon"
+          *ngIf="birthDateCtrl.invalid && (birthDateCtrl.touched || signForm.submitted)"
+        >
+          !
+          <div class="field-tooltip">
+            <span>Date of birth is required.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div
+      class="field"
+      [class.field-invalid]="passwordCtrl.invalid && (passwordCtrl.touched || signForm.submitted)"
+    >
+      <input
+        type="password"
+        placeholder="Password"
+        [(ngModel)]="password"
+        (ngModelChange)="onPasswordChange($event)"
+        name="password"
+        #passwordCtrl="ngModel"
+        required
+        minlength="6"
+        maxlength="50"
+      />
+
+      <div
+        class="field-icon"
+        *ngIf="passwordCtrl.invalid && (passwordCtrl.touched || signForm.submitted)"
+      >
+        !
+        <div class="field-tooltip">
+          <span *ngIf="passwordCtrl.errors?.['required']"> Password is required. </span>
+          <span *ngIf="passwordCtrl.errors?.['minlength']">
+            Password must be at least 6 characters.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Password -->
+    <div
+      class="field"
+      [class.field-invalid]="
+        (confirmCtrl.touched || signForm.submitted) && (confirmCtrl.invalid || passwordMismatch)
+      "
+    >
+      <input
+        type="password"
+        placeholder="Confirm password"
+        [(ngModel)]="confirmPassword"
+        (ngModelChange)="onConfirmPasswordChange($event)"
+        name="confirmPassword"
+        #confirmCtrl="ngModel"
+        required
+      />
+
+      <div
+        class="field-icon"
+        *ngIf="
+          (confirmCtrl.touched || signForm.submitted) && (confirmCtrl.invalid || passwordMismatch)
+        "
+      >
+        !
+        <div class="field-tooltip">
+          <span *ngIf="confirmCtrl.errors?.['required']"> Please confirm your password. </span>
+          <span *ngIf="passwordMismatch"> Passwords do not match. </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy Policy -->
+    <div
+      class="field policy-field"
+      [class.field-invalid]="policyCtrl.invalid && (policyCtrl.touched || signForm.submitted)"
+    >
+      <div
+        class="field-icon"
+        *ngIf="policyCtrl.invalid && (policyCtrl.touched || signForm.submitted)"
+      >
+        !
+        <div class="field-tooltip">
+          <span>You must accept the privacy policy.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttonContainer">
+      <button type="submit" class="btn signup-btn" [disabled]="loading || signForm.invalid">
+        {{ loading ? 'Signing up...' : 'Sign Up' }}
+      </button>
+
+      <div>
+        <div class="policy-container">
+          <input
+            class="checkbox"
+            type="checkbox"
+            id="privacyPolicy"
+            [(ngModel)]="acceptedPolicy"
+            name="acceptedPolicy"
+            #policyCtrl="ngModel"
+            required
+          />
+          <label for="privacyPolicy">
+            I agree to the
+            <a href="#">Privacy Policy</a>
+          </label>
+        </div>
+        <button type="button" class="login-link txtna" (click)="switchToLogin($event)">
+          I have an account
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

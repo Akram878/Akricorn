@@ -1,0 +1,50 @@
+<div class="dashboard-users">
+  <div class="header-row">
+    <h2>Users</h2>
+    <button class="btn-primary" (click)="loadUsers()">Reload</button>
+  </div>
+
+  <div class="status" *ngIf="isLoading">Loading...</div>
+  <div class="status error" *ngIf="error">{{ error }}</div>
+
+  <table *ngIf="!isLoading && users.length > 0" class="users-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Contact</th>
+        <th>Email</th>
+        <th>City</th>
+        <th>Role</th>
+        <th>Active</th>
+        <th>Birth Edit</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let u of users">
+        <td>{{ u.id }}</td>
+        <td>{{ u.name }} {{ u.family }}</td>
+        <td>+{{ u.countryCode }} {{ u.number }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.city }}</td>
+        <td>{{ u.role }}</td>
+        <td>
+          <span [class.badge-active]="u.isActive" [class.badge-inactive]="!u.isActive">
+            {{ u.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td>{{ u.canEditBirthDate ? 'Yes' : 'No' }}</td>
+        <td>
+          <button class="btn-secondary" (click)="onToggle(u)">
+            {{ u.isActive ? 'Disable' : 'Enable' }}
+          </button>
+          <button class="btn-primary" (click)="onChangeRole(u)">Change Role</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!isLoading && users.length === 0" class="status">No users found.</div>
+</div>

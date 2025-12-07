@@ -1,0 +1,197 @@
+<div class="lms-courses-page">
+  <!-- Header -->
+  <div class="lms-courses-page__header">
+    <div class="lms-courses-page__breadcrumb">
+      <span>LMS</span>
+      <span>/</span>
+      <span class="active">Courses</span>
+    </div>
+
+    <h2>Available Courses</h2>
+    <p>
+      Browse a curated set of demo courses. Later this page will be connected to the backend and the
+      payment system so users can unlock real content.
+    </p>
+  </div>
+
+  <!-- Topbar: filters (متناسقة مع الديزاين) -->
+  <div class="lms-courses-page__topbar">
+    <!-- Left: filters -->
+    <div class="lms-courses-page__filters">
+      <!-- Price -->
+      <div class="lms-filter-field">
+        <label class="lms-filter-field__label">Price</label>
+        <div class="lms-filter-field__controls">
+          <input
+            type="number"
+            class="lms-filter-input"
+            placeholder="Min"
+            [(ngModel)]="priceMin"
+            (ngModelChange)="applyFilters()"
+          />
+          <span class="lms-filter-dash">–</span>
+          <input
+            type="number"
+            class="lms-filter-input"
+            placeholder="Max"
+            [(ngModel)]="priceMax"
+            (ngModelChange)="applyFilters()"
+          />
+        </div>
+      </div>
+
+      <!-- Hours -->
+      <div class="lms-filter-field">
+        <label class="lms-filter-field__label">Min hours</label>
+        <input
+          type="number"
+          class="lms-filter-input"
+          placeholder="e.g. 5"
+          [(ngModel)]="minHours"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+
+      <!-- Category -->
+      <div class="lms-filter-field">
+        <label class="lms-filter-field__label">Category</label>
+        <select class="lms-filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
+          <option value="all">All</option>
+          <option *ngFor="let cat of categories" [value]="cat">
+            {{ cat }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Path -->
+      <div class="lms-filter-field">
+        <label class="lms-filter-field__label">Path</label>
+        <select class="lms-filter-select" [(ngModel)]="selectedPath" (change)="applyFilters()">
+          <option value="all">All</option>
+          <option *ngFor="let p of paths" [value]="p">
+            {{ p }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Rating -->
+      <div class="lms-filter-field">
+        <label class="lms-filter-field__label">Min rating</label>
+        <select class="lms-filter-select" [(ngModel)]="minRating" (change)="applyFilters()">
+          <option [ngValue]="null">Any</option>
+          <option [ngValue]="1">1+</option>
+          <option [ngValue]="2">2+</option>
+          <option [ngValue]="3">3+</option>
+          <option [ngValue]="4">4+</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Right: reset button (نفس روح الصفحة) -->
+    <div class="lms-courses-page__sort">
+      <button type="button" class="lms-primary-btn" (click)="resetFilters()">Reset filters</button>
+    </div>
+  </div>
+
+  <!-- Courses grid -->
+  <div
+    class="lms-courses-grid"
+    *ngIf="!isLoading && !error && filteredCourses.length > 0; else loadingOrEmpty"
+  >
+    <article
+      class="lms-course-card"
+      *ngFor="let c of filteredCourses; trackBy: trackByCourseId"
+      [class.lms-course-card--owned]="isCourseOwned(c)"
+    >
+      <!-- overlay للكورس المملوك -->
+      <div class="lms-course-card__overlay" *ngIf="isCourseOwned(c)">
+        <span>You already own this course</span>
+      </div>
+
+      <header class="lms-course-card__header">
+        <div class="lms-course-card__title-block">
+          <h3 class="lms-course-card__title">
+            {{ c.title }}
+          </h3>
+          <p class="lms-course-card__subtitle">
+            {{ c.description }}
+          </p>
+        </div>
+
+        <!-- level badge (نستخدم category لو حاب) -->
+        <span
+          class="lms-course-card__level"
+          [ngClass]="{
+            'lms-course-card__level--beginner': c.category === 'Beginner',
+            'lms-course-card__level--intermediate': c.category === 'Intermediate',
+            'lms-course-card__level--advanced': c.category === 'Advanced'
+          }"
+        >
+          {{ c.category || 'General' }}
+        </span>
+      </header>
+
+      <div class="lms-course-card__body">
+        <div class="lms-course-card__meta">
+          <span>
+            <span>⏱</span>
+            <span>{{ c.hours || 0 }} h</span>
+          </span>
+
+          <span>
+            <span>📚</span>
+            <span>{{ c.pathTitle || 'No path' }}</span>
+          </span>
+
+          <span>
+            <span>⭐</span>
+            <span>
+              <ng-container *ngIf="c.rating && c.rating > 0; else noRating">
+                {{ c.rating | number : '1.1-1' }} / 5
+              </ng-container>
+              <ng-template #noRating>no rating</ng-template>
+            </span>
+          </span>
+        </div>
+
+        <!-- تقدر تستخدم التاغ لأي شيء (مثلاً فئة مختصرة) -->
+        <div class="lms-course-card__tag">
+          {{ c.category || 'Course' }}
+        </div>
+      </div>
+
+      <footer class="lms-course-card__footer">
+        <div class="lms-course-card__price">
+          <span class="lms-course-card__price-label">Price</span>
+          <span class="lms-course-card__price-value"> {{ c.price | number : '1.2-2' }} $ </span>
+        </div>
+
+        <button
+          type="button"
+          class="lms-primary-btn"
+          (click)="onPurchase(c)"
+          [disabled]="processingCourseId === c.id || isCourseOwned(c)"
+        >
+          {{
+            isCourseOwned(c) ? 'Owned' : processingCourseId === c.id ? 'Processing...' : 'Purchase'
+          }}
+        </button>
+      </footer>
+    </article>
+  </div>
+
+  <ng-template #loadingOrEmpty>
+    <div class="lms-courses-page__state" *ngIf="isLoading">Loading courses...</div>
+
+    <div
+      class="lms-courses-page__state lms-courses-page__state--empty"
+      *ngIf="!isLoading && !error && filteredCourses.length === 0"
+    >
+      No courses match your filters.
+    </div>
+
+    <div class="lms-courses-page__state lms-courses-page__state--error" *ngIf="!isLoading && error">
+      {{ error }}
+    </div>
+  </ng-template>
+</div>

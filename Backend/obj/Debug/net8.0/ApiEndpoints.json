@@ -1,5 +1,580 @@
 [
   {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/books",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Backend.Controllers.BookDto, Backend, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "Create",
+    "RelativePath": "api/admin/books",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.CreateBookRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/books/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.BookDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "Update",
+    "RelativePath": "api/admin/books/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.UpdateBookRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/books/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "ToggleActive",
+    "RelativePath": "api/admin/books/{id}/toggle",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCoursesController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/courses",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCoursesController",
+    "Method": "Create",
+    "RelativePath": "api/admin/courses",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.CourseCreateRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCoursesController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/courses/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCoursesController",
+    "Method": "Update",
+    "RelativePath": "api/admin/courses/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.CourseUpdateRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCoursesController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/courses/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminDashboardController",
+    "Method": "GetSummary",
+    "RelativePath": "api/admin/dashboard/summary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminAuthController",
+    "Method": "Login",
+    "RelativePath": "api/admin/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.AdminLoginRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminLearningPathsController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/paths",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Backend.Controllers.LearningPathDto, Backend, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminLearningPathsController",
+    "Method": "Create",
+    "RelativePath": "api/admin/paths",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.CreateLearningPathRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminLearningPathsController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/paths/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.LearningPathDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminLearningPathsController",
+    "Method": "Update",
+    "RelativePath": "api/admin/paths/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.UpdateLearningPathRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminLearningPathsController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/paths/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminLearningPathsController",
+    "Method": "ToggleActive",
+    "RelativePath": "api/admin/paths/{id}/toggle",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/tools",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Backend.Controllers.ToolDto, Backend, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "Create",
+    "RelativePath": "api/admin/tools",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.CreateToolRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/tools/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.ToolDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "Update",
+    "RelativePath": "api/admin/tools/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.UpdateToolRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/tools/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "ToggleActive",
+    "RelativePath": "api/admin/tools/{id}/toggle",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminUsersController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Backend.Controllers.AdminUserDto, Backend, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminUsersController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/users/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.AdminUserDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminUsersController",
+    "Method": "ChangeRole",
+    "RelativePath": "api/admin/users/{id}/role",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.AdminUpdateUserRoleRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminUsersController",
+    "Method": "ToggleActive",
+    "RelativePath": "api/admin/users/{id}/toggle",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AuthController",
+    "Method": "UpdateAccount",
+    "RelativePath": "api/Auth/account",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.UpdateAccountSettingsRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.UserDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AuthController",
+    "Method": "DeleteAccount",
+    "RelativePath": "api/Auth/delete",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.DeleteAccountRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Backend.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
@@ -9,26 +584,128 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "Backend.Models.UserLoginRequest",
+        "Type": "Backend.Controllers.LoginRequest",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.AuthResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Backend.Controllers.AuthController",
-    "Method": "SignUp",
+    "Method": "UpdateProfile",
+    "RelativePath": "api/Auth/profile",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.UpdateProfileRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.UserDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.AuthController",
+    "Method": "Signup",
     "RelativePath": "api/Auth/signup",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "user",
-        "Type": "Backend.Models.User",
+        "Name": "request",
+        "Type": "Backend.Controllers.SignupRequest",
         "IsRequired": true
       }
     ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.AuthResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "GetBooks",
+    "RelativePath": "api/lms/books",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "GetCourses",
+    "RelativePath": "api/lms/courses",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "PurchaseCourse",
+    "RelativePath": "api/lms/courses/{courseId}/purchase",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "GetMyBooks",
+    "RelativePath": "api/lms/my-books",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "GetMyCourses",
+    "RelativePath": "api/lms/my-courses",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   }
 ]

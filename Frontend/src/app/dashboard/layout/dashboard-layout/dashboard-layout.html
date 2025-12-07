@@ -1,0 +1,35 @@
+<div class="dashboard-container bg-primary">
+  <aside class="dashboard-sidebar bg-secondary">
+    <div class="logo">
+      <h2>Akricorn</h2>
+      <span>Admin Panel</span>
+    </div>
+
+    <nav class="nav-links">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Overview
+      </a>
+      <a routerLink="/dashboard/courses" routerLinkActive="active"> Courses </a>
+      <a routerLink="/dashboard/books" routerLinkActive="active"> Books </a>
+      <a routerLink="/dashboard/paths" routerLinkActive="active"> Learning Paths </a>
+      <a routerLink="/dashboard/tools" routerLinkActive="active"> Tools </a>
+      <a routerLink="/dashboard/users" routerLinkActive="active"> Users </a>
+    </nav>
+
+    <button class="logout-btn" (click)="onLogout()">Logout</button>
+  </aside>
+
+  <main class="dashboard-main">
+    <header class="dashboard-header">
+      <h1>Dashboard</h1>
+    </header>
+
+    <section class="dashboard-content">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>

@@ -1,0 +1,456 @@
+@use '../../../../scss/base/mixins' as *;
+@use '../../../../scss/base/variables' as *;
+
+// نفس الباليت الأساسية (مطابقة لباقي الصفحات)
+$emerald-900: #020f0c;
+$emerald-800: #021813;
+$emerald-700: #08342a;
+
+$gold-100: #fff4cf;
+$gold-200: #f9e0a2;
+$gold-300: #f0cb7a;
+$gold-400: #d9a74a;
+$gold-500: #b9822f;
+
+/* =================== PAGE WRAPPER =================== */
+
+.lms-courses-page {
+  width: 100%;
+  padding: 1.5rem 1.8rem 2.2rem;
+  background: radial-gradient(circle at top left, rgba(217, 167, 74, 0.06), transparent 55%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+/* =================== HEADER =================== */
+
+.lms-courses-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 760px;
+}
+
+.lms-courses-page__breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba($gold-200, 0.7);
+
+  span {
+    opacity: 0.7;
+  }
+
+  .active {
+    opacity: 1;
+    color: $gold-100;
+  }
+}
+
+.lms-courses-page__header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: $gold-100;
+  margin: 0;
+}
+
+.lms-courses-page__header p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba($gold-200, 0.85);
+}
+
+/* =================== TOPBAR (FILTERS + RESET) =================== */
+
+.lms-courses-page__topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.lms-courses-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+/* حقل فلتر عام (Min hours + Category) */
+
+.lms-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 140px;
+}
+
+.lms-filter-field__label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba($gold-200, 0.8);
+}
+
+/* مدخل الأرقام (Min hours) */
+
+.lms-filter-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  background: radial-gradient(circle at top left, rgba(12, 148, 136, 0.16), transparent 65%),
+    $emerald-900;
+  color: $gold-100;
+  font-size: 0.82rem;
+  outline: none;
+
+  &::placeholder {
+    color: rgba($gold-200, 0.6);
+  }
+
+  &:focus {
+    border-color: rgba($gold-400, 0.9);
+    box-shadow: 0 0 0 1px rgba($gold-400, 0.45);
+  }
+}
+
+/* السلكت (Category) */
+
+.lms-filter-select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  background: radial-gradient(circle at top left, rgba(12, 148, 136, 0.16), transparent 65%),
+    $emerald-900;
+  color: $gold-100;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+
+  &:focus {
+    border-color: rgba($gold-400, 0.9);
+    box-shadow: 0 0 0 1px rgba($gold-400, 0.45);
+  }
+}
+
+/* زر Reset filters على اليمين */
+
+.lms-courses-page__sort {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 180px;
+}
+
+/* نستخدم نفس زر .lms-primary-btn العام، بس ممكن نخفّف الshadow شوي لو حابب */
+
+.lms-courses-page__sort .lms-primary-btn {
+  padding-inline: 1.1rem;
+}
+
+/* =================== GRID =================== */
+
+.lms-courses-grid {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem 1.3rem;
+}
+
+/* =================== COURSE CARD (نفس الكورسات العامة) =================== */
+
+.lms-course-card {
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+
+  padding: 1.25rem 1.35rem;
+  border-radius: 0.7rem;
+
+  border: 1px solid rgba(6, 95, 70, 0.95);
+  background: radial-gradient(circle at top left, rgba(217, 167, 74, 0.12), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(8, 52, 42, 0.9), $emerald-900);
+  color: $gold-100;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease,
+    background 0.16s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba($gold-400, 0.95);
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.8);
+    background: radial-gradient(circle at top left, rgba(217, 167, 74, 0.2), transparent 60%),
+      radial-gradient(circle at bottom right, rgba(8, 52, 42, 0.96), $emerald-900);
+  }
+}
+
+/* Header */
+
+.lms-course-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.lms-course-card__title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lms-course-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: $gold-100;
+}
+
+.lms-course-card__subtitle {
+  margin: 0.18rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba($gold-200, 0.9);
+}
+
+/* Level badge (Beginner / Intermediate / Advanced) */
+
+.lms-course-card__level {
+  flex-shrink: 0;
+  align-self: flex-start;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+
+  border: 1px solid rgba($gold-300, 0.8);
+  color: $gold-100;
+  background: radial-gradient(circle at top left, rgba($gold-400, 0.45), transparent 70%);
+}
+
+.lms-course-card__level--beginner {
+  border-color: rgba(52, 211, 153, 0.85);
+  color: #bbf7d0;
+  background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.35), transparent 70%);
+}
+
+.lms-course-card__level--intermediate {
+  border-color: rgba(96, 165, 250, 0.85);
+  color: #bfdbfe;
+  background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.35), transparent 70%);
+}
+
+.lms-course-card__level--advanced {
+  border-color: rgba(248, 113, 113, 0.9);
+  color: #fecaca;
+  background: radial-gradient(circle at top left, rgba(248, 113, 113, 0.4), transparent 70%);
+}
+
+/* Body + Meta */
+
+.lms-course-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.lms-course-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.9rem;
+  font-size: 0.78rem;
+  color: rgba($gold-200, 0.95);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    background: radial-gradient(circle at top left, rgba(12, 148, 136, 0.25), transparent 70%);
+    border: 1px solid rgba(15, 118, 110, 0.9);
+  }
+
+  span span:first-child {
+    font-size: 0.9rem; // الأيقونات ⏱ 📚 🗓
+  }
+}
+
+/* Tag My course */
+
+.lms-course-card__tag {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+
+  color: $emerald-900;
+  background: linear-gradient(120deg, $gold-200, $gold-400);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+/* Footer */
+
+.lms-course-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.3rem;
+}
+
+.lms-course-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.lms-course-card__price-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba($gold-200, 0.7);
+}
+
+.lms-course-card__price-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $gold-100;
+}
+
+/* زر Open course */
+
+.lms-course-card .lms-primary-btn {
+  min-width: 7.3rem;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  background: linear-gradient(135deg, $gold-400, $gold-500);
+  color: #020617;
+  font-weight: 600;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8);
+
+  transition: transform 0.14s ease-out, box-shadow 0.14s ease-out, filter 0.14s ease-out,
+    opacity 0.14s ease-out;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+    box-shadow: none;
+  }
+}
+
+/* =================== STATES (Loading / Empty / Error) =================== */
+
+.lms-courses-page__state {
+  margin-top: 1.2rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.88rem;
+  color: rgba($gold-200, 0.9);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(15, 118, 110, 0.8);
+}
+
+.lms-courses-page__state--empty {
+  border-style: dashed;
+  border-color: rgba($gold-400, 0.85);
+  color: rgba($gold-200, 0.95);
+}
+
+.lms-courses-page__state--error {
+  border-color: rgba(248, 113, 113, 0.9);
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.65);
+}
+
+/* =================== RESPONSIVE =================== */
+
+@media (max-width: 900px) {
+  .lms-courses-page {
+    padding-inline: 1.2rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .lms-courses-page__topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lms-courses-page__filters {
+    width: 100%;
+  }
+
+  .lms-courses-page__sort {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .lms-courses-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lms-course-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lms-course-card .lms-primary-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .lms-courses-page {
+    padding-inline: 1rem;
+  }
+
+  .lms-course-card {
+    padding: 1.05rem 1.1rem;
+    border-radius: 0.55rem;
+  }
+
+  .lms-course-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lms-course-card__level {
+    margin-top: 0.25rem;
+  }
+}

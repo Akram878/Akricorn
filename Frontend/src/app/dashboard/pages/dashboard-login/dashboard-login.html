@@ -1,0 +1,26 @@
+<div class="dashboard-login-wrapper bg-primary">
+  <div class="dashboard-login-card bg-secondary">
+    <h1 class="title">Akricorn Admin</h1>
+    <p class="subtitle">Sign in to dashboard</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username" placeholder="owner" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="Password" />
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" [disabled]="isSubmitting || loginForm.invalid">
+        {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
+      </button>
+    </form>
+  </div>
+</div>

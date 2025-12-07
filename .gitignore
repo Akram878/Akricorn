@@ -1,0 +1,51 @@
+# ==== General ====
+*.log
+*.user
+*.suo
+*.tmp
+*.temp
+
+# ==== Visual Studio ====
+.vs/
+*.vssscc
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.ipch
+*.aps
+*.ncb
+*.opt
+*.sdf
+*.cachefile
+*.dbmdl
+
+# ==== Build output ====
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+
+# ==== .NET specific ====
+*.dll
+*.exe
+
+# ==== Frontend Node (Angular/React/Vue/etc) ====
+node_modules/
+dist/
+build/
+.tmp/
+.cache/
+.npm/
+.yarn/
+
+# ==== Others ====
+*.vsidx
+*.swp
+*.DS_Store
+Thumbs.db
