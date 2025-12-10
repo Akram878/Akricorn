@@ -3,10 +3,6 @@
   "WorkspaceRootPath": "D:\\Akricorn\\Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\adminbookscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\adminbookscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\admincoursecontentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\admincoursecontentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -15,12 +11,16 @@
       "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\admincoursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\swaggerfileoperationfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:swaggerfileoperationfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\adminbookscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\adminbookscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\swaggerfileoperationfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:swaggerfileoperationfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -162,7 +162,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
@@ -175,51 +175,49 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-07T13:10:32.432Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "AdminCourseContentController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminCourseContentController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminCourseContentController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AdminCourseContentController.cs",
               "RelativeToolTip": "Controllers\\AdminCourseContentController.cs",
-              "ViewState": "AgIAAMAAAACAmZmZmZkjwMUAAAA4AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-10T03:39:24.736Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "AdminCoursesController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminCoursesController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminCoursesController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AdminCoursesController.cs",
               "RelativeToolTip": "Controllers\\AdminCoursesController.cs",
-              "ViewState": "AgIAAPEAAAAAAAAAAAAIwAIBAAAHAAAAAAAAAA==",
+              "ViewState": "AgIAAO4AAAAAAAAAAAAYwAQBAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-10T02:31:32.246Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "AdminBooksController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminBooksController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminBooksController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AdminBooksController.cs",
               "RelativeToolTip": "Controllers\\AdminBooksController.cs",
-              "ViewState": "AgIAAKgAAAAAAAAAAAAzwK8AAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAKgAAAAAAAAAAAAzwLEAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-30T08:41:16.392Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-30T08:41:16.392Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "SwaggerFileOperationFilter.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\SwaggerFileOperationFilter.cs",
               "RelativeDocumentMoniker": "SwaggerFileOperationFilter.cs",
@@ -227,12 +225,11 @@
               "RelativeToolTip": "SwaggerFileOperationFilter.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-10T04:36:57.275Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-10T04:36:57.275Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -240,8 +237,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T05:42:48.585Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T05:42:48.585Z"
             },
             {
               "$type": "Document",
@@ -253,8 +249,7 @@
               "RelativeToolTip": "WeatherForecast.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-10T04:41:48.155Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-10T04:41:48.155Z"
             },
             {
               "$type": "Document",
@@ -266,12 +261,7 @@
               "RelativeToolTip": "Controllers\\AdminLearningPathsController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAPcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-30T08:58:54.619Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+              "WhenOpened": "2025-11-30T08:58:54.619Z"
             },
             {
               "$type": "Document",
@@ -283,8 +273,7 @@
               "RelativeToolTip": "Controllers\\AdminDashboardController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-30T07:42:57.048Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-30T07:42:57.048Z"
             },
             {
               "$type": "Document",
@@ -296,8 +285,7 @@
               "RelativeToolTip": "Models\\Book.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T07:04:39.57Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-29T07:04:39.57Z"
             },
             {
               "$type": "Document",
@@ -321,8 +309,7 @@
               "RelativeToolTip": "Migrations\\20251209162022_Initial.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-09T16:20:22.511Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-09T16:20:22.511Z"
             },
             {
               "$type": "Document",
@@ -334,8 +321,7 @@
               "RelativeToolTip": "Models\\UserBook.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T07:06:45.911Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-29T07:06:45.911Z"
             },
             {
               "$type": "Document",
@@ -635,6 +621,10 @@
               "RelativeToolTip": "Backend.csproj",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-11-14T15:44:47.174Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }

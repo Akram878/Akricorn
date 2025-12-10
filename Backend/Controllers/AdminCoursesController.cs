@@ -261,7 +261,7 @@ namespace Backend.Controllers
         [HttpPost("upload-thumbnail")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadThumbnail([FromForm] IFormFile file)
+        public async Task<IActionResult> UploadThumbnail(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file uploaded." });

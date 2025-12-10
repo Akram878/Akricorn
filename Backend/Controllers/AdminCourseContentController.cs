@@ -1,9 +1,10 @@
 ﻿using Backend.Data;
 using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using System.ComponentModel.DataAnnotations;
 namespace Backend.Controllers
 {
     [ApiController]
@@ -162,8 +163,8 @@ namespace Backend.Controllers
         [HttpPost("lessons/{lessonId}/upload")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadLessonFile(int lessonId, [FromForm] IFormFile file)
- 
+        public async Task<IActionResult> UploadLessonFile(int lessonId, IFormFile file)
+
         {
             try
             {
@@ -192,7 +193,9 @@ namespace Backend.Controllers
                 {
                     LessonId = lessonId,
                     FileName = file.FileName,
-                    FileUrl = url
+                    FileUrl = url,
+                    SizeBytes = file.Length,
+                    ContentType = file.ContentType ?? "application/octet-stream"
                 };
 
                 _context.CourseLessonFiles.Add(newFile);
