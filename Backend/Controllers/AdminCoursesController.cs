@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System;
 using System.IO;
+using Backend.Helpers;
 
 namespace Backend.Controllers
 {
@@ -109,6 +110,8 @@ namespace Backend.Controllers
 
                 _context.Courses.Add(course);
                 await _context.SaveChangesAsync();
+
+                EnsureCourseDirectories(course.Id);
 
                 // Save Learning Paths 
                 var pathIds = (request.PathIds ?? new List<int>())
@@ -232,7 +235,11 @@ namespace Backend.Controllers
 
             try
             {
-                // Remove learning path links 
+                var courseFolder = CourseStorageHelper.GetCourseFolder(id);
+                if (Directory.Exists(courseFolder))
+                    Directory.Delete(courseFolder, true);
+
+                // Remove learning path links
                 var links = _context.LearningPathCourses
                     .Where(lp => lp.CourseId == id);
                 _context.LearningPathCourses.RemoveRange(links);
@@ -253,23 +260,26 @@ namespace Backend.Controllers
             }
         }
 
-        // ============================================================ 
-        // UPLOAD THUMBNAIL 
-        // ============================================================ 
-
-
-        [HttpPost("upload-thumbnail")]
+        // ============================================================
+        // UPLOAD THUMBNAIL
+        // ============================================================
+        [HttpPost("{courseId}/upload-thumbnail")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadThumbnail(IFormFile file)
+        public async Task<IActionResult> UploadThumbnail(int courseId, IFormFile file)
         {
+            var course = await _context.Courses.FindAsync(courseId);
+            if (course == null)
+                return NotFound(new { message = "Course not found." });
+
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file uploaded." });
 
-            var folder = Path.Combine("wwwroot", "uploads", "course-thumbnails");
+            var folder = CourseStorageHelper.GetThumbnailFolder(courseId);
+            Directory.CreateDirectory(folder);
 
-            if (!Directory.Exists(folder))
-                Directory.CreateDirectory(folder);
+            foreach (var existing in Directory.GetFiles(folder))
+                System.IO.File.Delete(existing);
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var path = Path.Combine(folder, fileName);
@@ -279,8 +289,14 @@ namespace Backend.Controllers
                 await file.CopyToAsync(stream);
             }
 
+            var relativePath = Path.Combine("courses", $"course-{courseId}", "thumbnail", fileName)
+               .Replace("\\", "/");
+
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var url = $"{baseUrl}/uploads/course-thumbnails/{fileName}";
+            var url = $"{baseUrl}/{relativePath}";
+
+            course.ThumbnailUrl = url;
+            await _context.SaveChangesAsync();
 
             return Ok(new { url });
         }
@@ -327,6 +343,15 @@ namespace Backend.Controllers
             public double Rating { get; set; }
             public string ThumbnailUrl { get; set; }
             public List<int> PathIds { get; set; } = new();
+        }
+
+        private void EnsureCourseDirectories(int courseId)
+        {
+            var thumbnailFolder = CourseStorageHelper.GetThumbnailFolder(courseId);
+            var contentFolder = CourseStorageHelper.GetContentFolder(courseId);
+
+            Directory.CreateDirectory(thumbnailFolder);
+            Directory.CreateDirectory(contentFolder);
         }
     }
 }

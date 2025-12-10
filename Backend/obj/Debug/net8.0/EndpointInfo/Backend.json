@@ -652,10 +652,21 @@
         }
       }
     },
-    "/api/admin/courses/upload-thumbnail": {
+    "/api/admin/courses/{courseId}/upload-thumbnail": {
       "post": {
         "tags": [
           "AdminCourses"
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
         ],
         "requestBody": {
           "content": {

@@ -300,6 +300,27 @@
   },
   {
     "ContainingType": "Backend.Controllers.AdminCoursesController",
+    "Method": "UploadThumbnail",
+    "RelativePath": "api/admin/courses/{courseId}/upload-thumbnail",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCoursesController",
     "Method": "GetById",
     "RelativePath": "api/admin/courses/{id}",
     "HttpMethod": "GET",
@@ -357,22 +378,6 @@
         "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "Backend.Controllers.AdminCoursesController",
-    "Method": "UploadThumbnail",
-    "RelativePath": "api/admin/courses/upload-thumbnail",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "file",
-        "Type": "Microsoft.AspNetCore.Http.IFormFile",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": []
