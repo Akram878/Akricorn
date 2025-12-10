@@ -182,6 +182,10 @@
               "IsPinned": true
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "CourseStorageHelper.cs",
@@ -193,10 +197,6 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-10T11:12:13.336Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",
@@ -219,7 +219,7 @@
               "RelativeDocumentMoniker": "Controllers\\AdminCoursesController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AdminCoursesController.cs",
               "RelativeToolTip": "Controllers\\AdminCoursesController.cs",
-              "ViewState": "AgIAAFABAAAAAAAAAAAywGIBAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAEUBAAAAAAAAAAA6wGIBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-10T02:31:32.246Z",
               "EditorCaption": ""
