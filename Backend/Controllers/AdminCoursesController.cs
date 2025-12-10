@@ -3,6 +3,12 @@ using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
+using System.IO;
 
 namespace Backend.Controllers
 {
@@ -18,243 +24,309 @@ namespace Backend.Controllers
             _context = context;
         }
 
-        // ============================
-        //   GET ALL COURSES
-        // ============================
+        // ============================================================ 
+        // GET ALL COURSES 
+        // ============================================================ 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAll()
         {
-            var courses = await _context.Courses
-                .Include(c => c.CourseBooks)
+            var result = await _context.Courses
                 .Include(c => c.LearningPathCourses)
+                .Select(c => new CourseDto
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Description = c.Description,
+                    Price = c.Price,
+                    IsActive = c.IsActive,
+                    Hours = c.Hours,
+                    Category = c.Category,
+                    Rating = c.Rating,
+                    ThumbnailUrl = c.ThumbnailUrl,
+                    PathIds = c.LearningPathCourses
+                        .Select(lp => lp.LearningPathId)
+                        .ToList()
+                })
                 .ToListAsync();
 
-            var result = courses.Select(c => new CourseDto
-            {
-                Id = c.Id,
-                Title = c.Title,
-                Description = c.Description,
-                Price = c.Price,
-                IsActive = c.IsActive,
-                Hours = c.Hours,
-                Category = c.Category,
-                Rating = c.Rating,
-                BookIds = c.CourseBooks.Select(cb => cb.BookId).ToList(),
-                PathIds = c.LearningPathCourses.Select(lp => lp.LearningPathId).ToList()
-            });
-
             return Ok(result);
         }
 
-        // ============================
-        //   GET COURSE BY ID
-        // ============================
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id)
+        // ============================================================ 
+        // GET COURSE BY ID 
+        // ============================================================ 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CourseDto>> GetById(int id)
         {
-            var c = await _context.Courses
-                .Include(c => c.CourseBooks)
+            var course = await _context.Courses
                 .Include(c => c.LearningPathCourses)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (c == null)
+            if (course == null)
                 return NotFound(new { message = "Course not found." });
 
-            var result = new CourseDto
+            var dto = new CourseDto
             {
-                Id = c.Id,
-                Title = c.Title,
-                Description = c.Description,
-                Price = c.Price,
-                IsActive = c.IsActive,
-                Hours = c.Hours,
-                Category = c.Category,
-                Rating = c.Rating,
-                BookIds = c.CourseBooks.Select(cb => cb.BookId).ToList(),
-                PathIds = c.LearningPathCourses.Select(lp => lp.LearningPathId).ToList()
+                Id = course.Id,
+                Title = course.Title,
+                Description = course.Description,
+                Price = course.Price,
+                IsActive = course.IsActive,
+                Hours = course.Hours,
+                Category = course.Category,
+                Rating = course.Rating,
+                ThumbnailUrl = course.ThumbnailUrl,
+                PathIds = course.LearningPathCourses
+                    .Select(lp => lp.LearningPathId)
+                    .ToList()
             };
 
-            return Ok(result);
+            return Ok(dto);
         }
 
-        // ============================
-        //   CREATE COURSE
-        // ============================
+        // ============================================================ 
+        // CREATE COURSE 
+        // ============================================================ 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CourseCreateRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateCourseRequest request)
         {
-            var c = new Course
-            {
-                Title = request.Title,
-                Description = request.Description,
-                Price = request.Price,
-                IsActive = request.IsActive,
-                Hours = request.Hours,
-                Category = request.Category,
-                Rating = request.Rating
-            };
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            _context.Courses.Add(c);
-            await _context.SaveChangesAsync();
-
-            // Books
-            if (request.BookIds != null)
+            try
             {
-                foreach (var bookId in request.BookIds)
+                var course = new Course
                 {
-                    _context.CourseBooks.Add(new CourseBook
-                    {
-                        CourseId = c.Id,
-                        BookId = bookId
-                    });
-                }
-            }
+                    Title = request.Title,
+                    Description = request.Description,
+                    Price = request.Price,
+                    IsActive = request.IsActive,
+                    Hours = request.Hours,
+                    Category = request.Category,
+                    Rating = request.Rating,
+                    ThumbnailUrl = request.ThumbnailUrl
+                };
 
-            // Paths
-            if (request.PathIds != null)
-            {
-                foreach (var pathId in request.PathIds)
+                _context.Courses.Add(course);
+                await _context.SaveChangesAsync();
+
+                // Save Learning Paths 
+                var pathIds = (request.PathIds ?? new List<int>())
+                    .Distinct()
+                    .ToList();
+
+                if (pathIds.Count > 0)
                 {
-                    _context.LearningPathCourses.Add(new LearningPathCourse
+                    var validPaths = await _context.LearningPaths
+                        .Where(lp => pathIds.Contains(lp.Id))
+                        .Select(lp => lp.Id)
+                        .ToListAsync();
+
+                    var order = 0;
+
+                    foreach (var pathId in validPaths)
                     {
-                        CourseId = c.Id,
-                        LearningPathId = pathId,
-                        StepOrder = 1
-                    });
+                        _context.LearningPathCourses.Add(new LearningPathCourse
+                        {
+                            CourseId = course.Id,
+                            LearningPathId = pathId,
+                            StepOrder = order++
+                        });
+                    }
                 }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Course created successfully.", id = course.Id });
             }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Course created successfully." });
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = $"Error while creating course: {ex.Message}",
+                    inner = ex.InnerException?.Message
+                });
+            }
         }
 
-        // ============================
-        //   UPDATE COURSE
-        // ============================
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] CourseUpdateRequest request)
+        // ============================================================ 
+        // UPDATE COURSE 
+        // ============================================================ 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCourseRequest request)
         {
-            var c = await _context.Courses
-                .Include(c => c.CourseBooks)
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var course = await _context.Courses
                 .Include(c => c.LearningPathCourses)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (c == null)
+            if (course == null)
                 return NotFound(new { message = "Course not found." });
 
-            c.Title = request.Title;
-            c.Description = request.Description;
-            c.Price = request.Price;
-            c.IsActive = request.IsActive;
-            c.Hours = request.Hours;
-            c.Category = request.Category;
-            c.Rating = request.Rating;
-
-            // update books
-            _context.CourseBooks.RemoveRange(c.CourseBooks);
-            if (request.BookIds != null)
+            try
             {
-                foreach (var bookId in request.BookIds)
-                {
-                    _context.CourseBooks.Add(new CourseBook
-                    {
-                        CourseId = c.Id,
-                        BookId = bookId
-                    });
-                }
-            }
+                // Update basic fields 
+                course.Title = request.Title;
+                course.Description = request.Description;
+                course.Price = request.Price;
+                course.IsActive = request.IsActive;
+                course.Hours = request.Hours;
+                course.Category = request.Category;
+                course.Rating = request.Rating;
+                course.ThumbnailUrl = request.ThumbnailUrl;
 
-            // update paths
-            _context.LearningPathCourses.RemoveRange(c.LearningPathCourses);
-            if (request.PathIds != null)
+                // Update Learning Paths 
+                var oldLinks = _context.LearningPathCourses
+                    .Where(lp => lp.CourseId == id);
+                _context.LearningPathCourses.RemoveRange(oldLinks);
+
+                var pathIds = (request.PathIds ?? new List<int>())
+                    .Distinct()
+                    .ToList();
+
+                if (pathIds.Count > 0)
+                {
+                    var validPaths = await _context.LearningPaths
+                        .Where(lp => pathIds.Contains(lp.Id))
+                        .Select(lp => lp.Id)
+                        .ToListAsync();
+
+                    var order = 0;
+
+                    foreach (var pathId in validPaths)
+                    {
+                        _context.LearningPathCourses.Add(new LearningPathCourse
+                        {
+                            CourseId = id,
+                            LearningPathId = pathId,
+                            StepOrder = order++
+                        });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Course updated successfully." });
+            }
+            catch (Exception ex)
             {
-                foreach (var pathId in request.PathIds)
+                return StatusCode(500, new
                 {
-                    _context.LearningPathCourses.Add(new LearningPathCourse
-                    {
-                        CourseId = c.Id,
-                        LearningPathId = pathId,
-                        StepOrder = 1
-                    });
-                }
+                    message = $"Error while updating course: {ex.Message}",
+                    inner = ex.InnerException?.Message
+                });
             }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Course updated successfully." });
         }
 
-        // ============================
-        //   DELETE COURSE
-        // ============================
-        [HttpDelete("{id:int}")]
+        // ============================================================ 
+        // DELETE COURSE 
+        // ============================================================ 
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var c = await _context.Courses
-                .Include(c => c.CourseBooks)
-                .Include(c => c.LearningPathCourses)
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            if (c == null)
+            var course = await _context.Courses.FindAsync(id);
+            if (course == null)
                 return NotFound(new { message = "Course not found." });
 
-            _context.CourseBooks.RemoveRange(c.CourseBooks);
-            _context.LearningPathCourses.RemoveRange(c.LearningPathCourses);
-            _context.Courses.Remove(c);
+            try
+            {
+                // Remove learning path links 
+                var links = _context.LearningPathCourses
+                    .Where(lp => lp.CourseId == id);
+                _context.LearningPathCourses.RemoveRange(links);
 
-            await _context.SaveChangesAsync();
+                _context.Courses.Remove(course);
 
-            return Ok(new { message = "Course deleted successfully." });
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Course deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = $"Error while deleting course: {ex.Message}",
+                    inner = ex.InnerException?.Message
+                });
+            }
         }
-    }
 
-    // ============================
-    //   DTO + REQUEST MODELS
-    // ============================
-    public class CourseDto
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public decimal Price { get; set; }
-        public bool IsActive { get; set; }
+        // ============================================================ 
+        // UPLOAD THUMBNAIL 
+        // ============================================================ 
 
-        public int Hours { get; set; }
-        public string Category { get; set; }
-        public double Rating { get; set; }
 
-        public List<int> BookIds { get; set; }
-        public List<int> PathIds { get; set; }
-    }
+        [HttpPost("upload-thumbnail")]
+        [DisableRequestSizeLimit]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadThumbnail([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file uploaded." });
 
-    public class CourseCreateRequest
-    {
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public decimal Price { get; set; }
-        public bool IsActive { get; set; }
+            var folder = Path.Combine("wwwroot", "uploads", "course-thumbnails");
 
-        public int Hours { get; set; }
-        public string Category { get; set; }
-        public double Rating { get; set; }
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
 
-        public List<int> BookIds { get; set; }
-        public List<int> PathIds { get; set; }
-    }
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var path = Path.Combine(folder, fileName);
 
-    public class CourseUpdateRequest
-    {
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public decimal Price { get; set; }
-        public bool IsActive { get; set; }
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
 
-        public int Hours { get; set; }
-        public string Category { get; set; }
-        public double Rating { get; set; }
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var url = $"{baseUrl}/uploads/course-thumbnails/{fileName}";
 
-        public List<int> BookIds { get; set; }
-        public List<int> PathIds { get; set; }
+            return Ok(new { url });
+        }
+
+
+        // ============================================================ 
+        // DTO + REQUEST MODELS 
+        // ============================================================ 
+        public class CourseDto
+        {
+            public int Id { get; set; }
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public decimal Price { get; set; }
+            public bool IsActive { get; set; }
+            public int Hours { get; set; }
+            public string Category { get; set; }
+            public double Rating { get; set; }
+            public string ThumbnailUrl { get; set; }
+            public List<int> PathIds { get; set; } = new();
+        }
+
+        public class CreateCourseRequest
+        {
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public decimal Price { get; set; }
+            public bool IsActive { get; set; } = true;
+            public int Hours { get; set; }
+            public string Category { get; set; }
+            public double Rating { get; set; }
+            public string ThumbnailUrl { get; set; }
+            public List<int> PathIds { get; set; } = new();
+        }
+
+        public class UpdateCourseRequest
+        {
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public decimal Price { get; set; }
+            public bool IsActive { get; set; } = true;
+            public int Hours { get; set; }
+            public string Category { get; set; }
+            public double Rating { get; set; }
+            public string ThumbnailUrl { get; set; }
+            public List<int> PathIds { get; set; } = new();
+        }
     }
 }

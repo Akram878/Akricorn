@@ -93,14 +93,12 @@
 
     <!-- Auth + settings -->
     <div class="header-auth">
-      <!-- لو مش مسجّل -->
       <ng-container *ngIf="!isLoggedIn; else loggedInDesktop">
-        <a [routerLink]="'/auth/login'" class="btn-h" (click)="isMobileNavOpen = false">Sign</a>
+        <a [routerLink]="'/auth/login'" class="btn-h">Sign</a>
       </ng-container>
 
-      <!-- لو مسجّل: زر واحد فقط Profile يفتح مودال -->
       <ng-template #loggedInDesktop>
-        <button type="button" class="btn-h" (click)="openProfileModal($event)">Profile</button>
+        <button class="btn-h" [routerLink]="'/profile'">Profile</button>
       </ng-template>
     </div>
 

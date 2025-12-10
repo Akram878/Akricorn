@@ -31,5 +31,15 @@ namespace Backend.Models
 
         // هل الحساب مفعّل أم لا (للتعطيل من الداشبورد)
         public bool IsActive { get; set; } = true;
+
+        // Navigation Properties
+        public virtual ICollection<UserCourse> UserCourses { get; set; }
+        public virtual ICollection<UserBook> UserBooks { get; set; }
+
+        public User()
+        {
+            UserCourses = new HashSet<UserCourse>();
+            UserBooks = new HashSet<UserBook>();
+        }
     }
 }

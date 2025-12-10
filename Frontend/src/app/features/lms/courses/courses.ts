@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DecimalPipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // 👈 مهم جداً
 import {
   PublicCoursesService,
@@ -54,7 +55,8 @@ export class Courses implements OnInit {
 
   constructor(
     private publicCoursesService: PublicCoursesService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -184,9 +186,9 @@ export class Courses implements OnInit {
   //      Purchase logic
   // ============================
   onPurchase(course: PublicCourse): void {
-    // إذا الكورس مملوك أصلاً → لا تعيد الشراء
+    // لو الكورس مملوك → ودّيه مباشرة إلى My Courses
     if (this.isCourseOwned(course)) {
-      this.notification.showInfo('You already own this course.');
+      this.router.navigate(['/lms/my-courses']);
       return;
     }
 
@@ -199,7 +201,7 @@ export class Courses implements OnInit {
     this.publicCoursesService.purchaseCourse(course.id).subscribe({
       next: () => {
         this.notification.showSuccess('Course purchased successfully.');
-        this.ownedCourseIds.add(course.id);
+        this.ownedCourseIds.add(course.id); // يظهر Owned بدون ريفرش
         this.processingCourseId = null;
       },
       error: (err) => {

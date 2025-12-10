@@ -7,23 +7,38 @@ export interface PublicBook {
   title: string;
   description: string;
   price: number;
+}
+
+export interface MyBook {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
   fileUrl: string;
+  grantedAt: string | null;
+  isFromCourse: boolean | null;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class PublicBooksService {
-  private readonly baseUrl = 'https://localhost:7150/api/lms';
+  private readonly baseUrl = 'https://localhost:7150/api/lms'; // عدّل البورت لو مختلف
 
   constructor(private http: HttpClient) {}
 
+  // الكتب العامة (اللايبرري) — متاحة للجميع
   getBooks(): Observable<PublicBook[]> {
     return this.http.get<PublicBook[]>(`${this.baseUrl}/books`);
   }
 
-  // لو حبيت لاحقاً تجيب كتاب واحد بالتفصيل:
-  // getBook(id: number): Observable<PublicBook> {
-  //   return this.http.get<PublicBook>(`${this.baseUrl}/books/${id}`);
-  // }
+  // الكتب التي يملكها المستخدم
+  getMyBooks(): Observable<MyBook[]> {
+    return this.http.get<MyBook[]>(`${this.baseUrl}/my-books`);
+  }
+
+  // شراء كتاب واحد
+  purchaseBook(bookId: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/books/${bookId}/purchase`, {});
+  }
 }

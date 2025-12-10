@@ -13,13 +13,14 @@ body {
   width: 100%;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   // background: linear-gradient(145deg, rgb(0 29 22) 0%, rgb(1 24 16) 60%, rgb(0 18 12) 100%);
-  background: radial-gradient(
-    circle at top left,
-    #0b3a2a 0%,
-    #031b14 40%,
-    #02130f 70%,
-    #010806 100%
-  );
+  // background: radial-gradient(
+  //   circle at top left,
+  //   #0b3a2a 0%,
+  //   #031b14 40%,
+  //   #02130f 70%,
+  //   #010806 100%
+  // );
+  background-color: #031712;
   color: #f5e9d4;
   a {
     color: hsl(42.67deg 88.24% 80%);

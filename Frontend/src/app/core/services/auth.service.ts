@@ -162,8 +162,8 @@ export class AuthService {
   //        Delete account
   // ============================
 
-  deleteAccount(userId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/delete`, { id: userId }).pipe(
+  deleteAccount(userId: number, currentPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/delete`, { id: userId, currentPassword }).pipe(
       tap(() => {
         this.logout();
       })

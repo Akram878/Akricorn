@@ -1,0 +1,417 @@
+/* =====================================================================
+   CORE LAYOUT
+===================================================================== */
+
+.course-content-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  width: 100%;
+  color: #e5e7eb;
+  font-family: 'Inter', sans-serif;
+}
+
+/* =====================================================================
+   TOP BAR
+===================================================================== */
+
+.editor-topbar {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+  .btn-icon {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #e5e7eb;
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 600;
+  }
+
+  .subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: #9ca3af;
+  }
+}
+
+/* =====================================================================
+   BODY
+===================================================================== */
+
+.editor-body {
+}
+
+/* =====================================================================
+   CARD BASE
+===================================================================== */
+
+.card {
+  background: #0f1625;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.35);
+
+  h3 {
+    margin: 0 0 1.2rem;
+    font-size: 1.18rem;
+    font-weight: 600;
+  }
+}
+
+/* =====================================================================
+   LEFT SIDE — OVERVIEW CARD
+===================================================================== */
+
+.overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+
+  .thumbnail-block {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+
+    .thumbnail-preview {
+      width: 165px;
+      height: 105px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #1e2533;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .thumbnail-placeholder {
+        color: #9ca3af;
+        font-size: 0.88rem;
+      }
+    }
+
+    .thumbnail-actions {
+      .btn-secondary {
+        padding: 0.55rem 1.1rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #e5e7eb;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: 0.2s;
+        display: inline-block;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.14);
+        }
+      }
+    }
+  }
+
+  .overview-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 1rem;
+
+    .overview-item {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+
+      .label {
+        font-size: 0.78rem;
+        color: #9ca3af;
+      }
+
+      .value {
+        margin-top: 0.25rem;
+        font-size: 0.98rem;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+/* =====================================================================
+   LEFT SIDE — FORM CARD
+===================================================================== */
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    label {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+
+    input,
+    select,
+    textarea {
+      background: #1e2533;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.55rem 0.7rem;
+      color: #e5e7eb;
+      font-size: 0.92rem;
+
+      &:focus {
+        outline: none;
+        border-color: #22c55e;
+      }
+    }
+  }
+
+  .checkbox-field {
+    margin-top: 0.3rem;
+
+    label {
+      display: flex;
+      gap: 0.55rem;
+      align-items: center;
+    }
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #178b43);
+      border: none;
+      padding: 0.65rem 1.5rem;
+      color: white;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      color: #e5e7eb;
+      border: none;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
+  }
+}
+
+/* =====================================================================
+   RIGHT SIDE — CONTENT
+===================================================================== */
+
+.editor-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ADD SECTION */
+.add-section {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+
+  input {
+    flex: 1;
+    background: #1e2533;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    color: #e5e7eb;
+  }
+
+  button {
+    background: #22c55e;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+/* SECTION BLOCK */
+.section-block {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.4rem;
+
+  .section-header {
+    display: flex;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+
+    input {
+      flex: 1;
+      background: #1e2533;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+      color: #e5e7eb;
+    }
+
+    button {
+      background: #22c55e;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+
+      &:nth-child(4) {
+        background: #ef4444;
+      }
+    }
+  }
+}
+
+/* ADD LESSON */
+.add-lesson {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+
+  input {
+    flex: 1;
+    background: #1e2533;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    color: #e5e7eb;
+  }
+
+  button {
+    background: #22c55e;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+
+/* LESSON BLOCK */
+.lesson-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.1rem;
+
+  .lesson-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h5 {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    button {
+      background: #ef4444;
+      border: none;
+      padding: 0.5rem 0.9rem;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  }
+
+  .file-upload {
+    margin-top: 0.7rem;
+
+    p {
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: #9ca3af;
+    }
+  }
+
+  .files-list {
+    margin-top: 0.7rem;
+
+    .file-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0.7rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 0.45rem;
+
+      span {
+        color: #e5e7eb;
+      }
+
+      button {
+        background: #ef4444;
+        border: none;
+        padding: 0.4rem 0.75rem;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+    }
+  }
+}

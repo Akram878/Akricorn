@@ -1,10 +1,16 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
+import { AuthService } from '../services/auth.service';
+import { AdminAuthService } from '../services/admin-auth.service';
 
 export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   const notification = inject(NotificationService);
+  const router = inject(Router);
+  const authService = inject(AuthService);
+  const adminAuthService = inject(AdminAuthService);
 
   // توكن المستخدم العادي
   const userToken = localStorage.getItem('auth_token');
@@ -21,11 +27,22 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
     tokenToUse = userToken || adminToken;
   }
 
+  // ================================
+  //  ⭐ التعديل الوحيد المسموح به ⭐
+  // ================================
+  // معالجة مشاكل multipart/form-data
+  const extraOptions: any = {};
+  if (req.method === 'POST' || req.method === 'PUT') {
+    extraOptions.withCredentials = true; // مهم لعدم حذف التوكن
+    extraOptions.reportProgress = true; // مفيد للرفع
+  }
+
   const authReq = tokenToUse
     ? req.clone({
         setHeaders: {
           Authorization: `Bearer ${tokenToUse}`,
         },
+        ...extraOptions, // ← ← إضافة التعديل هنا فقط
       })
     : req;
 
@@ -33,7 +50,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error) => {
       console.error('HTTP Interceptor Error:', error);
 
-      // ⛔ في حالة "Failed to fetch"
+      // ⛔ "Failed to fetch" (مثلاً السيرفر طافي)
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         notification.showError(
           'Cannot connect to the server. Please check that the backend is running.'
@@ -41,7 +58,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // ⛔ في حالة Network error (status = 0)
+      // ⛔ Network error (status = 0)
       if (error instanceof HttpErrorResponse && error.status === 0) {
         notification.showError(
           'Cannot connect to the server. Please check that the backend is running.'
@@ -49,25 +66,84 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // 🧠 رسالة افتراضية
-      let message = 'An unexpected error occurred.';
+      let message: string | null = 'An unexpected error occurred.';
 
       if (error instanceof HttpErrorResponse) {
-        // حالة 401 → وضّح الرسالة شوي
-        if (error.status === 401) {
-          if (req.url.includes('/api/admin')) {
-            message = 'Unauthorized. Please log in as admin again.';
-          } else {
-            message = 'Unauthorized. Please log in again.';
+        const isAdminRequest = req.url.includes('/api/admin');
+
+        // ======================
+        //          403
+        // ======================
+        if (error.status === 403) {
+          if (!tokenToUse) {
+            return throwError(() => error);
           }
-        } else if (error.error?.message) {
+
+          if (isAdminRequest) {
+            message = error.error?.message || 'You do not have permission to perform this action.';
+
+            if (message) {
+              notification.showError(message);
+            }
+
+            return throwError(() => error);
+          } else {
+            message =
+              error.error?.message || 'Your account has been disabled. Please contact support.';
+
+            if (message) {
+              notification.showError(message);
+            }
+
+            authService.logout();
+            router.navigate(['/auth/login']);
+
+            return throwError(() => error);
+          }
+        }
+
+        // ======================
+        //          401
+        // ======================
+        if (error.status === 401) {
+          if (!tokenToUse) {
+            message = null;
+            return throwError(() => error);
+          }
+
+          if (isAdminRequest) {
+            message = 'Admin session has expired. Please log in again.';
+            adminAuthService.logout();
+          } else {
+            message = 'Your session has expired. Please log in again.';
+            authService.logout();
+            router.navigate(['/auth/login']);
+          }
+
+          if (message) {
+            notification.showError(message);
+          }
+
+          return throwError(() => error);
+        }
+
+        // ======================
+        //     باقي الحالات
+        // ======================
+        if (error.error?.message) {
           message = error.error.message;
         } else if (error.status >= 500) {
-          message = 'A server error occurred. Please try again later.';
+          if (error.error && error.error.message) {
+            message = error.error.message;
+          } else {
+            message = 'A server error occurred. Please try again later.';
+          }
         }
       }
 
-      notification.showError(message);
+      if (message) {
+        notification.showError(message);
+      }
 
       return throwError(() => error);
     })

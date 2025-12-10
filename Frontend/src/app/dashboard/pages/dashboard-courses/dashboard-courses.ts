@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, CurrencyPipe, NgIf, NgForOf } from '@angular/common';
 import {
   AdminCoursesService,
   AdminCourseDto,
   CreateCourseRequest,
-  UpdateCourseRequest,
 } from '../../../core/services/admin-courses.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
@@ -12,30 +11,31 @@ import {
   AdminLearningPathDto,
 } from '../../../core/services/admin-paths.service';
 
+import { CourseContentEditor } from './course-content-editor/course-content-editor';
+
 @Component({
   selector: 'app-dashboard-courses',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, CurrencyPipe, ReactiveFormsModule],
+  imports: [CommonModule, NgIf, NgForOf, CurrencyPipe, ReactiveFormsModule, CourseContentEditor],
   templateUrl: './dashboard-courses.html',
   styleUrl: './dashboard-courses.scss',
 })
 export class DashboardCourses implements OnInit {
+  @ViewChild(CourseContentEditor)
+  contentEditor!: CourseContentEditor;
+
   courses: AdminCourseDto[] = [];
-  isLoading = false;
-  error: string | null = null;
-
-  // learning paths للـ select
   paths: AdminLearningPathDto[] = [];
-  isLoadingPaths = false;
 
-  // فورم الإنشاء / التعديل
-  courseForm: FormGroup;
+  isLoading = false;
   isSaving = false;
-  editMode = false;
-  editingCourseId: number | null = null;
+  isEditorOpen = false;
+  isCreateMode = false;
 
-  // هل المودال مفتوح؟
-  showForm = false;
+  error: string | null = null;
+  selectedCourse: AdminCourseDto | null = null;
+
+  courseForm: FormGroup;
 
   constructor(
     private adminCourses: AdminCoursesService,
@@ -43,16 +43,15 @@ export class DashboardCourses implements OnInit {
     private fb: FormBuilder
   ) {
     this.courseForm = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(200)]],
-      category: ['', [Validators.required, Validators.maxLength(100)]],
-      price: [0, [Validators.required, Validators.min(0)]],
-      hours: [0, [Validators.required, Validators.min(0)]],
-      thumbnailUrl: ['', [Validators.required, Validators.maxLength(500)]],
-      description: ['', [Validators.required, Validators.maxLength(4000)]],
+      title: ['', Validators.required],
+      category: ['', Validators.required],
+      price: [0, Validators.required],
+      hours: [0, Validators.required],
+      thumbnailUrl: [''],
+      description: ['', Validators.required],
       isActive: [true],
-      // إدخال IDs الكتب كنص
-      bookIdsText: [''],
-      learningPathId: [null, [Validators.required]],
+
+      learningPathId: [null],
     });
   }
 
@@ -61,54 +60,33 @@ export class DashboardCourses implements OnInit {
     this.loadPaths();
   }
 
-  // تحميل الكورسات
   loadCourses(): void {
     this.isLoading = true;
-    this.error = null;
-
     this.adminCourses.getAll().subscribe({
-      next: (data) => {
-        this.courses = data;
+      next: (res) => {
+        this.courses = res;
         this.isLoading = false;
       },
       error: () => {
-        this.error = 'Failed to load courses.';
+        this.error = 'Failed to load courses';
         this.isLoading = false;
       },
     });
   }
 
-  // تحميل الـ learning paths لاستخدامها في الـ select
   loadPaths(): void {
-    this.isLoadingPaths = true;
-
     this.adminPaths.getAll().subscribe({
-      next: (data) => {
-        this.paths = data;
-        this.isLoadingPaths = false;
-      },
-      error: () => {
-        this.isLoadingPaths = false;
-        // نخلي الكورسات تشتغل حتى لو paths فشلت
-      },
+      next: (res) => (this.paths = res),
+      error: () => {},
     });
   }
 
-  // تحويل النص إلى قائمة IDs
-  private parseBookIds(text: string): number[] {
-    if (!text || !text.trim()) return [];
-    return text
-      .split(',')
-      .map((x) => x.trim())
-      .filter((x) => x !== '')
-      .map((x) => Number(x))
-      .filter((x) => !Number.isNaN(x));
-  }
+  // ===================== CREATE =====================
+  openCreateEditor(): void {
+    this.isEditorOpen = true;
+    this.isCreateMode = true;
+    this.selectedCourse = null;
 
-  // فتح الفورم لإنشاء كورس جديد
-  openCreateForm(): void {
-    this.editMode = false;
-    this.editingCourseId = null;
     this.courseForm.reset({
       title: '',
       category: '',
@@ -117,129 +95,132 @@ export class DashboardCourses implements OnInit {
       thumbnailUrl: '',
       description: '',
       isActive: true,
-      bookIdsText: '',
-      learningPathId: this.paths.length > 0 ? this.paths[0].id : null,
+
+      learningPathId: null,
     });
-    this.error = null;
-    this.isSaving = false;
-    this.showForm = true;
   }
 
-  // تعبئة الفورم للتعديل
-  onEdit(course: AdminCourseDto): void {
-    this.editMode = true;
-    this.editingCourseId = course.id;
+  // ===================== EDIT =====================
+  openEditEditor(course: AdminCourseDto): void {
+    this.isEditorOpen = true;
+    this.isCreateMode = false;
+    this.selectedCourse = course;
 
     this.courseForm.setValue({
       title: course.title,
-      category: course.category || '',
+      category: course.category ?? '',
       price: course.price,
       hours: course.hours ?? 0,
-      thumbnailUrl: course.thumbnailUrl || '',
+      thumbnailUrl: course.thumbnailUrl ?? '',
       description: course.description,
       isActive: course.isActive,
-      bookIdsText: (course.bookIds || []).join(','),
-      learningPathId: course.learningPathId ?? this.paths[0]?.id ?? null,
+
+      learningPathId: course.pathIds?.length ? course.pathIds[0] : null,
     });
 
-    this.error = null;
-    this.isSaving = false;
-    this.showForm = true;
-  }
-
-  // إغلاق الفورم / إعادة للوضع الافتراضي
-  resetForm(): void {
-    this.editMode = false;
-    this.editingCourseId = null;
-    this.courseForm.reset({
-      title: '',
-      category: '',
-      price: 0,
-      hours: 0,
-      thumbnailUrl: '',
-      description: '',
-      isActive: true,
-      bookIdsText: '',
-      learningPathId: null,
+    setTimeout(() => {
+      this.contentEditor.courseId = course.id;
+      this.contentEditor.loadContent();
     });
-    this.isSaving = false;
-    this.error = null;
-    this.showForm = false;
   }
 
-  // إرسال الفورم (إنشاء أو تعديل)
-  onSubmit(): void {
+  // ===================== SAVE =====================
+  onSubmitEditor(): void {
     if (this.courseForm.invalid || this.isSaving) return;
 
     this.isSaving = true;
-    this.error = null;
 
-    const value = this.courseForm.value;
-    const payload: CreateCourseRequest | UpdateCourseRequest = {
-      title: value.title,
-      category: value.category,
-      price: value.price,
-      hours: value.hours,
-      thumbnailUrl: value.thumbnailUrl,
-      description: value.description,
-      isActive: value.isActive,
-      bookIds: this.parseBookIds(value.bookIdsText),
-      learningPathId: value.learningPathId,
+    const v = this.courseForm.value;
+
+    const payload: CreateCourseRequest = {
+      title: v.title,
+      description: v.description,
+      price: v.price,
+      isActive: v.isActive,
+      hours: v.hours,
+      category: v.category,
+      rating: 0,
+      thumbnailUrl: v.thumbnailUrl,
+
+      pathIds: v.learningPathId ? [v.learningPathId] : [],
     };
 
-    if (this.editMode && this.editingCourseId != null) {
-      // تعديل
-      this.adminCourses.update(this.editingCourseId, payload).subscribe({
-        next: () => {
+    if (this.isCreateMode) {
+      this.adminCourses.create(payload).subscribe({
+        next: (res) => {
           this.isSaving = false;
-          this.resetForm();
+          this.isCreateMode = false;
+
+          this.selectedCourse = {
+            ...payload,
+            id: res.id,
+          };
+
+          setTimeout(() => {
+            this.contentEditor.courseId = res.id;
+            this.contentEditor.loadContent();
+          });
+
           this.loadCourses();
         },
         error: () => {
+          this.error = 'Failed to create course';
           this.isSaving = false;
-          this.error = 'Failed to update course.';
         },
       });
-    } else {
-      // إنشاء
-      this.adminCourses.create(payload).subscribe({
+    } else if (this.selectedCourse) {
+      this.adminCourses.update(this.selectedCourse.id, payload).subscribe({
         next: () => {
           this.isSaving = false;
-          this.resetForm();
           this.loadCourses();
         },
         error: () => {
+          this.error = 'Failed to update course';
           this.isSaving = false;
-          this.error = 'Failed to create course.';
         },
       });
     }
   }
 
-  // تفعيل / تعطيل
+  // ===================== TOGGLE =====================
   onToggle(course: AdminCourseDto): void {
     this.adminCourses.toggleActive(course.id).subscribe({
-      next: (res) => {
-        course.isActive = res.isActive;
-      },
-      error: () => {
-        this.error = 'Failed to change status.';
-      },
+      next: (res) => (course.isActive = res.isActive),
+      error: () => (this.error = 'Failed to change status'),
     });
   }
 
-  // حذف
+  // ===================== DELETE =====================
   onDelete(course: AdminCourseDto): void {
-    const confirmDelete = confirm(`Delete course "${course.title}" ?`);
-    if (!confirmDelete) return;
+    if (!confirm(`Delete course "${course.title}" ?`)) return;
 
     this.adminCourses.delete(course.id).subscribe({
       next: () => {
         this.courses = this.courses.filter((c) => c.id !== course.id);
       },
-      error: () => {
-        this.error = 'Failed to delete course.';
-      },
+      error: () => (this.error = 'Failed to delete course'),
     });
+  }
+
+  closeEditor(): void {
+    this.isEditorOpen = false;
+  }
+
+  reloadCourses(): void {
+    this.loadCourses();
+  }
+
+  onThumbnailSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+
+    this.adminCourses.uploadThumbnail(file).subscribe({
+      next: (res) => this.courseForm.patchValue({ thumbnailUrl: res.url }),
+      error: () => (this.error = 'Failed to upload thumbnail'),
+    });
+
+    input.value = '';
   }
 }

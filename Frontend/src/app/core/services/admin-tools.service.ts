@@ -45,16 +45,6 @@ export class AdminToolsService {
     });
   }
 
-  toggleActive(id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/${id}/toggle`, {}, { headers: this.getAuthHeaders() });
-  }
-
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
   create(data: CreateToolRequest): Observable<any> {
     return this.http.post(this.apiUrl, data, {
       headers: this.getAuthHeaders(),
@@ -65,5 +55,15 @@ export class AdminToolsService {
     return this.http.put(`${this.apiUrl}/${id}`, data, {
       headers: this.getAuthHeaders(),
     });
+  }
+
+  delete(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  toggleActive(id: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/toggle`, {}, { headers: this.getAuthHeaders() });
   }
 }

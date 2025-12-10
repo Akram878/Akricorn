@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import {
   AuthService,
   User,
@@ -9,15 +9,15 @@ import {
   UpdateAccountSettingsRequest,
 } from '../../../core/services/auth.service';
 import { Subscription } from 'rxjs';
-
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterModule],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss'],
 })
-export class Profile implements OnInit, OnDestroy {
+export class ProfileComponent implements OnInit, OnDestroy {
   user: User | null = null;
   private sub!: Subscription;
 
@@ -50,7 +50,7 @@ export class Profile implements OnInit, OnDestroy {
   // قفل تعديل تاريخ الميلاد (سنربطه بالباك إند)
   birthDateLocked = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
     this.sub = this.authService.currentUser$.subscribe((user: User | null) => {
@@ -75,15 +75,19 @@ export class Profile implements OnInit, OnDestroy {
           newPassword: '',
           confirmNewPassword: '',
         };
-
-        // لو أضفت canEditBirthDate في User من الباك إند:
-        // this.birthDateLocked = user.canEditBirthDate === false;
       }
     });
   }
 
+  // ... (rest of the file)
+
   ngOnDestroy(): void {
     if (this.sub) this.sub.unsubscribe();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
   }
 
   // ============================
@@ -300,7 +304,10 @@ export class Profile implements OnInit, OnDestroy {
     );
     if (!confirmed) return;
 
-    this.authService.deleteAccount(this.user.id).subscribe({
+    const password = prompt('Please enter your password to confirm deletion:');
+    if (!password) return;
+
+    this.authService.deleteAccount(this.user.id, password).subscribe({
       next: () => {
         alert('Your account has been deleted.');
         this.authService.logout();
@@ -318,16 +325,5 @@ export class Profile implements OnInit, OnDestroy {
     // أو:
     // this.router.navigate(['/home']);
     console.log('closeProfile() clicked');
-  }
-
-  /**
-   * تسجيل الخروج
-   * هنا اربطها مع خدمة الـ Auth عندك
-   */
-  logout(): void {
-    // مثال:
-    // this.authService.logout();
-    // this.router.navigate(['/auth/login']);
-    console.log('logout() clicked');
   }
 }

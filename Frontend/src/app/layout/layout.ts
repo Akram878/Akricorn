@@ -2,7 +2,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Profile } from '../features/home/profile/profile';
+import { ProfileComponent } from '../features/home/profile/profile';
 import { SettingSection } from '../features/setting-section/setting-section';
 
 // 👈 [التعديل 2: استيراد AuthService]
@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-Layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, SettingSection, Profile],
+  imports: [CommonModule, RouterModule, SettingSection, ProfileComponent],
   templateUrl: './layout.html',
   styleUrls: ['./layout.scss'],
 })

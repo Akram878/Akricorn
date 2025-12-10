@@ -3,8 +3,10 @@ using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Backend.Controllers
 {
@@ -19,28 +21,8 @@ namespace Backend.Controllers
             _context = context;
         }
 
-        // 🔐 Helper موحّد لجلب الـ userId من الـ JWT
-        private int? GetCurrentUserId()
-        {
-            var userIdClaim = User.Claims.FirstOrDefault(c =>
-                c.Type == "Id" ||
-                c.Type == "id" ||
-                c.Type == ClaimTypes.NameIdentifier ||   // "nameid"
-                c.Type == "UserId" ||
-                c.Type == "userId"
-            );
-
-            if (userIdClaim == null)
-                return null;
-
-            if (int.TryParse(userIdClaim.Value, out var userId))
-                return userId;
-
-            return null;
-        }
-
         // ============================
-        //     Public Courses
+        //         Public Courses
         // ============================
         [HttpGet("courses")]
         [AllowAnonymous]
@@ -61,7 +43,52 @@ namespace Backend.Controllers
         }
 
         // ============================
-        //     Library Books
+        //       Course Content
+        // ============================
+        [HttpGet("courses/{courseId}/content")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCourseContent(int courseId)
+        {
+            var course = await _context.Courses
+                .Include(c => c.Sections)
+                    .ThenInclude(s => s.Lessons)
+                        .ThenInclude(l => l.Files)
+                .FirstOrDefaultAsync(c => c.Id == courseId && c.IsActive);
+
+            if (course == null)
+                return NotFound(new { message = "Course not found." });
+
+            var result = course.Sections
+                .OrderBy(s => s.Order)
+                .Select(s => new
+                {
+                    sectionId = s.Id,
+                    sectionTitle = s.Title,
+                    sectionOrder = s.Order,
+                    lessons = s.Lessons
+                        .OrderBy(l => l.Order)
+                        .Select(l => new
+                        {
+                            lessonId = l.Id,
+                            lessonTitle = l.Title,
+                            lessonOrder = l.Order,
+                            files = l.Files
+                                .OrderBy(f => f.Id)
+                                .Select(f => new
+                                {
+                                    fileId = f.Id,
+                                    fileName = f.FileName,
+                                    fileUrl = f.FileUrl,
+                                    uploadedAt = f.UploadedAt
+                                })
+                        })
+                });
+
+            return Ok(result);
+        }
+
+        // ============================
+        //         Public Books
         // ============================
         [HttpGet("books")]
         [AllowAnonymous]
@@ -74,8 +101,7 @@ namespace Backend.Controllers
                     b.Id,
                     b.Title,
                     b.Description,
-                    b.Price,
-                    b.FileUrl
+                    b.Price
                 })
                 .ToListAsync();
 
@@ -83,11 +109,11 @@ namespace Backend.Controllers
         }
 
         // ============================
-        //     Purchase Course
+        //      Purchase Book
         // ============================
-        [HttpPost("courses/{courseId}/purchase")]
+        [HttpPost("books/{bookId}/purchase")]
         [Authorize]
-        public async Task<IActionResult> PurchaseCourse(int courseId)
+        public async Task<IActionResult> PurchaseBook(int bookId)
         {
             var userId = GetCurrentUserId();
             if (userId == null)
@@ -95,77 +121,51 @@ namespace Backend.Controllers
 
             try
             {
-                // تأكد أن الكورس موجود
-                var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId);
-                if (course == null)
-                    return NotFound(new { message = "Course not found." });
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
-                // تأكد أن المستخدم لا يملك الكورس مسبقاً
-                var courseAlreadyOwned = await _context.UserCourses
-                    .AnyAsync(uc => uc.UserId == userId.Value && uc.CourseId == courseId);
+                if (user == null)
+                    return Unauthorized(new { message = "User not found." });
 
-                if (courseAlreadyOwned)
-                    return BadRequest(new { message = "You already own this course." });
+                if (!user.IsActive)
+                    return StatusCode(403, new { message = "Your account has been disabled." });
 
-                // أضف سجل UserCourse
-                var userCourse = new UserCourse
+                var book = await _context.Books
+                    .FirstOrDefaultAsync(b => b.Id == bookId && b.IsActive);
+
+                if (book == null)
+                    return NotFound(new { message = "Book not found." });
+
+                var alreadyOwned = await _context.UserBooks
+                    .AnyAsync(ub => ub.UserId == userId && ub.BookId == bookId);
+
+                if (alreadyOwned)
+                    return BadRequest(new { message = "You already own this book." });
+
+                var userBook = new UserBook
                 {
-                    CourseId = courseId,
                     UserId = userId.Value,
-                    PurchasedAt = DateTime.UtcNow
+                    BookId = bookId,
+                    GrantedAt = DateTime.UtcNow,
+                    IsFromCourse = false
                 };
 
-                _context.UserCourses.Add(userCourse);
-
-                // أضف الكتب المرتبطة بالكورس إلى مكتبة المستخدم
-                var courseBooks = await _context.CourseBooks
-                    .Where(cb => cb.CourseId == courseId)
-                    .ToListAsync();
-
-                if (courseBooks.Any())
-                {
-                    var courseBookIds = courseBooks.Select(cb => cb.BookId).ToList();
-
-                    // الكتب التي يملكها المستخدم أصلاً
-                    var existingUserBookIds = await _context.UserBooks
-                        .Where(ub => ub.UserId == userId.Value && courseBookIds.Contains(ub.BookId))
-                        .Select(ub => ub.BookId)
-                        .ToListAsync();
-
-                    // الكتب التي سنضيفها فقط (غير الموجودة)
-                    var booksToAdd = courseBookIds
-                        .Where(bookId => !existingUserBookIds.Contains(bookId))
-                        .Distinct()
-                        .ToList();
-
-                    foreach (var bookId in booksToAdd)
-                    {
-                        _context.UserBooks.Add(new UserBook
-                        {
-                            UserId = userId.Value,
-                            BookId = bookId
-                        });
-                    }
-                }
-
+                _context.UserBooks.Add(userBook);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Course purchased successfully." });
+                return Ok(new { message = "Book purchased successfully." });
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                // لو فيه أي مشكلة في الـ constraints (مثلاً حاول يضيف duplicate)
-                return BadRequest(new { message = "You already own this course or its books." });
-            }
-            catch (Exception)
-            {
-                // fallback لأي خطأ غير متوقع
-                return StatusCode(500, new { message = "An error occurred while purchasing the course." });
+                return StatusCode(500, new
+                {
+                    message = "Error while purchasing book.",
+                    inner = ex.InnerException?.Message ?? ex.Message
+                });
             }
         }
 
         // ============================
-        //     My Courses
+        //         My Courses
         // ============================
         [HttpGet("my-courses")]
         [Authorize]
@@ -174,6 +174,16 @@ namespace Backend.Controllers
             var userId = GetCurrentUserId();
             if (userId == null)
                 return Unauthorized(new { message = "Invalid token." });
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+            if (user == null)
+                return Unauthorized(new { message = "User not found." });
+
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
 
             var myCourses = await _context.UserCourses
                 .Where(uc => uc.UserId == userId.Value)
@@ -192,7 +202,7 @@ namespace Backend.Controllers
         }
 
         // ============================
-        //     My Books
+        //         My Books
         // ============================
         [HttpGet("my-books")]
         [Authorize]
@@ -200,7 +210,17 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized();
+                return Unauthorized(new { message = "Invalid token." });
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+            if (user == null)
+                return Unauthorized(new { message = "User not found." });
+
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
 
             var books = await _context.UserBooks
                 .Where(ub => ub.UserId == userId.Value)
@@ -211,11 +231,83 @@ namespace Backend.Controllers
                     ub.Book.Title,
                     ub.Book.Description,
                     ub.Book.Price,
-                    ub.Book.FileUrl
+                    ub.Book.FileUrl,
+                    ub.GrantedAt,
+                    ub.IsFromCourse
                 })
                 .ToListAsync();
 
             return Ok(books);
+        }
+
+        // ============================
+        //          Public Tools
+        // ============================
+        [HttpGet("tools")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTools()
+        {
+            var tools = await _context.Tools
+                .Where(t => t.IsActive)
+                .OrderBy(t => t.DisplayOrder)
+                .ThenBy(t => t.Name)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Name,
+                    t.Description,
+                    t.Url,
+                    t.Category,
+                    t.DisplayOrder
+                })
+                .ToListAsync();
+
+            return Ok(tools);
+        }
+
+        // ============================
+        //       Learning Paths
+        // ============================
+        [HttpGet("paths")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetLearningPaths()
+        {
+            var paths = await _context.LearningPaths
+                .Where(p => p.IsActive)
+                .Include(p => p.LearningPathCourses)
+                .OrderBy(p => p.DisplayOrder)
+                .ThenBy(p => p.Title)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Title,
+                    p.Description,
+                    CoursesCount = p.LearningPathCourses.Count,
+                    p.DisplayOrder
+                })
+                .ToListAsync();
+
+            return Ok(paths);
+        }
+
+        // ============================
+        //         Helper
+        // ============================
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c =>
+                c.Type == "Id" ||
+                c.Type == "id" ||
+                c.Type == ClaimTypes.NameIdentifier ||
+                c.Type == "UserId" ||
+                c.Type == "userId" ||
+                c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub
+            );
+
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+                return userId;
+
+            return null;
         }
     }
 }

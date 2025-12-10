@@ -14,7 +14,7 @@
   </div>
 
   <div class="lms-tools-grid">
-    <article class="lms-tool-card hovershadow" *ngFor="let t of demoTools">
+    <article class="lms-tool-card hovershadow" *ngFor="let t of tools; trackBy: trackByToolId">
       <header class="lms-tool-card__header">
         <div class="lms-tool-card__icon">
           <span *ngIf="t.category === 'Coding'">💻</span>
@@ -49,7 +49,7 @@
       </div>
 
       <footer class="lms-tool-card__footer">
-        <button type="button" class="lms-primary-btn">Open tool (Demo)</button>
+        <button type="button" class="lms-primary-btn" (click)="openTool(t)">Open tool</button>
       </footer>
     </article>
   </div>

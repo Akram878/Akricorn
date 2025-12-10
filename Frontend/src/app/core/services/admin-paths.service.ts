@@ -26,7 +26,7 @@ export interface UpdateLearningPathRequest extends CreateLearningPathRequest {}
   providedIn: 'root',
 })
 export class AdminPathsService {
-  private apiUrl = 'https://localhost:7150/api/admin/paths'; // عدّل البورت لو مختلف
+  private apiUrl = 'https://localhost:7150/api/admin/paths';
 
   constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
 
@@ -39,6 +39,12 @@ export class AdminPathsService {
 
   getAll(): Observable<AdminLearningPathDto[]> {
     return this.http.get<AdminLearningPathDto[]>(this.apiUrl, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  getById(id: number): Observable<AdminLearningPathDto> {
+    return this.http.get<AdminLearningPathDto>(`${this.apiUrl}/${id}`, {
       headers: this.getAuthHeaders(),
     });
   }

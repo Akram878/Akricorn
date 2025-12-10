@@ -7,58 +7,137 @@ namespace Backend.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        // ========== USERS ==========
         public DbSet<User> Users { get; set; }
 
-        // 🆕 LMS
+        // ========== LMS ==========
         public DbSet<Course> Courses { get; set; }
-        public DbSet<Book> Books { get; set; }
-        public DbSet<CourseBook> CourseBooks { get; set; }
-        public DbSet<UserCourse> UserCourses { get; set; }
-        public DbSet<UserBook> UserBooks { get; set; }
-        // 🆕 Admin dashboard accounts
-        public DbSet<AdminAccount> AdminAccounts { get; set; }
 
-        // 🆕 Learning Paths
+        // كتب (ما زلنا بحاجة لها)
+        public DbSet<Book> Books { get; set; }
+        public DbSet<UserBook> UserBooks { get; set; }
+
+        public DbSet<UserCourse> UserCourses { get; set; }
+
+        // ========== ADMIN ==========
+        public DbSet<AdminAccount> AdminAccounts { get; set; }
         public DbSet<LearningPath> LearningPaths { get; set; }
         public DbSet<LearningPathCourse> LearningPathCourses { get; set; }
-
-        // 🆕 Tools
         public DbSet<Tool> Tools { get; set; }
 
+        public DbSet<Payment> Payments { get; set; }
+
+        // ========== COURSE CONTENT ==========
+        public DbSet<CourseSection> CourseSections { get; set; }
+        public DbSet<CourseLesson> CourseLessons { get; set; }
+        public DbSet<CourseLessonFile> CourseLessonFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // مفتاح مركب للـ CourseBook (Many-to-Many)
-            modelBuilder.Entity<CourseBook>()
-                .HasKey(cb => new { cb.CourseId, cb.BookId });
 
-            modelBuilder.Entity<CourseBook>()
-                .HasOne(cb => cb.Course)
-                .WithMany(c => c.CourseBooks)
-                .HasForeignKey(cb => cb.CourseId);
+            // ==========================================
+            // UserCourse (many-to-many: User ↔ Course)
+            // ==========================================
+            modelBuilder.Entity<UserCourse>()
+                .HasKey(uc => new { uc.UserId, uc.CourseId });
 
-            modelBuilder.Entity<CourseBook>()
-                .HasOne(cb => cb.Book)
+            modelBuilder.Entity<UserCourse>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserCourses)
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserCourse>()
+                .HasOne(uc => uc.Course)
                 .WithMany()
-                .HasForeignKey(cb => cb.BookId);
+                .HasForeignKey(uc => uc.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // ممكن تضيف seed بسيطة لاحقاً هنا لو حبيت
+            modelBuilder.Entity<UserCourse>()
+                .Property(uc => uc.PurchasedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
 
-            // Many-to-Many: LearningPath ↔ Course
+
+            // ==========================================
+            // UserBook (many-to-many: User ↔ Book)
+            // ==========================================
+            modelBuilder.Entity<UserBook>()
+                .HasKey(ub => new { ub.UserId, ub.BookId });
+
+            modelBuilder.Entity<UserBook>()
+                .HasOne(ub => ub.User)
+                .WithMany(u => u.UserBooks)
+                .HasForeignKey(ub => ub.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserBook>()
+                .HasOne(ub => ub.Book)
+                .WithMany()
+                .HasForeignKey(ub => ub.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserBook>()
+                .Property(ub => ub.GrantedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+
+            // ==========================================
+            // LearningPathCourse (Course ↔ LearningPath)
+            // ==========================================
             modelBuilder.Entity<LearningPathCourse>()
                 .HasKey(pc => new { pc.LearningPathId, pc.CourseId });
 
             modelBuilder.Entity<LearningPathCourse>()
                 .HasOne(pc => pc.LearningPath)
                 .WithMany(lp => lp.LearningPathCourses)
-                .HasForeignKey(pc => pc.LearningPathId);
+                .HasForeignKey(pc => pc.LearningPathId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<LearningPathCourse>()
                 .HasOne(pc => pc.Course)
+                .WithMany(c => c.LearningPathCourses)
+                .HasForeignKey(pc => pc.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // ==========================================
+            // Payments
+            // ==========================================
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
                 .WithMany()
-                .HasForeignKey(pc => pc.CourseId);
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // ==========================================
+            // COURSE CONTENT NEW SYSTEM
+            // ==========================================
+
+            // SECTION → COURSE
+            modelBuilder.Entity<CourseSection>()
+                .HasOne(s => s.Course)
+                .WithMany(c => c.Sections)
+                .HasForeignKey(s => s.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // LESSON → SECTION
+            modelBuilder.Entity<CourseLesson>()
+                .HasOne(l => l.Section)
+                .WithMany(s => s.Lessons)
+                .HasForeignKey(l => l.SectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // FILE → LESSON
+            modelBuilder.Entity<CourseLessonFile>()
+                .HasOne(f => f.Lesson)
+                .WithMany(l => l.Files)
+                .HasForeignKey(f => f.LessonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ========== DONE ==========
         }
     }
 }

@@ -115,6 +115,179 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "GetCourseContent",
+    "RelativePath": "api/admin/course-content/{courseId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "CreateSection",
+    "RelativePath": "api/admin/course-content/{courseId}/sections",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.CreateSectionRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "DeleteFile",
+    "RelativePath": "api/admin/course-content/files/{fileId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "DeleteLesson",
+    "RelativePath": "api/admin/course-content/lessons/{lessonId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "lessonId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "UploadLessonFile",
+    "RelativePath": "api/admin/course-content/lessons/{lessonId}/upload",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "lessonId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "ContentType",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ContentDisposition",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Headers",
+        "Type": "Microsoft.AspNetCore.Http.IHeaderDictionary",
+        "IsRequired": false
+      },
+      {
+        "Name": "Length",
+        "Type": "System.Int64",
+        "IsRequired": false
+      },
+      {
+        "Name": "Name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "FileName",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "UpdateSection",
+    "RelativePath": "api/admin/course-content/sections/{sectionId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "sectionId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.UpdateSectionRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "DeleteSection",
+    "RelativePath": "api/admin/course-content/sections/{sectionId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "sectionId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "CreateLesson",
+    "RelativePath": "api/admin/course-content/sections/{sectionId}/lessons",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "sectionId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.CreateLessonRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Backend.Controllers.AdminCoursesController",
     "Method": "GetAll",
     "RelativePath": "api/admin/courses",
@@ -122,7 +295,17 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Backend.Controllers.AdminCoursesController\u002BCourseDto, Backend, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Backend.Controllers.AdminCoursesController",
@@ -134,7 +317,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "Backend.Controllers.CourseCreateRequest",
+        "Type": "Backend.Controllers.AdminCoursesController\u002BCreateCourseRequest",
         "IsRequired": true
       }
     ],
@@ -154,7 +337,17 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Controllers.AdminCoursesController\u002BCourseDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Backend.Controllers.AdminCoursesController",
@@ -171,7 +364,7 @@
       },
       {
         "Name": "request",
-        "Type": "Backend.Controllers.CourseUpdateRequest",
+        "Type": "Backend.Controllers.AdminCoursesController\u002BUpdateCourseRequest",
         "IsRequired": true
       }
     ],
@@ -189,6 +382,47 @@
         "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCoursesController",
+    "Method": "UploadThumbnail",
+    "RelativePath": "api/admin/courses/upload-thumbnail",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ContentType",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ContentDisposition",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Headers",
+        "Type": "Microsoft.AspNetCore.Http.IHeaderDictionary",
+        "IsRequired": false
+      },
+      {
+        "Name": "Length",
+        "Type": "System.Int64",
+        "IsRequired": false
+      },
+      {
+        "Name": "Name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "FileName",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -664,6 +898,22 @@
   },
   {
     "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "PurchaseBook",
+    "RelativePath": "api/lms/books/{bookId}/purchase",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
     "Method": "GetCourses",
     "RelativePath": "api/lms/courses",
     "HttpMethod": "GET",
@@ -674,9 +924,9 @@
   },
   {
     "ContainingType": "Backend.Controllers.LmsController",
-    "Method": "PurchaseCourse",
-    "RelativePath": "api/lms/courses/{courseId}/purchase",
-    "HttpMethod": "POST",
+    "Method": "GetCourseContent",
+    "RelativePath": "api/lms/courses/{courseId}/content",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -702,6 +952,52 @@
     "ContainingType": "Backend.Controllers.LmsController",
     "Method": "GetMyCourses",
     "RelativePath": "api/lms/my-courses",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "GetLearningPaths",
+    "RelativePath": "api/lms/paths",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "GetTools",
+    "RelativePath": "api/lms/tools",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.PaymentsController",
+    "Method": "PurchaseCourseWithPayment",
+    "RelativePath": "api/payments/course/{courseId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.PaymentsController",
+    "Method": "GetMyPayments",
+    "RelativePath": "api/payments/my",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

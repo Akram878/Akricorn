@@ -14,7 +14,7 @@
   </div>
 
   <div class="lms-path-list">
-    <article class="lms-path-card hovershadow" *ngFor="let p of demoPaths">
+    <article class="lms-path-card hovershadow" *ngFor="let p of paths; trackBy: trackByPathId">
       <header class="lms-path-card__header">
         <div>
           <h3 class="lms-path-card__title">{{ p.title }}</h3>

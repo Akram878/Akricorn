@@ -170,10 +170,14 @@
           type="button"
           class="lms-primary-btn"
           (click)="onPurchase(c)"
-          [disabled]="processingCourseId === c.id || isCourseOwned(c)"
+          [disabled]="processingCourseId === c.id"
         >
           {{
-            isCourseOwned(c) ? 'Owned' : processingCourseId === c.id ? 'Processing...' : 'Purchase'
+            isCourseOwned(c)
+              ? 'View in My Courses'
+              : processingCourseId === c.id
+              ? 'Processing...'
+              : 'Purchase'
           }}
         </button>
       </footer>

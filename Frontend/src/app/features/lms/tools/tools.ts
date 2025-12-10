@@ -1,11 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PublicToolsService, PublicTool } from '../../../core/services/public-tools.service';
 
-interface DemoTool {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
+interface UiTool extends PublicTool {
   status: 'Beta' | 'Stable';
   tag: string;
 }
@@ -17,31 +14,47 @@ interface DemoTool {
   templateUrl: './tools.html',
   styleUrls: ['./tools.scss'],
 })
-export class LmsTools {
-  demoTools: DemoTool[] = [
-    {
-      id: 1,
-      name: 'Code Playground',
-      description: 'Run small code snippets directly in the browser.',
-      category: 'Coding',
-      status: 'Beta',
-      tag: 'Interactive',
-    },
-    {
-      id: 2,
-      name: 'Quiz Builder',
-      description: 'Generate quizzes from course content and notes.',
-      category: 'Assessment',
-      status: 'Stable',
-      tag: 'Exams',
-    },
-    {
-      id: 3,
-      name: 'Study Planner',
-      description: 'Plan your weekly study schedule and track progress.',
-      category: 'Productivity',
-      status: 'Stable',
-      tag: 'Planning',
-    },
-  ];
+export class LmsTools implements OnInit {
+  tools: UiTool[] = [];
+  isLoading = false;
+  error: string | null = null;
+
+  constructor(private toolsService: PublicToolsService) {}
+
+  ngOnInit(): void {
+    this.loadTools();
+  }
+
+  loadTools(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.toolsService.getTools().subscribe({
+      next: (data) => {
+        // نضيف status/tag فقط للواجهة حتى نحافظ على نفس الديزاين
+        this.tools = data.map((t) => ({
+          ...t,
+          status: 'Stable',
+          tag: t.category,
+        }));
+        this.isLoading = false;
+      },
+      error: () => {
+        this.error = 'Failed to load tools. Please try again later.';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  trackByToolId(index: number, tool: UiTool): number {
+    return tool.id;
+  }
+
+  openTool(tool: UiTool): void {
+    if (!tool.url) {
+      return;
+    }
+
+    window.open(tool.url, '_blank');
+  }
 }

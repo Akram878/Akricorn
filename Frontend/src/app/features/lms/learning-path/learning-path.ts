@@ -1,10 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  PublicLearningPathsService,
+  PublicLearningPath,
+} from '../../../core/services/public-learning-paths.service';
 
-interface DemoLearningPath {
+interface UiLearningPath {
   id: number;
   title: string;
-  subtitle: string;
+  subtitle: string; // description
   level: 'Beginner' | 'Intermediate' | 'Advanced';
   estimatedWeeks: number;
   coursesCount: number;
@@ -18,34 +22,50 @@ interface DemoLearningPath {
   templateUrl: './learning-path.html',
   styleUrls: ['./learning-path.scss'],
 })
-export class LearningPath {
-  demoPaths: DemoLearningPath[] = [
-    {
-      id: 1,
-      title: 'Fullstack Web Developer',
-      subtitle: 'From HTML & CSS to backend APIs and databases.',
-      level: 'Intermediate',
-      estimatedWeeks: 16,
-      coursesCount: 6,
-      focusArea: 'Web Development',
-    },
-    {
-      id: 2,
-      title: 'Data & Algorithms Starter',
-      subtitle: 'Learn the fundamentals of data structures and algorithms.',
-      level: 'Beginner',
-      estimatedWeeks: 10,
-      coursesCount: 4,
-      focusArea: 'Computer Science',
-    },
-    {
-      id: 3,
-      title: 'Database & SQL Specialist',
-      subtitle: 'Design, query, and optimize relational databases.',
-      level: 'Intermediate',
-      estimatedWeeks: 12,
-      coursesCount: 5,
-      focusArea: 'Databases',
-    },
-  ];
+export class LearningPath implements OnInit {
+  paths: UiLearningPath[] = [];
+  isLoading = false;
+  error: string | null = null;
+
+  constructor(private pathsService: PublicLearningPathsService) {}
+
+  ngOnInit(): void {
+    this.loadPaths();
+  }
+
+  loadPaths(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.pathsService.getPaths().subscribe({
+      next: (data: PublicLearningPath[]) => {
+        this.paths = data.map((p) => {
+          const level: UiLearningPath['level'] =
+            p.coursesCount <= 2 ? 'Beginner' : p.coursesCount <= 5 ? 'Intermediate' : 'Advanced';
+
+          const estimatedWeeks = Math.max(4, (p.coursesCount || 2) * 2);
+
+          return {
+            id: p.id,
+            title: p.title,
+            subtitle: p.description,
+            level,
+            estimatedWeeks,
+            coursesCount: p.coursesCount,
+            focusArea: 'Mixed topics',
+          };
+        });
+
+        this.isLoading = false;
+      },
+      error: () => {
+        this.error = 'Failed to load learning paths. Please try again later.';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  trackByPathId(index: number, path: UiLearningPath): number {
+    return path.id;
+  }
 }

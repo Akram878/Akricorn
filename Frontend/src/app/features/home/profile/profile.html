@@ -4,7 +4,13 @@
     <div class="profile-card__topbar">
       <!-- زر الرجوع -->
       <button type="button" class="chip-btn" (click)="closeProfile()">← Back</button>
-
+      <div class="profile-card__section">
+        <h3>Payments</h3>
+        <p>View your course and book payments.</p>
+        <button type="button" class="chip-btn" [routerLink]="['/profile/payments']">
+          Open payments
+        </button>
+      </div>
       <!-- زر تسجيل الخروج (فقط للمستخدم المسجّل، ليس الضيف) -->
       <button type="button" class="chip-btn chip-btn--danger" (click)="logout()" *ngIf="!u.isGuest">
         Log out

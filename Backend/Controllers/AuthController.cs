@@ -37,20 +37,14 @@ namespace Backend.Controllers
         public async Task<ActionResult<AuthResponse>> Signup([FromBody] SignupRequest request)
         {
             if (request == null)
-            {
                 return BadRequest(new { message = "Invalid request payload." });
-            }
 
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            {
                 return BadRequest(new { message = "Email and password are required." });
-            }
 
             var emailExists = await _context.Users.AnyAsync(u => u.Email == request.Email);
             if (emailExists)
-            {
                 return BadRequest(new { message = "Email is already in use." });
-            }
 
             var user = new User
             {
@@ -61,7 +55,8 @@ namespace Backend.Controllers
                 Email = request.Email,
                 City = request.City,
                 BirthDate = request.BirthDate,
-                CanEditBirthDate = true
+                CanEditBirthDate = true,
+                IsActive = true
             };
 
             user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
@@ -96,13 +91,21 @@ namespace Backend.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null)
             {
-                return BadRequest(new { message = "Invalid email or password." });
+                // بيانات دخول خاطئة
+                return Unauthorized(new { message = "Invalid email or password." });
+            }
+
+            // ✅ حساب معطَّل: لا يسمح له بتسجيل الدخول أبداً
+            if (!user.IsActive)
+            {
+                return StatusCode(403, new { message = "Your account has been disabled. Please contact support." });
             }
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
             if (result == PasswordVerificationResult.Failed)
             {
-                return BadRequest(new { message = "Invalid email or password." });
+                // بيانات دخول خاطئة
+                return Unauthorized(new { message = "Invalid email or password." });
             }
 
             var dto = ToDto(user);
@@ -124,32 +127,30 @@ namespace Backend.Controllers
         public async Task<ActionResult<UserDto>> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
             if (request == null)
-            {
                 return BadRequest(new { message = "Invalid request payload." });
-            }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.Id);
+            int userId = GetUserIdFromJwt();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
             if (user == null)
-            {
                 return NotFound(new { message = "User not found." });
-            }
+
+            // ✅ لو الأدمن عطّل الحساب بعد ما المستخدم دخل
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
 
             if (string.IsNullOrWhiteSpace(request.CurrentPassword))
-            {
                 return BadRequest(new { message = "Current password is required to update profile." });
-            }
 
             var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
             if (verifyResult == PasswordVerificationResult.Failed)
-            {
                 return BadRequest(new { message = "Current password is incorrect." });
-            }
 
             user.Name = request.Name;
             user.Family = request.Family;
             user.City = request.City;
 
-            // منطق تعديل تاريخ الميلاد مرة واحدة فقط
+            // Handle BirthDate update logic
             if (request.BirthDate != user.BirthDate)
             {
                 if (!user.CanEditBirthDate && user.BirthDate.HasValue)
@@ -178,35 +179,31 @@ namespace Backend.Controllers
         public async Task<ActionResult<UserDto>> UpdateAccount([FromBody] UpdateAccountSettingsRequest request)
         {
             if (request == null)
-            {
                 return BadRequest(new { message = "Invalid request payload." });
-            }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.Id);
+            int userId = GetUserIdFromJwt();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
             if (user == null)
-            {
                 return NotFound(new { message = "User not found." });
-            }
+
+            // ✅ لا تسمح لمستخدم معطّل بتعديل حسابه
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
 
             if (string.IsNullOrWhiteSpace(request.CurrentPassword))
-            {
                 return BadRequest(new { message = "Current password is required to update account settings." });
-            }
 
             var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
             if (verifyResult == PasswordVerificationResult.Failed)
-            {
                 return BadRequest(new { message = "Current password is incorrect." });
-            }
 
-            // تغيير الإيميل مع التحقق من عدم تكراره
+            // Handle Email update with duplication check
             if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
             {
                 var emailExists = await _context.Users.AnyAsync(u => u.Email == request.Email && u.Id != user.Id);
                 if (emailExists)
-                {
                     return BadRequest(new { message = "Email is already in use." });
-                }
 
                 user.Email = request.Email;
             }
@@ -231,15 +228,24 @@ namespace Backend.Controllers
         public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
         {
             if (request == null)
-            {
                 return BadRequest(new { message = "Invalid request payload." });
-            }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.Id);
+            int userId = GetUserIdFromJwt();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
             if (user == null)
-            {
                 return NotFound(new { message = "User not found." });
-            }
+
+            // ✅ حتى لو حاول يحذف حسابه وهو معطّل → نمنع
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
+
+            if (string.IsNullOrWhiteSpace(request.CurrentPassword))
+                return BadRequest(new { message = "Current password is required to delete account." });
+
+            var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
+            if (verifyResult == PasswordVerificationResult.Failed)
+                return BadRequest(new { message = "Invalid password" });
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
@@ -250,6 +256,20 @@ namespace Backend.Controllers
         // ============================
         //          Helpers
         // ============================
+
+        private int GetUserIdFromJwt()
+        {
+            var idClaim = User.Claims.FirstOrDefault(c =>
+                c.Type == JwtRegisteredClaimNames.Sub ||
+                c.Type == ClaimTypes.NameIdentifier);
+
+            if (idClaim != null && int.TryParse(idClaim.Value, out int id))
+            {
+                return id;
+            }
+
+            throw new UnauthorizedAccessException("Invalid token.");
+        }
 
         private static UserDto ToDto(User user)
         {
@@ -323,7 +343,6 @@ namespace Backend.Controllers
 
     public class UpdateProfileRequest
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Family { get; set; }
         public string City { get; set; }
@@ -333,7 +352,6 @@ namespace Backend.Controllers
 
     public class UpdateAccountSettingsRequest
     {
-        public int Id { get; set; }
         public string Email { get; set; }
         public string CountryCode { get; set; }
         public string Number { get; set; }
@@ -343,7 +361,7 @@ namespace Backend.Controllers
 
     public class DeleteAccountRequest
     {
-        public int Id { get; set; }
+        public string CurrentPassword { get; set; }
     }
 
     public class UserDto
@@ -354,7 +372,6 @@ namespace Backend.Controllers
         public string CountryCode { get; set; }
         public string Number { get; set; }
         public string Email { get; set; }
-
         public string City { get; set; }
         public DateTime? BirthDate { get; set; }
         public bool CanEditBirthDate { get; set; }

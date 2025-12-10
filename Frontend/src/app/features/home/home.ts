@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule } from '@angular/router';
-import { Profile } from './profile/profile';
+import { ProfileComponent } from './profile/profile';
 
 interface Star3D {
   x: number;
@@ -12,7 +12,7 @@ interface Star3D {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, Profile, RouterModule],
+  imports: [CommonModule, RouterOutlet, ProfileComponent, RouterModule],
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })

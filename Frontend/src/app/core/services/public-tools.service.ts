@@ -6,14 +6,16 @@ export interface PublicTool {
   id: number;
   name: string;
   description: string;
-  // أضف الحقول اللي عندك في الـ Model لاحقاً
+  url: string;
+  category: string;
+  displayOrder: number;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class PublicToolsService {
-  private readonly baseUrl = 'https://localhost:7150/api/lms';
+  private readonly baseUrl = 'https://localhost:7150/api/lms'; // عدّل البورت لو مختلف
 
   constructor(private http: HttpClient) {}
 

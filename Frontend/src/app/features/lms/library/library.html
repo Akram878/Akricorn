@@ -32,7 +32,11 @@
 
   <!-- Books List -->
   <div class="lms-library-list">
-    <article class="lms-book-row hovershadow" *ngFor="let b of books; trackBy: trackByBookId">
+    <article
+      class="lms-book-row hovershadow"
+      *ngFor="let b of books; trackBy: trackByBookId"
+      [class.lms-book-row--owned]="isBookOwned(b)"
+    >
       <!-- Cover -->
       <div class="lms-book-row__cover">
         <div class="lms-book-row__cover-art">
@@ -61,6 +65,7 @@
           <span>Online resource</span>
           <span>Unlimited pages</span>
           <span class="lms-book-row__tag">E-Book</span>
+          <span class="lms-book-row__owned" *ngIf="isBookOwned(b)">Owned</span>
         </div>
       </div>
 
@@ -72,18 +77,21 @@
         </div>
 
         <!-- If a file exists -->
-        <a
-          *ngIf="b.fileUrl"
-          [href]="b.fileUrl"
-          target="_blank"
-          rel="noopener"
-          class="lms-secondary-btn"
-        >
-          Open file
-        </a>
 
-        <!-- If no file -->
-        <button *ngIf="!b.fileUrl" class="lms-secondary-btn" disabled>No file yet</button>
+        <button
+          type="button"
+          class="lms-secondary-btn"
+          (click)="onAction(b)"
+          [disabled]="processingBookId === b.id"
+        >
+          {{
+            isBookOwned(b)
+              ? 'View in My Books'
+              : processingBookId === b.id
+              ? 'Processing...'
+              : 'Purchase'
+          }}
+        </button>
       </footer>
     </article>
   </div>

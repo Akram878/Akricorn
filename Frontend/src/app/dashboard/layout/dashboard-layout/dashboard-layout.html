@@ -1,35 +1,107 @@
-<div class="dashboard-container bg-primary">
-  <aside class="dashboard-sidebar bg-secondary">
-    <div class="logo">
-      <h2>Akricorn</h2>
-      <span>Admin Panel</span>
+<div class="dashboard-shell dashboard-shell--dark">
+  <!-- Sidebar -->
+  <aside class="dashboard-shell__sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand__logo">
+        <!-- مجرد مربع ذهبي بسيط يمكن استبداله بصورة شعار -->
+        <span class="brand-mark"></span>
+        <div class="brand-text">
+          <span class="brand-text__title">Akricorn</span>
+          <span class="brand-text__subtitle">Admin Panel</span>
+        </div>
+      </div>
     </div>
 
-    <nav class="nav-links">
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav__section-label">Main</div>
+
       <a
+        class="sidebar-nav__link"
         routerLink="/dashboard"
-        routerLinkActive="active"
+        routerLinkActive="sidebar-nav__link--active"
         [routerLinkActiveOptions]="{ exact: true }"
       >
-        Overview
+        <span class="sidebar-nav__icon sidebar-nav__icon--overview"></span>
+        <span class="sidebar-nav__text">Overview</span>
       </a>
-      <a routerLink="/dashboard/courses" routerLinkActive="active"> Courses </a>
-      <a routerLink="/dashboard/books" routerLinkActive="active"> Books </a>
-      <a routerLink="/dashboard/paths" routerLinkActive="active"> Learning Paths </a>
-      <a routerLink="/dashboard/tools" routerLinkActive="active"> Tools </a>
-      <a routerLink="/dashboard/users" routerLinkActive="active"> Users </a>
+
+      <a
+        class="sidebar-nav__link"
+        routerLink="/dashboard/courses"
+        routerLinkActive="sidebar-nav__link--active"
+      >
+        <span class="sidebar-nav__icon sidebar-nav__icon--courses"></span>
+        <span class="sidebar-nav__text">Courses</span>
+      </a>
+
+      <a
+        class="sidebar-nav__link"
+        routerLink="/dashboard/books"
+        routerLinkActive="sidebar-nav__link--active"
+      >
+        <span class="sidebar-nav__icon sidebar-nav__icon--books"></span>
+        <span class="sidebar-nav__text">Books</span>
+      </a>
+
+      <a
+        class="sidebar-nav__link"
+        routerLink="/dashboard/paths"
+        routerLinkActive="sidebar-nav__link--active"
+      >
+        <span class="sidebar-nav__icon sidebar-nav__icon--paths"></span>
+        <span class="sidebar-nav__text">Learning Paths</span>
+      </a>
+
+      <a
+        class="sidebar-nav__link"
+        routerLink="/dashboard/tools"
+        routerLinkActive="sidebar-nav__link--active"
+      >
+        <span class="sidebar-nav__icon sidebar-nav__icon--tools"></span>
+        <span class="sidebar-nav__text">Tools</span>
+      </a>
+
+      <a
+        class="sidebar-nav__link"
+        routerLink="/dashboard/users"
+        routerLinkActive="sidebar-nav__link--active"
+      >
+        <span class="sidebar-nav__icon sidebar-nav__icon--users"></span>
+        <span class="sidebar-nav__text">Users</span>
+      </a>
     </nav>
 
-    <button class="logout-btn" (click)="onLogout()">Logout</button>
+    <div class="sidebar-footer">
+      <button class="btn-outline btn-outline--full" (click)="onLogout()">Logout</button>
+    </div>
   </aside>
 
-  <main class="dashboard-main">
-    <header class="dashboard-header">
-      <h1>Dashboard</h1>
+  <!-- Main -->
+  <main class="dashboard-shell__main">
+    <!-- Top bar -->
+    <header class="dashboard-topbar">
+      <div class="dashboard-topbar__left">
+        <div class="topbar-title">
+          <h1 class="topbar-title__main">Dashboard</h1>
+          <p class="topbar-title__subtitle">
+            Manage courses, library and users inside the Akricorn learning platform.
+          </p>
+        </div>
+      </div>
+
+      <div class="dashboard-topbar__right">
+        <div class="topbar-chip">
+          <span class="topbar-chip__dot"></span>
+          <span class="topbar-chip__text">Admin</span>
+        </div>
+      </div>
     </header>
 
-    <section class="dashboard-content">
-      <router-outlet></router-outlet>
+    <!-- Content wrapper -->
+    <section class="dashboard-shell__content">
+      <div class="dashboard-page-wrapper">
+        <router-outlet></router-outlet>
+      </div>
     </section>
   </main>
 </div>

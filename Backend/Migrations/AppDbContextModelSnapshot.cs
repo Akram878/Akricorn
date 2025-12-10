@@ -111,6 +111,10 @@ namespace Backend.Migrations
                     b.Property<double>("Rating")
                         .HasColumnType("float");
 
+                    b.Property<string>("ThumbnailUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -120,19 +124,90 @@ namespace Backend.Migrations
                     b.ToTable("Courses");
                 });
 
-            modelBuilder.Entity("Backend.Models.CourseBook", b =>
+            modelBuilder.Entity("Backend.Models.CourseLesson", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("CourseLessons");
+                });
+
+            modelBuilder.Entity("Backend.Models.CourseLessonFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LessonId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId");
+
+                    b.ToTable("CourseLessonFiles");
+                });
+
+            modelBuilder.Entity("Backend.Models.CourseSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<int>("BookId")
+                    b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.HasKey("CourseId", "BookId");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("BookId");
+                    b.HasKey("Id");
 
-                    b.ToTable("CourseBooks");
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseSections");
                 });
 
             modelBuilder.Entity("Backend.Models.LearningPath", b =>
@@ -173,9 +248,6 @@ namespace Backend.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CourseId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("StepOrder")
                         .HasColumnType("int");
 
@@ -183,9 +255,60 @@ namespace Backend.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.HasIndex("CourseId1");
-
                     b.ToTable("LearningPathCourses");
+                });
+
+            modelBuilder.Entity("Backend.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalReference")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TargetId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Backend.Models.Tool", b =>
@@ -279,74 +402,76 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.UserBook", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BookId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("GrantedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("GrantedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<bool>("IsFromCourse")
+                    b.Property<bool?>("IsFromCourse")
                         .HasColumnType("bit");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "BookId");
 
                     b.HasIndex("BookId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserBooks");
                 });
 
             modelBuilder.Entity("Backend.Models.UserCourse", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("PurchasedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("PurchasedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "CourseId");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserCourses");
                 });
 
-            modelBuilder.Entity("Backend.Models.CourseBook", b =>
+            modelBuilder.Entity("Backend.Models.CourseLesson", b =>
                 {
-                    b.HasOne("Backend.Models.Book", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
+                    b.HasOne("Backend.Models.CourseSection", "Section")
+                        .WithMany("Lessons")
+                        .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Section");
+                });
+
+            modelBuilder.Entity("Backend.Models.CourseLessonFile", b =>
+                {
+                    b.HasOne("Backend.Models.CourseLesson", "Lesson")
+                        .WithMany("Files")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("Backend.Models.CourseSection", b =>
+                {
                     b.HasOne("Backend.Models.Course", "Course")
-                        .WithMany("CourseBooks")
+                        .WithMany("Sections")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Book");
 
                     b.Navigation("Course");
                 });
@@ -354,14 +479,10 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.LearningPathCourse", b =>
                 {
                     b.HasOne("Backend.Models.Course", "Course")
-                        .WithMany()
+                        .WithMany("LearningPathCourses")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Backend.Models.Course", null)
-                        .WithMany("LearningPathCourses")
-                        .HasForeignKey("CourseId1");
 
                     b.HasOne("Backend.Models.LearningPath", "LearningPath")
                         .WithMany("LearningPathCourses")
@@ -374,6 +495,17 @@ namespace Backend.Migrations
                     b.Navigation("LearningPath");
                 });
 
+            modelBuilder.Entity("Backend.Models.Payment", b =>
+                {
+                    b.HasOne("Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Backend.Models.UserBook", b =>
                 {
                     b.HasOne("Backend.Models.Book", "Book")
@@ -383,7 +515,7 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Backend.Models.User", "User")
-                        .WithMany()
+                        .WithMany("UserBooks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -402,7 +534,7 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("Backend.Models.User", "User")
-                        .WithMany()
+                        .WithMany("UserCourses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -414,14 +546,31 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.Course", b =>
                 {
-                    b.Navigation("CourseBooks");
-
                     b.Navigation("LearningPathCourses");
+
+                    b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("Backend.Models.CourseLesson", b =>
+                {
+                    b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("Backend.Models.CourseSection", b =>
+                {
+                    b.Navigation("Lessons");
                 });
 
             modelBuilder.Entity("Backend.Models.LearningPath", b =>
                 {
                     b.Navigation("LearningPathCourses");
+                });
+
+            modelBuilder.Entity("Backend.Models.User", b =>
+                {
+                    b.Navigation("UserBooks");
+
+                    b.Navigation("UserCourses");
                 });
 #pragma warning restore 612, 618
         }

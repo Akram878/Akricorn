@@ -1,0 +1,73 @@
+<div class="lms-books-page">
+  <!-- Header -->
+  <div class="lms-books-page__header">
+    <div class="lms-books-page__breadcrumb">
+      <span>LMS</span>
+      <span>/</span>
+      <span class="active">My books</span>
+    </div>
+
+    <h2>My books</h2>
+    <p>
+      All books you own, either purchased directly or unlocked from your courses. Click any book to
+      open it.
+    </p>
+  </div>
+
+  <div class="lms-books-page__content">
+    <ng-container *ngIf="!isLoading; else loadingTpl">
+      <!-- Empty state -->
+      <div
+        class="lms-books-page__state lms-books-page__state--empty"
+        *ngIf="!error && myBooks.length === 0"
+      >
+        You don't have any books yet.
+      </div>
+
+      <!-- Error state -->
+      <div class="lms-books-page__state lms-books-page__state--error" *ngIf="!isLoading && error">
+        {{ error }}
+      </div>
+
+      <!-- Books grid -->
+      <div class="lms-books-grid" *ngIf="!error && myBooks.length > 0">
+        <article class="lms-book-card" *ngFor="let b of myBooks">
+          <header class="lms-book-card__header">
+            <h3 class="lms-book-card__title">{{ b.title }}</h3>
+
+            <span class="lms-book-card__badge" *ngIf="b.isFromCourse"> From course </span>
+            <span
+              class="lms-book-card__badge lms-book-card__badge--direct"
+              *ngIf="b.isFromCourse === false"
+            >
+              Direct purchase
+            </span>
+          </header>
+
+          <p class="lms-book-card__description">
+            {{ b.description || 'No description provided.' }}
+          </p>
+
+          <div class="lms-book-card__meta">
+            <span class="lms-book-card__price" *ngIf="b.price && b.price > 0">
+              {{ b.price | number : '1.2-2' }} $
+            </span>
+            <span class="lms-book-card__price" *ngIf="!b.price || b.price === 0"> Free </span>
+
+            <span class="lms-book-card__date" *ngIf="b.grantedAt">
+              Added {{ b.grantedAt | date : 'mediumDate' }}
+            </span>
+          </div>
+
+          <button class="lms-book-card__action" type="button" (click)="openFile(b)">
+            Open book
+          </button>
+        </article>
+      </div>
+    </ng-container>
+
+    <ng-template #loadingTpl>
+      <div class="lms-books-page__state">Loading your books...</div>
+    </ng-template>
+  </div>
+</div>

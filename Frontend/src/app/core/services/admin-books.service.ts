@@ -26,7 +26,7 @@ export interface UpdateBookRequest extends CreateBookRequest {}
   providedIn: 'root',
 })
 export class AdminBooksService {
-  private apiUrl = 'https://localhost:7150/api/admin/books'; // عدّل البورت لو مختلف
+  private apiUrl = 'https://localhost:7150/api/admin/books'; // غيّر البورت لو الباك إند عندك غير
 
   constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
 
@@ -43,16 +43,6 @@ export class AdminBooksService {
     });
   }
 
-  toggleActive(id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/${id}/toggle`, {}, { headers: this.getAuthHeaders() });
-  }
-
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: this.getAuthHeaders(),
-    });
-  }
-
   create(data: CreateBookRequest): Observable<any> {
     return this.http.post(this.apiUrl, data, {
       headers: this.getAuthHeaders(),
@@ -63,5 +53,15 @@ export class AdminBooksService {
     return this.http.put(`${this.apiUrl}/${id}`, data, {
       headers: this.getAuthHeaders(),
     });
+  }
+
+  delete(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  toggleActive(id: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/toggle`, {}, { headers: this.getAuthHeaders() });
   }
 }

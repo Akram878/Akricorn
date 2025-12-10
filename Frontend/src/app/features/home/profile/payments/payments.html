@@ -1,0 +1,29 @@
+<div class="profile-payments">
+  <h2>Payments</h2>
+
+  <div *ngIf="isLoading">Loading payments...</div>
+  <div *ngIf="!isLoading && error" class="error">{{ error }}</div>
+
+  <table *ngIf="!isLoading && !error && payments.length > 0" class="payments-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of payments">
+        <td>#{{ p.id }}</td>
+        <td>{{ p.description }}</td>
+        <td>{{ p.amount | number : '1.2-2' }} {{ p.currency }}</td>
+        <td>{{ p.status }}</td>
+        <td>{{ p.createdAt | date : 'short' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!isLoading && !error && payments.length === 0">No payments yet.</div>
+</div>

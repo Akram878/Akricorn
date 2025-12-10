@@ -3,6 +3,9 @@ using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Backend.Controllers
 {
@@ -96,20 +99,30 @@ namespace Backend.Controllers
             _context.LearningPaths.Add(path);
             await _context.SaveChangesAsync();
 
-            // ربط الكورسات لو انوجدت
+            // Link courses with precise order
             if (request.CourseIds != null && request.CourseIds.Any())
             {
                 var validCourseIds = await _context.Courses
                     .Where(c => request.CourseIds.Contains(c.Id))
                     .Select(c => c.Id)
                     .ToListAsync();
+                
+                var pathCourses = new List<LearningPathCourse>();
 
-                var pathCourses = validCourseIds.Select((courseId, index) => new LearningPathCourse
+                for (int i = 0; i < request.CourseIds.Count; i++)
                 {
-                    LearningPathId = path.Id,
-                    CourseId = courseId,
-                    StepOrder = index
-                });
+                    int courseId = request.CourseIds[i];
+
+                    if (validCourseIds.Contains(courseId))
+                    {
+                        pathCourses.Add(new LearningPathCourse
+                        {
+                            LearningPathId = path.Id,
+                            CourseId = courseId,
+                            StepOrder = i + 1
+                        });
+                    }
+                }
 
                 _context.LearningPathCourses.AddRange(pathCourses);
                 await _context.SaveChangesAsync();
@@ -140,13 +153,12 @@ namespace Backend.Controllers
             path.IsActive = request.IsActive;
             path.DisplayOrder = request.DisplayOrder;
 
-            // حذف الربط القديم
+            // Update Courses
             if (path.LearningPathCourses != null && path.LearningPathCourses.Any())
             {
                 _context.LearningPathCourses.RemoveRange(path.LearningPathCourses);
             }
 
-            // إضافة الربط الجديد
             if (request.CourseIds != null && request.CourseIds.Any())
             {
                 var validCourseIds = await _context.Courses
@@ -154,12 +166,21 @@ namespace Backend.Controllers
                     .Select(c => c.Id)
                     .ToListAsync();
 
-                var pathCourses = validCourseIds.Select((courseId, index) => new LearningPathCourse
+                var pathCourses = new List<LearningPathCourse>();
+
+                for (int i = 0; i < request.CourseIds.Count; i++)
                 {
-                    LearningPathId = path.Id,
-                    CourseId = courseId,
-                    StepOrder = index
-                });
+                    int courseId = request.CourseIds[i];
+                    if (validCourseIds.Contains(courseId))
+                    {
+                        pathCourses.Add(new LearningPathCourse
+                        {
+                            LearningPathId = path.Id,
+                            CourseId = courseId,
+                            StepOrder = i + 1
+                        });
+                    }
+                }
 
                 _context.LearningPathCourses.AddRange(pathCourses);
             }

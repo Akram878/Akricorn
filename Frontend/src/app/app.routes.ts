@@ -13,7 +13,8 @@ import { Login } from './features/auth/login/login';
 import { Sign } from './features/auth/sign/sign';
 
 // Home
-import { Profile } from './features/home/profile/profile';
+import { ProfileComponent } from './features/home/profile/profile';
+import { Payments } from './features/home/profile/payments/payments'; // 🆕 صفحة المدفوعات
 
 // 🛡 AuthGuard (لليوزر)
 import { authGuard } from './core/guards/auth-guard';
@@ -33,14 +34,14 @@ import { DashboardHome } from './dashboard/pages/dashboard-home/dashboard-home';
 import { adminAuthGuard } from './core/guards/admin-auth.guard';
 
 import { DashboardCourses } from './dashboard/pages/dashboard-courses/dashboard-courses';
-
 import { DashboardBooks } from './dashboard/pages/dashboard-books/dashboard-books';
-
 import { DashboardPaths } from './dashboard/pages/dashboard-paths/dashboard-paths';
 import { DashboardTools } from './dashboard/pages/dashboard-tools/dashboard-tools';
 import { DashboardUsers } from './dashboard/pages/dashboard-users/dashboard-users';
 
 import { MyCourses } from './features/lms/my-courses/my-courses';
+import { MyBooks } from './features/lms/my-books/my-books';
+
 export const routes: Routes = [
   {
     path: 'auth',
@@ -85,6 +86,11 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
+        path: 'lms/my-books',
+        component: MyBooks,
+        canActivate: [authGuard],
+      },
+      {
         path: 'services-section',
         component: ServicesSection,
       },
@@ -94,7 +100,12 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        component: Profile,
+        component: ProfileComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'profile/payments', // 🆕 صفحة سجل المدفوعات
+        component: Payments,
         canActivate: [authGuard],
       },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -107,7 +118,7 @@ export const routes: Routes = [
     component: DashboardLoginComponent,
   },
 
-  // 🆕 شيل الداشبورد المحمي
+  // 🆕 الداشبورد المحمي
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,

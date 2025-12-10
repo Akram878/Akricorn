@@ -1,220 +1,84 @@
 <div class="dashboard-courses">
-  <!-- شريط العنوان + زر إضافة جديد -->
-  <div class="header-row">
-    <div class="header-row__title">
-      <h2>Courses</h2>
-      <span class="header-row__subtitle">
-        Manage Akricorn LMS courses (create, edit, enable/disable, delete).
-      </span>
-    </div>
-
-    <div class="header-row__actions">
-      <button type="button" class="btn-primary btn-round" (click)="openCreateForm()">+</button>
-      <button type="button" class="btn-secondary" (click)="loadCourses()">Reload</button>
-    </div>
-  </div>
-
-  <!-- الرسائل العامة -->
-  <div class="status error" *ngIf="error">{{ error }}</div>
-  <div class="status" *ngIf="isLoading">Loading...</div>
-
-  <!-- جدول الكورسات -->
-  <table *ngIf="!isLoading && courses.length > 0" class="courses-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th style="width: 16%">Title</th>
-        <th>Category</th>
-        <th>Description</th>
-        <th>Hours</th>
-        <th>Price</th>
-        <th>Path</th>
-        <th>Active</th>
-        <th>Books</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let c of courses">
-        <td>{{ c.id }}</td>
-        <td>{{ c.title }}</td>
-        <td>{{ c.category }}</td>
-        <td class="description-cell">
-          {{ c.description }}
-        </td>
-        <td>{{ c.hours }}</td>
-        <td>{{ c.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
-        <td>
-          {{ c.learningPathId }}
-        </td>
-        <td>
-          <span [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">
-            {{ c.isActive ? 'Active' : 'Inactive' }}
-          </span>
-        </td>
-        <td>
-          {{ c.bookIds?.length || 0 }}
-        </td>
-        <td class="actions-cell">
-          <button class="btn-small" (click)="onEdit(c)">Edit</button>
-          <button class="btn-secondary" (click)="onToggle(c)">
-            {{ c.isActive ? 'Disable' : 'Enable' }}
-          </button>
-          <button class="btn-danger" (click)="onDelete(c)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div *ngIf="!isLoading && courses.length === 0" class="status">No courses found yet.</div>
-
-  <!-- ✅ المودال العائم مع تضبيب الخلفية -->
-  <div class="modal-backdrop" *ngIf="showForm" (click)="resetForm()">
-    <div class="modal-card bg-secondary" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div>
-          <h3 class="form-title">
-            {{ editMode ? 'Edit Course' : 'Create New Course' }}
-          </h3>
-          <p class="form-subtitle">
-            {{ editMode ? 'Update the course details.' : 'Add a new course to Akricorn LMS.' }}
-          </p>
-        </div>
-
-        <button type="button" class="icon-btn" (click)="resetForm()" aria-label="Close">×</button>
+  <!-- ===========================
+       LIST VIEW
+       =========================== -->
+  <ng-container *ngIf="!isEditorOpen">
+    <div class="header-row">
+      <div class="header-row__title">
+        <h2>Courses</h2>
+        <span class="header-row__subtitle"> Manage Akricorn LMS courses. </span>
       </div>
 
-      <form [formGroup]="courseForm" (ngSubmit)="onSubmit()">
-        <div class="form-grid">
-          <!-- العنوان -->
-          <div class="form-field">
-            <label for="title">Title</label>
-            <input
-              id="title"
-              type="text"
-              formControlName="title"
-              placeholder="e.g. Advanced Angular for Students"
-            />
-            <div
-              class="field-error"
-              *ngIf="courseForm.get('title')?.invalid && courseForm.get('title')?.touched"
-            >
-              Title is required.
-            </div>
-          </div>
-
-          <!-- الفئة -->
-          <div class="form-field">
-            <label for="category">Category</label>
-            <input
-              id="category"
-              type="text"
-              formControlName="category"
-              placeholder="e.g. Programming / Math / Languages"
-            />
-            <div
-              class="field-error"
-              *ngIf="courseForm.get('category')?.invalid && courseForm.get('category')?.touched"
-            >
-              Category is required.
-            </div>
-          </div>
-
-          <!-- السعر -->
-          <div class="form-field">
-            <label for="price">Price</label>
-            <input id="price" type="number" formControlName="price" min="0" step="0.01" />
-            <div class="field-hint">Set 0 for free courses.</div>
-          </div>
-
-          <!-- الساعات -->
-          <div class="form-field">
-            <label for="hours">Hours</label>
-            <input id="hours" type="number" formControlName="hours" min="0" step="0.5" />
-            <div class="field-hint">Total video/content hours.</div>
-          </div>
-
-          <!-- الليرنينغ باث -->
-          <div class="form-field">
-            <label for="learningPathId">Learning Path</label>
-            <select id="learningPathId" formControlName="learningPathId">
-              <option [ngValue]="null" disabled *ngIf="paths.length === 0">
-                No learning paths
-              </option>
-              <option *ngFor="let p of paths" [ngValue]="p.id">{{ p.id }} — {{ p.title }}</option>
-            </select>
-            <div
-              class="field-error"
-              *ngIf="
-                courseForm.get('learningPathId')?.invalid &&
-                courseForm.get('learningPathId')?.touched
-              "
-            >
-              Learning path is required.
-            </div>
-          </div>
-
-          <!-- حالة الكورس -->
-          <div class="form-field checkbox-field">
-            <label>
-              <input type="checkbox" formControlName="isActive" />
-              Active (visible in LMS)
-            </label>
-          </div>
-
-          <!-- الصورة الرمزية -->
-          <div class="form-field full-width">
-            <label for="thumbnailUrl">Thumbnail URL</label>
-            <input
-              id="thumbnailUrl"
-              type="text"
-              formControlName="thumbnailUrl"
-              placeholder="https://example.com/course-thumbnail.jpg"
-            />
-            <div class="field-hint">Public image URL to be used in LMS course card.</div>
-          </div>
-
-          <!-- الوصف -->
-          <div class="form-field full-width">
-            <label for="description">Description</label>
-            <textarea
-              id="description"
-              rows="3"
-              formControlName="description"
-              placeholder="Short description of the course..."
-            ></textarea>
-          </div>
-
-          <!-- الكتب المرتبطة -->
-          <div class="form-field full-width">
-            <label for="bookIdsText">Related book IDs</label>
-            <input
-              id="bookIdsText"
-              type="text"
-              formControlName="bookIdsText"
-              placeholder="e.g. 1, 2, 3"
-            />
-            <div class="field-hint">Enter book IDs separated by commas (optional).</div>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-primary" [disabled]="courseForm.invalid || isSaving">
-            {{
-              isSaving
-                ? editMode
-                  ? 'Saving...'
-                  : 'Creating...'
-                : editMode
-                ? 'Save Changes'
-                : 'Create Course'
-            }}
-          </button>
-
-          <button type="button" class="btn-secondary" (click)="resetForm()">Cancel</button>
-        </div>
-      </form>
+      <div class="header-row__actions">
+        <button type="button" class="btn-primary btn-round" (click)="openCreateEditor()">+</button>
+        <button type="button" class="btn-secondary" (click)="loadCourses()">Reload</button>
+      </div>
     </div>
+
+    <div class="status error" *ngIf="error">{{ error }}</div>
+    <div class="status" *ngIf="isLoading">Loading...</div>
+
+    <table *ngIf="!isLoading && courses.length > 0" class="courses-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th style="width: 16%">Title</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Hours</th>
+          <th>Price</th>
+          <th>Path</th>
+          <th>Active</th>
+
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let c of courses">
+          <td>{{ c.id }}</td>
+          <td>{{ c.title }}</td>
+          <td>{{ c.category }}</td>
+          <td class="description-cell">{{ c.description }}</td>
+          <td>{{ c.hours }}</td>
+          <td>{{ c.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
+          <td>{{ c.pathIds?.length ? c.pathIds[0] : '-' }}</td>
+
+          <td>
+            <span [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">
+              {{ c.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+
+          <td class="actions-cell">
+            <button class="btn-secondary" (click)="onToggle(c)">
+              {{ c.isActive ? 'Disable' : 'Enable' }}
+            </button>
+
+            <button class="btn-danger" (click)="onDelete(c)">Delete</button>
+
+            <button class="btn-small btn-primary" (click)="openEditEditor(c)">Edit</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!isLoading && courses.length === 0" class="status">No courses found yet.</div>
+  </ng-container>
+
+  <!-- ===========================
+       CALL THE EDITOR COMPONENT
+       =========================== -->
+  <div *ngIf="isEditorOpen" class="editor-wrapper">
+    <app-course-content-editor
+      [courseId]="selectedCourse?.id ?? 0"
+      [courseTitle]="courseForm.get('title')?.value"
+      [isCreateMode]="isCreateMode"
+      [form]="courseForm"
+      [paths]="paths"
+      (closeEditor)="closeEditor()"
+      (submitForm)="onSubmitEditor()"
+      (reloadCourses)="loadCourses()"
+    ></app-course-content-editor>
   </div>
 </div>
