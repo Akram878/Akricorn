@@ -3,6 +3,38 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminAuthService } from './admin-auth.service';
 
+export interface LessonFileDto {
+  id: number;
+  fileName: string;
+  fileUrl: string;
+}
+
+export interface LessonDto {
+  id: number;
+  title: string;
+  order: number;
+  files: LessonFileDto[];
+}
+
+export interface SectionDto {
+  id: number;
+  title: string;
+  order: number;
+  lessons: LessonDto[];
+}
+
+export interface CourseContentDto {
+  courseId: number;
+  sections: SectionDto[];
+}
+
+export interface CourseContentResponse {
+  message?: string;
+  id?: number;
+  url?: string;
+  content: CourseContentDto;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -21,8 +53,8 @@ export class AdminCourseContentService {
   // =============================================
   // GET COURSE CONTENT
   // =============================================
-  getCourseContent(courseId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${courseId}`, {
+  getCourseContent(courseId: number): Observable<CourseContentDto> {
+    return this.http.get<CourseContentDto>(`${this.baseUrl}/${courseId}`, {
       headers: this.getAuthHeaders(),
     });
   }
@@ -30,20 +62,26 @@ export class AdminCourseContentService {
   // =============================================
   // SECTIONS
   // =============================================
-  createSection(courseId: number, body: { title: string; order: number }): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/${courseId}/sections`, body, {
+  createSection(
+    courseId: number,
+    body: { title: string; order: number; forceInsert?: boolean }
+  ): Observable<CourseContentResponse> {
+    return this.http.post<CourseContentResponse>(`${this.baseUrl}/${courseId}/sections`, body, {
       headers: this.getAuthHeaders(),
     });
   }
 
-  updateSection(sectionId: number, body: { title?: string; order?: number }): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/sections/${sectionId}`, body, {
+  updateSection(
+    sectionId: number,
+    body: { title: string; order: number }
+  ): Observable<CourseContentResponse> {
+    return this.http.put<CourseContentResponse>(`${this.baseUrl}/sections/${sectionId}`, body, {
       headers: this.getAuthHeaders(),
     });
   }
 
-  deleteSection(sectionId: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/sections/${sectionId}`, {
+  deleteSection(sectionId: number): Observable<CourseContentResponse> {
+    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/sections/${sectionId}`, {
       headers: this.getAuthHeaders(),
     });
   }
@@ -51,14 +89,30 @@ export class AdminCourseContentService {
   // =============================================
   // LESSONS
   // =============================================
-  createLesson(sectionId: number, body: { title: string; order: number }): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/sections/${sectionId}/lessons`, body, {
+  createLesson(
+    sectionId: number,
+    body: { title: string; order: number; forceInsert?: boolean }
+  ): Observable<CourseContentResponse> {
+    return this.http.post<CourseContentResponse>(
+      `${this.baseUrl}/sections/${sectionId}/lessons`,
+      body,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
+  }
+
+  updateLesson(
+    lessonId: number,
+    body: { title: string; order: number }
+  ): Observable<CourseContentResponse> {
+    return this.http.put<CourseContentResponse>(`${this.baseUrl}/lessons/${lessonId}`, body, {
       headers: this.getAuthHeaders(),
     });
   }
 
-  deleteLesson(lessonId: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/lessons/${lessonId}`, {
+  deleteLesson(lessonId: number): Observable<CourseContentResponse> {
+    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/lessons/${lessonId}`, {
       headers: this.getAuthHeaders(),
     });
   }
@@ -66,17 +120,21 @@ export class AdminCourseContentService {
   // =============================================
   // FILES
   // =============================================
-  uploadLessonFile(lessonId: number, file: File): Observable<any> {
+  uploadLessonFile(lessonId: number, file: File): Observable<CourseContentResponse> {
     const form = new FormData();
     form.append('file', file);
 
-    return this.http.post<any>(`${this.baseUrl}/lessons/${lessonId}/upload`, form, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.post<CourseContentResponse>(
+      `${this.baseUrl}/lessons/${lessonId}/upload`,
+      form,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
   }
 
-  deleteLessonFile(fileId: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/files/${fileId}`, {
+  deleteLessonFile(fileId: number): Observable<CourseContentResponse> {
+    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/files/${fileId}`, {
       headers: this.getAuthHeaders(),
     });
   }

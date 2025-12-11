@@ -86,12 +86,16 @@ export class AdminCoursesService {
    * Backend endpoint: POST /api/admin/courses/upload-thumbnail
    * Expects multipart/form-data with field name "file"
    */
-  uploadThumbnail(file: File): Observable<{ url: string }> {
+  uploadThumbnail(courseId: number, file: File): Observable<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file); // MUST be "file" to match IFormFile file
 
-    return this.http.post<{ url: string }>(`${this.apiUrl}/upload-thumbnail`, formData, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.post<{ url: string }>(
+      `${this.apiUrl}/${courseId}/upload-thumbnail`,
+      formData,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
   }
 }

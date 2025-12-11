@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-namespace Backend.Controllers;
 using Backend.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
+
+namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/admin/course-content")]
@@ -26,8 +29,18 @@ public class AdminCourseContentController : ControllerBase
     // ============================================================
     // GET COURSE CONTENT
     // ============================================================
-    [HttpGet("{courseId}")]
-    public async Task<IActionResult> GetCourseContent(int courseId)
+    private static int FindNextAvailableOrder(IEnumerable<int> usedOrders, int startFrom)
+    {
+        var used = new HashSet<int>(usedOrders);
+        var candidate = Math.Max(1, startFrom);
+
+        while (used.Contains(candidate))
+            candidate++;
+
+        return candidate;
+    }
+
+    private async Task<object?> BuildCourseContentDto(int courseId)
     {
         var course = await _context.Courses
             .Include(c => c.Sections)
@@ -36,9 +49,9 @@ public class AdminCourseContentController : ControllerBase
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
         if (course == null)
-            return NotFound(new { message = "Course not found." });
+            return null;
 
-        var result = new
+        return new
         {
             courseId = course.Id,
             sections = course.Sections
@@ -65,17 +78,48 @@ public class AdminCourseContentController : ControllerBase
                 })
         };
 
-        return Ok(result);
+
     }
 
     // ============================================================
-    // CREATE SECTION
+    // GET COURSE CONTENT
     // ============================================================
-    [HttpPost("{courseId}/sections")]
+    [HttpGet("{courseId}")]
+    public async Task<IActionResult> GetCourseContent(int courseId)
+    {
+        var content = await BuildCourseContentDto(courseId);
+
+        if (content == null)
+            return NotFound(new { message = "Course not found." });
+
+        return Ok(content);
+    }
+
+        // ============================================================
+        // CREATE SECTION
+        // ============================================================
+        [HttpPost("{courseId}/sections")]
     public async Task<IActionResult> CreateSection(int courseId, [FromBody] CreateSectionRequest request)
     {
         if (!await _context.Courses.AnyAsync(c => c.Id == courseId))
             return NotFound(new { message = "Course not found." });
+
+        var existingSections = await _context.CourseSections
+           .Where(s => s.CourseId == courseId)
+           .ToListAsync();
+
+        var conflictingSection = existingSections.FirstOrDefault(s => s.Order == request.Order);
+        if (conflictingSection != null && !request.ForceInsert)
+            return Conflict(new { message = "Order already used for another section.", order = request.Order });
+
+        if (conflictingSection != null)
+        {
+            var usedOrders = existingSections
+                .Where(s => s.Id != conflictingSection.Id)
+                .Select(s => s.Order);
+            conflictingSection.Order = FindNextAvailableOrder(usedOrders, request.Order + 1);
+        }
+
 
         var section = new CourseSection
         {
@@ -88,7 +132,9 @@ public class AdminCourseContentController : ControllerBase
         await _context.SaveChangesAsync();
         var sectionFolder = CourseStorageHelper.GetSectionFolder(courseId, section.Id);
         Directory.CreateDirectory(sectionFolder);
-        return Ok(new { message = "Section created.", id = section.Id });
+        var content = await BuildCourseContentDto(courseId);
+
+        return Ok(new { message = "Section created.", id = section.Id, content });
     }
 
     // ============================================================
@@ -101,11 +147,23 @@ public class AdminCourseContentController : ControllerBase
         if (section == null)
             return NotFound(new { message = "Section not found." });
 
+
+        var conflictingSection = await _context.CourseSections
+            .FirstOrDefaultAsync(s => s.CourseId == section.CourseId && s.Id != sectionId && s.Order == request.Order);
+
+        if (conflictingSection != null)
+        {
+            conflictingSection.Order = section.Order;
+        }
+
+
         section.Title = request.Title;
         section.Order = request.Order;
 
         await _context.SaveChangesAsync();
-        return Ok(new { message = "Section updated." });
+        var content = await BuildCourseContentDto(section.CourseId);
+
+        return Ok(new { message = "Section updated.", content });
     }
 
     // ============================================================
@@ -119,13 +177,17 @@ public class AdminCourseContentController : ControllerBase
                .FirstOrDefaultAsync(s => s.Id == sectionId);
         if (section == null)
             return NotFound(new { message = "Section not found." });
+
+        var courseId = section.CourseId;
         var sectionFolder = CourseStorageHelper.GetSectionFolder(section.CourseId, section.Id);
         if (Directory.Exists(sectionFolder))
             Directory.Delete(sectionFolder, true);
         _context.CourseSections.Remove(section);
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "Section deleted." });
+        var content = await BuildCourseContentDto(courseId);
+
+        return Ok(new { message = "Section deleted.", content });
     }
 
     // ============================================================
@@ -137,6 +199,24 @@ public class AdminCourseContentController : ControllerBase
         var section = await _context.CourseSections.FirstOrDefaultAsync(s => s.Id == sectionId);
         if (section == null)
             return NotFound(new { message = "Section not found." });
+
+
+        var existingLessons = await _context.CourseLessons
+           .Where(l => l.SectionId == sectionId)
+           .ToListAsync();
+
+        var conflictingLesson = existingLessons.FirstOrDefault(l => l.Order == request.Order);
+        if (conflictingLesson != null && !request.ForceInsert)
+            return Conflict(new { message = "Order already used for another lesson.", order = request.Order });
+
+        if (conflictingLesson != null)
+        {
+            var usedOrders = existingLessons
+                .Where(l => l.Id != conflictingLesson.Id)
+                .Select(l => l.Order);
+            conflictingLesson.Order = FindNextAvailableOrder(usedOrders, request.Order + 1);
+        }
+
 
         var lesson = new CourseLesson
         {
@@ -150,7 +230,42 @@ public class AdminCourseContentController : ControllerBase
         await _context.SaveChangesAsync();
         var lessonFolder = CourseStorageHelper.GetLessonFolder(section.CourseId, sectionId, lesson.Id);
         Directory.CreateDirectory(lessonFolder);
-        return Ok(new { message = "Lesson created.", id = lesson.Id });
+
+
+        var content = await BuildCourseContentDto(section.CourseId);
+
+        return Ok(new { message = "Lesson created.", id = lesson.Id, content });
+    }
+
+    // ============================================================
+    // UPDATE LESSON
+    // ============================================================
+    [HttpPut("lessons/{lessonId}")]
+    public async Task<IActionResult> UpdateLesson(int lessonId, [FromBody] UpdateLessonRequest request)
+    {
+        var lesson = await _context.CourseLessons
+            .Include(l => l.Section)
+            .FirstOrDefaultAsync(l => l.Id == lessonId);
+
+        if (lesson == null)
+            return NotFound(new { message = "Lesson not found." });
+
+        var conflictingLesson = await _context.CourseLessons
+            .FirstOrDefaultAsync(l => l.SectionId == lesson.SectionId && l.Id != lessonId && l.Order == request.Order);
+
+        if (conflictingLesson != null)
+        {
+            conflictingLesson.Order = lesson.Order;
+        }
+
+        lesson.Title = request.Title;
+        lesson.Order = request.Order;
+
+        await _context.SaveChangesAsync();
+
+        var content = await BuildCourseContentDto(lesson.Section.CourseId);
+
+        return Ok(new { message = "Lesson updated.", content });
     }
 
     // ============================================================
@@ -164,14 +279,16 @@ public class AdminCourseContentController : ControllerBase
                 .FirstOrDefaultAsync(l => l.Id == lessonId);
         if (lesson == null)
             return NotFound(new { message = "Lesson not found." });
-
+        var courseId = lesson.Section.CourseId;
         var lessonFolder = CourseStorageHelper.GetLessonFolder(lesson.Section.CourseId, lesson.SectionId, lesson.Id);
         if (Directory.Exists(lessonFolder))
             Directory.Delete(lessonFolder, true);
         _context.CourseLessons.Remove(lesson);
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "Lesson deleted." });
+        var content = await BuildCourseContentDto(courseId);
+
+        return Ok(new { message = "Lesson deleted.", content });
     }
 
     // ============================================================
@@ -221,11 +338,14 @@ public class AdminCourseContentController : ControllerBase
             _context.CourseLessonFiles.Add(newFile);
             await _context.SaveChangesAsync();
 
+            var content = await BuildCourseContentDto(lesson.Section.CourseId);
+
             return Ok(new
             {
                 message = "File uploaded.",
                 id = newFile.Id,
-                url
+                url,
+                content
             });
         }
         catch (Exception ex)
@@ -264,9 +384,13 @@ public class AdminCourseContentController : ControllerBase
         _context.CourseLessonFiles.Remove(entity);
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "File deleted." }); }
 
-         private static string TryExtractFileName(string fileUrl)
+        var content = await BuildCourseContentDto(courseId);
+
+        return Ok(new { message = "File deleted.", content });
+    }
+
+    private static string TryExtractFileName(string fileUrl)
     {
         if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
             return Path.GetFileName(uri.LocalPath);
@@ -283,6 +407,7 @@ public class CreateSectionRequest
 {
     public string Title { get; set; }
     public int Order { get; set; }
+    public bool ForceInsert { get; set; } = false;
 }
 
 public class UpdateSectionRequest
@@ -292,6 +417,13 @@ public class UpdateSectionRequest
 }
 
 public class CreateLessonRequest
+{
+    public string Title { get; set; }
+    public int Order { get; set; }
+    public bool ForceInsert { get; set; } = false;
+}
+
+public class UpdateLessonRequest
 {
     public string Title { get; set; }
     public int Order { get; set; }

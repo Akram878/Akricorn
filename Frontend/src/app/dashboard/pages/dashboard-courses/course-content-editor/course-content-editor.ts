@@ -2,7 +2,11 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 
 import { NgIf, NgForOf, NgClass, CurrencyPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AdminCourseContentService } from '../../../../core/services/admin-course-content.service';
+import {
+  AdminCourseContentService,
+  CourseContentDto,
+  CourseContentResponse,
+} from '../../../../core/services/admin-course-content.service';
 import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
@@ -22,10 +26,11 @@ export class CourseContentEditor implements OnChanges {
   @Output() closeEditor = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<void>();
   @Output() reloadCourses = new EventEmitter<void>();
+  @Output() thumbnailSelected = new EventEmitter<File>();
 
   loading = false;
   error: string | null = null;
-  content: any = null;
+  content: CourseContentDto | null = null;
 
   newSectionTitle = '';
   newSectionOrder = 1;
@@ -45,9 +50,7 @@ export class CourseContentEditor implements OnChanges {
 
     this.api.getCourseContent(this.courseId).subscribe({
       next: (res) => {
-        this.content = res;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.applyContent(res);
       },
       error: () => {
         this.error = 'Failed to load course content';
@@ -60,25 +63,33 @@ export class CourseContentEditor implements OnChanges {
   // ==================== SECTIONS ====================
   addSection(): void {
     if (!this.newSectionTitle.trim()) return;
+    const payload = {
+      title: this.newSectionTitle.trim(),
+      order: this.newSectionOrder,
+    };
 
-    this.api
-      .createSection(this.courseId, {
-        title: this.newSectionTitle.trim(),
-        order: this.newSectionOrder,
-      })
-      .subscribe({
-        next: () => {
-          this.newSectionTitle = '';
-          this.newSectionOrder = 1;
+    this.api.createSection(this.courseId, payload).subscribe({
+      next: (res) => {
+        this.newSectionTitle = '';
+        this.newSectionOrder = 1;
+        this.applyContent(res.content);
+      },
+      error: (err) => {
+        if (err.status === 409 && confirm('Section order exists. Insert here and shift others?')) {
+          this.api
+            .createSection(this.courseId, { ...payload, forceInsert: true })
+            .subscribe((res: CourseContentResponse) => {
+              this.newSectionTitle = '';
+              this.newSectionOrder = 1;
+              this.applyContent(res.content);
+            });
+          return;
+        }
 
-          this.loadContent();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.error = 'Failed to create section';
-          this.cdr.detectChanges();
-        },
-      });
+        this.error = 'Failed to create section';
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   saveSection(section: any): void {
@@ -88,10 +99,7 @@ export class CourseContentEditor implements OnChanges {
         order: section.order,
       })
       .subscribe({
-        next: () => {
-          this.loadContent();
-          this.cdr.detectChanges();
-        },
+        next: (res) => this.applyContent(res.content),
         error: () => {
           this.error = 'Failed to update section';
           this.cdr.detectChanges();
@@ -103,10 +111,7 @@ export class CourseContentEditor implements OnChanges {
     if (!confirm('Delete this section?')) return;
 
     this.api.deleteSection(sectionId).subscribe({
-      next: () => {
-        this.loadContent();
-        this.cdr.detectChanges();
-      },
+      next: (res) => this.applyContent(res.content),
       error: () => {
         this.error = 'Failed to delete section';
         this.cdr.detectChanges();
@@ -119,16 +124,37 @@ export class CourseContentEditor implements OnChanges {
     const title = this.newLessonTitle[section.id]?.trim() || 'Lesson';
     const order = this.newLessonOrder[section.id] || 1;
 
-    this.api.createLesson(section.id, { title, order }).subscribe({
-      next: () => {
+    const payload = { title, order };
+
+    this.api.createLesson(section.id, payload).subscribe({
+      next: (res) => {
         this.newLessonTitle[section.id] = '';
         this.newLessonOrder[section.id] = 1;
 
-        this.loadContent();
+        this.applyContent(res.content);
+      },
+      error: (err) => {
+        if (err.status === 409 && confirm('Lesson order exists. Place here and move others?')) {
+          this.api
+            .createLesson(section.id, { ...payload, forceInsert: true })
+            .subscribe((res: CourseContentResponse) => {
+              this.newLessonTitle[section.id] = '';
+              this.newLessonOrder[section.id] = 1;
+              this.applyContent(res.content);
+            });
+          return;
+        }
+        this.error = 'Failed to create lesson';
         this.cdr.detectChanges();
       },
+    });
+  }
+
+  saveLesson(lesson: any): void {
+    this.api.updateLesson(lesson.id, { title: lesson.title, order: lesson.order }).subscribe({
+      next: (res) => this.applyContent(res.content),
       error: () => {
-        this.error = 'Failed to create lesson';
+        this.error = 'Failed to update lesson';
         this.cdr.detectChanges();
       },
     });
@@ -138,10 +164,7 @@ export class CourseContentEditor implements OnChanges {
     if (!confirm('Delete this lesson?')) return;
 
     this.api.deleteLesson(lessonId).subscribe({
-      next: () => {
-        this.loadContent();
-        this.cdr.detectChanges();
-      },
+      next: (res) => this.applyContent(res.content),
       error: () => {
         this.error = 'Failed to delete lesson';
         this.cdr.detectChanges();
@@ -158,10 +181,7 @@ export class CourseContentEditor implements OnChanges {
 
     files.forEach((file) => {
       this.api.uploadLessonFile(lessonId, file).subscribe({
-        next: () => {
-          this.loadContent();
-          this.cdr.detectChanges();
-        },
+        next: (res) => this.applyContent(res.content),
         error: () => {
           this.error = 'Failed to upload file';
           this.cdr.detectChanges();
@@ -176,10 +196,7 @@ export class CourseContentEditor implements OnChanges {
     if (!confirm('Delete file?')) return;
 
     this.api.deleteLessonFile(fileId).subscribe({
-      next: () => {
-        this.loadContent();
-        this.cdr.detectChanges();
-      },
+      next: (res) => this.applyContent(res.content),
       error: () => {
         this.error = 'Failed to delete file';
         this.cdr.detectChanges();
@@ -193,9 +210,28 @@ export class CourseContentEditor implements OnChanges {
     if (!input.files?.length) return;
 
     const reader = new FileReader();
+
+    const file = input.files[0];
+
     reader.onload = () => this.form.patchValue({ thumbnailUrl: reader.result });
 
-    reader.readAsDataURL(input.files[0]);
+    reader.readAsDataURL(file);
+    this.thumbnailSelected.emit(file);
     input.value = '';
+  }
+
+  private applyContent(res?: CourseContentDto | CourseContentResponse | null): void {
+    if (!res) {
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const content = (res as CourseContentResponse).content ?? (res as CourseContentDto);
+    if (content) {
+      this.content = content;
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
   }
 }

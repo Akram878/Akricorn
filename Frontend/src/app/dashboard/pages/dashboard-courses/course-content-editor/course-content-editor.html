@@ -171,8 +171,9 @@
             <!-- LESSONS -->
             <div class="lesson-block" *ngFor="let l of s.lessons">
               <div class="lesson-header">
-                <h5>{{ l.title }}</h5>
-                <span>Order: {{ l.order }}</span>
+                <input [(ngModel)]="l.title" />
+                <input type="number" [(ngModel)]="l.order" min="1" />
+                <button class="btn-secondary" (click)="saveLesson(l)">Save</button>
                 <button class="btn-danger" (click)="deleteLesson(l.id)">Delete Lesson</button>
               </div>
 

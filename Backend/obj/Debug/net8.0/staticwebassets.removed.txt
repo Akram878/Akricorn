@@ -1,2 +1,1 @@
-D:\Akricorn\Backend\wwwroot\uploads\course-files\0210166f-d382-4471-8514-f8bb0908f5ce.png
-D:\Akricorn\Backend\wwwroot\uploads\course-files\ce2e98e5-4317-48fe-85b6-3097b941ee18.png
+D:\Akricorn\Backend\wwwroot\courses\course-2\content\section-5\lesson-9\4ac7a739-3572-406f-b9fd-75199d0e9246.png

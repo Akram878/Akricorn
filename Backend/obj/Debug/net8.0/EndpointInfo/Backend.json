@@ -398,6 +398,46 @@
       }
     },
     "/api/admin/course-content/lessons/{lessonId}": {
+      "put": {
+        "tags": [
+          "AdminCourseContent"
+        ],
+        "parameters": [
+          {
+            "name": "lessonId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLessonRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLessonRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLessonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
       "delete": {
         "tags": [
           "AdminCourseContent"
@@ -1877,6 +1917,9 @@
           "order": {
             "type": "integer",
             "format": "int32"
+          },
+          "forceInsert": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -1891,6 +1934,9 @@
           "order": {
             "type": "integer",
             "format": "int32"
+          },
+          "forceInsert": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -2174,6 +2220,20 @@
               "format": "int32"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateLessonRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "order": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -34,7 +34,7 @@ export class DashboardCourses implements OnInit {
 
   error: string | null = null;
   selectedCourse: AdminCourseDto | null = null;
-
+  selectedThumbnailFile: File | null = null;
   courseForm: FormGroup;
 
   constructor(
@@ -86,6 +86,7 @@ export class DashboardCourses implements OnInit {
     this.isEditorOpen = true;
     this.isCreateMode = true;
     this.selectedCourse = null;
+    this.selectedThumbnailFile = null;
 
     this.courseForm.reset({
       title: '',
@@ -105,6 +106,7 @@ export class DashboardCourses implements OnInit {
     this.isEditorOpen = true;
     this.isCreateMode = false;
     this.selectedCourse = course;
+    this.selectedThumbnailFile = null;
 
     this.courseForm.setValue({
       title: course.title,
@@ -140,7 +142,9 @@ export class DashboardCourses implements OnInit {
       hours: v.hours,
       category: v.category,
       rating: 0,
-      thumbnailUrl: v.thumbnailUrl,
+      thumbnailUrl: this.selectedThumbnailFile
+        ? this.selectedCourse?.thumbnailUrl ?? ''
+        : v.thumbnailUrl,
 
       pathIds: v.learningPathId ? [v.learningPathId] : [],
     };
@@ -161,6 +165,8 @@ export class DashboardCourses implements OnInit {
             this.contentEditor.loadContent();
           });
 
+          this.uploadThumbnailIfNeeded(res.id);
+
           this.loadCourses();
         },
         error: () => {
@@ -172,6 +178,7 @@ export class DashboardCourses implements OnInit {
       this.adminCourses.update(this.selectedCourse.id, payload).subscribe({
         next: () => {
           this.isSaving = false;
+          this.uploadThumbnailIfNeeded(this.selectedCourse!.id);
           this.loadCourses();
         },
         error: () => {
@@ -210,17 +217,26 @@ export class DashboardCourses implements OnInit {
     this.loadCourses();
   }
 
-  onThumbnailSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
+  handleThumbnailSelected(file: File): void {
+    this.selectedThumbnailFile = file;
+  }
+  private uploadThumbnailIfNeeded(courseId: number): void {
+    if (!this.selectedThumbnailFile) return;
 
-    const file = input.files[0];
+    const file = this.selectedThumbnailFile;
+    this.selectedThumbnailFile = null;
 
-    this.adminCourses.uploadThumbnail(file).subscribe({
-      next: (res) => this.courseForm.patchValue({ thumbnailUrl: res.url }),
-      error: () => (this.error = 'Failed to upload thumbnail'),
+    this.adminCourses.uploadThumbnail(courseId, file).subscribe({
+      next: (res) => {
+        this.courseForm.patchValue({ thumbnailUrl: res.url });
+        const updated = this.courses.find((c) => c.id === courseId);
+        if (updated) {
+          updated.thumbnailUrl = res.url;
+        }
+      },
+      error: () => {
+        this.error = 'Failed to upload thumbnail';
+      },
     });
-
-    input.value = '';
   }
 }

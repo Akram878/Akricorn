@@ -169,6 +169,27 @@
   },
   {
     "ContainingType": "Backend.Controllers.AdminCourseContentController",
+    "Method": "UpdateLesson",
+    "RelativePath": "api/admin/course-content/lessons/{lessonId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "lessonId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.UpdateLessonRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminCourseContentController",
     "Method": "DeleteLesson",
     "RelativePath": "api/admin/course-content/lessons/{lessonId}",
     "HttpMethod": "DELETE",
