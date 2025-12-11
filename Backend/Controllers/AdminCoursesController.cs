@@ -260,6 +260,25 @@ namespace Backend.Controllers
             }
         }
 
+
+        // ============================================================
+        // TOGGLE COURSE ACTIVE STATUS
+        // ============================================================
+        [HttpPatch("{id:int}/toggle")]
+        public async Task<IActionResult> ToggleActive(int id)
+        {
+            var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == id);
+
+            if (course == null)
+                return NotFound(new { message = "Course not found." });
+
+            course.IsActive = !course.IsActive;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Course status changed.", isActive = course.IsActive });
+        }
+
+
         // ============================================================
         // UPLOAD THUMBNAIL
         // ============================================================
