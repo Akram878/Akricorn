@@ -138,10 +138,34 @@ namespace Backend.Controllers
                 IsActive = request.IsActive
             };
 
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await ExecuteWithMigrationRetry(async () =>
+                {
+                    _context.Books.Add(book);
+                    await _context.SaveChangesAsync();
+                });
 
-            return Ok(new { message = "Book created successfully.", bookId = book.Id });
+                return Ok(new { message = "Book created successfully.", bookId = book.Id });
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "Database unavailable while creating a book");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error while creating a book");
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "An unexpected error occurred while creating the book. See server logs for details.",
+                    error = ex.Message
+                });
+            }
         }
 
         // =========================
@@ -154,26 +178,55 @@ namespace Backend.Controllers
 
             if (request == null)
                 return BadRequest(new { message = "Request body is required." });
-            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+            try
+            {
+                var book = await ExecuteWithMigrationRetry(async () =>
+                {
+                    return await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+                });
 
-            if (book == null)
-                return NotFound(new { message = "Book not found." });
+                if (book == null)
+                    return NotFound(new { message = "Book not found." });
 
-            var validation = ValidateRequest(request);
-            if (validation != null)
-                return validation;
+                var validation = ValidateRequest(request);
+                if (validation != null)
+                    return validation;
 
-            book.Title = request.Title;
-            book.Description = request.Description;
-            book.Price = request.Price;
-            book.FileUrl = request.FileUrl;
-            book.Category = request.Category;
-            book.ThumbnailUrl = request.ThumbnailUrl;
-            book.IsActive = request.IsActive;
+                book.Title = request.Title;
+                book.Title = request.Title;
+                book.Description = request.Description;
+                book.Price = request.Price;
+                book.FileUrl = request.FileUrl;
+                book.Category = request.Category;
+                book.ThumbnailUrl = request.ThumbnailUrl;
+                book.IsActive = request.IsActive;
 
-            await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Book updated successfully." });
+                await ExecuteWithMigrationRetry(async () =>
+                {
+                    await _context.SaveChangesAsync();
+                });
+
+                return Ok(new { message = "Book updated successfully." });
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "Database unavailable while updating book {BookId}.", id);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error while updating book {BookId}.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "An unexpected error occurred while updating the book. See server logs for details.",
+                    error = ex.Message
+                });
+            }
         }
 
         // =========================
@@ -183,21 +236,47 @@ namespace Backend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var book = await _context.Books
-                 .Include(b => b.Files)
-                 .FirstOrDefaultAsync(b => b.Id == id);
+            try
+            {
+                var book = await ExecuteWithMigrationRetry(async () =>
+                {
+                    return await _context.Books
+                        .Include(b => b.Files)
+                        .FirstOrDefaultAsync(b => b.Id == id);
+                });
 
-            if (book == null)
-                return NotFound(new { message = "Book not found." });
+                if (book == null)
+                    return NotFound(new { message = "Book not found." });
+                await ExecuteWithMigrationRetry(async () =>
+                {
+                    _context.Books.Remove(book);
+                    await _context.SaveChangesAsync();
+                });
 
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
+                var folder = BookStorageHelper.GetBookFolder(id);
+                if (Directory.Exists(folder))
+                    Directory.Delete(folder, true);
 
-            var folder = BookStorageHelper.GetBookFolder(id);
-            if (Directory.Exists(folder))
-                Directory.Delete(folder, true);
-
-            return Ok(new { message = "Book deleted successfully." });
+                return Ok(new { message = "Book deleted successfully." });
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "Database unavailable while deleting book {BookId}.", id);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error while deleting book {BookId}.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "An unexpected error occurred while deleting the book. See server logs for details.",
+                    error = ex.Message
+                });
+            }
         }
 
         // =========================
@@ -207,15 +286,41 @@ namespace Backend.Controllers
         [HttpPatch("{id:int}/toggle")]
         public async Task<IActionResult> ToggleActive(int id)
         {
-            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+            try
+            {
+                var book = await ExecuteWithMigrationRetry(async () =>
+                {
+                    return await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+                });
 
-            if (book == null)
-                return NotFound(new { message = "Book not found." });
+                if (book == null)
+                    return NotFound(new { message = "Book not found." });
+                book.IsActive = !book.IsActive;
+                await ExecuteWithMigrationRetry(async () =>
+                {
+                    await _context.SaveChangesAsync();
+                });
 
-            book.IsActive = !book.IsActive;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Book status changed.", isActive = book.IsActive });
+                return Ok(new { message = "Book status changed.", isActive = book.IsActive });
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "Database unavailable while toggling book {BookId}.", id);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error while toggling book {BookId}.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "An unexpected error occurred while toggling the book. See server logs for details.",
+                    error = ex.Message
+                });
+            }
         }
 
         // =========================
@@ -227,40 +332,58 @@ namespace Backend.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadThumbnail(int id, IFormFile file)
         {
-            var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
-
-            if (book == null)
-                return NotFound(new { message = "Book not found." });
-
-            if (file == null || file.Length == 0)
-                return BadRequest(new { message = "No file uploaded." });
-
-            var folder = BookStorageHelper.GetThumbnailFolder(id);
-            Directory.CreateDirectory(folder);
-
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var physicalPath = Path.Combine(folder, fileName);
-
             try
             {
-              
-                  using (var stream = new FileStream(physicalPath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
+                var book = await ExecuteWithMigrationRetry(async () =>
+                {
+                    return await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+                });
+
+                if (book == null)
+                    return NotFound(new { message = "Book not found." });
+
+                if (file == null || file.Length == 0)
+                    return BadRequest(new { message = "No file uploaded." });
+
+                var folder = BookStorageHelper.GetThumbnailFolder(id);
+                Directory.CreateDirectory(folder);
+
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                var physicalPath = Path.Combine(folder, fileName);
+
+                try
+                {
+
+                    using (var stream = new FileStream(physicalPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    var relativePath = Path.Combine("books", $"book-{id}", "thumbnail", fileName).Replace("\\", "/");
+                    var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+
+                    book.ThumbnailUrl = url;
+                    await ExecuteWithMigrationRetry(async () =>
+                    {
+                        await _context.SaveChangesAsync();
+                    });
+
+                    return Ok(new { url });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error while uploading thumbnail for book {BookId}", id);
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while uploading the thumbnail." });
+                }
             }
-
-                var relativePath = Path.Combine("books", $"book-{id}", "thumbnail", fileName).Replace("\\", "/");
-                var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
-
-                book.ThumbnailUrl = url;
-                await _context.SaveChangesAsync();
-
-                return Ok(new { url });
-            }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-                _logger.LogError(ex, "Error while uploading thumbnail for book {BookId}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while uploading the thumbnail." });
+                _logger.LogError(ex, "Database unavailable while uploading thumbnail for book {BookId}.", id);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
             }
         }
 
@@ -273,52 +396,72 @@ namespace Backend.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadFile(int id, IFormFile file)
         {
-            var book = await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == id);
-            if (book == null)
-                return NotFound(new { message = "Book not found." });
-
-            if (file == null || file.Length == 0)
-                return BadRequest(new { message = "No file uploaded." });
-
-            var folder = BookStorageHelper.GetFilesFolder(id);
-            Directory.CreateDirectory(folder);
-
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var physicalPath = Path.Combine(folder, fileName);
+            
 
             try
             {
-                using (var stream = new FileStream(physicalPath, FileMode.Create))
+                var book = await ExecuteWithMigrationRetry(async () =>
                 {
-                    await file.CopyToAsync(stream);
+                    return await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == id);
+                });
+                if (book == null)
+                    return NotFound(new { message = "Book not found." });
+
+                if (file == null || file.Length == 0)
+                    return BadRequest(new { message = "No file uploaded." });
+
+                var folder = BookStorageHelper.GetFilesFolder(id);
+                Directory.CreateDirectory(folder);
+
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                var physicalPath = Path.Combine(folder, fileName);
+
+                try
+                {
+                    using (var stream = new FileStream(physicalPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    var relativePath = Path.Combine("books", $"book-{id}", "files", fileName).Replace("\\", "/");
+                    var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+
+                    var newFile = new BookFile
+                    {
+                        BookId = id,
+                        FileName = file.FileName,
+                        FileUrl = url,
+                        SizeBytes = file.Length,
+                        ContentType = file.ContentType ?? "application/octet-stream"
+                    };
+
+                    await ExecuteWithMigrationRetry(async () =>
+                    {
+                        _context.BookFiles.Add(newFile);
+
+                        if (string.IsNullOrEmpty(book.FileUrl))
+                            book.FileUrl = url;
+
+                        await _context.SaveChangesAsync();
+                    });
+
+                    var dto = MapToDto(book, newFile);
+
+                    return Ok(new { message = "File uploaded.", fileId = newFile.Id, url, book = dto });
                 }
-                var relativePath = Path.Combine("books", $"book-{id}", "files", fileName).Replace("\\", "/");
-                var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
-
-                var newFile = new BookFile
+                catch (Exception ex)
                 {
-                    BookId = id,
-                    FileName = file.FileName,
-                    FileUrl = url,
-                    SizeBytes = file.Length,
-                    ContentType = file.ContentType ?? "application/octet-stream"
-                };
-
-                _context.BookFiles.Add(newFile);
-
-                if (string.IsNullOrEmpty(book.FileUrl))
-                    book.FileUrl = url;
-
-                await _context.SaveChangesAsync();
-
-                var dto = MapToDto(book, newFile);
-
-                return Ok(new { message = "File uploaded.", fileId = newFile.Id, url, book = dto });
+                    _logger.LogError(ex, "Error while uploading file for book {BookId}", id);
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while uploading the file." });
+                }
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-                _logger.LogError(ex, "Error while uploading file for book {BookId}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while uploading the file." });
+                _logger.LogError(ex, "Database unavailable while uploading file for book {BookId}.", id);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
             }
         }
 
@@ -329,42 +472,68 @@ namespace Backend.Controllers
         [HttpDelete("files/{fileId:int}")]
         public async Task<IActionResult> DeleteFile(int fileId)
         {
-            var entity = await _context.BookFiles
-                .Include(f => f.Book)
-                .FirstOrDefaultAsync(f => f.Id == fileId);
-
-            if (entity == null)
-                return NotFound(new { message = "File not found." });
-
-            var bookId = entity.BookId;
-            var folder = BookStorageHelper.GetFilesFolder(bookId);
-            var fileName = TryExtractFileName(entity.FileUrl);
-            if (!string.IsNullOrEmpty(fileName))
-            {
-                var physicalPath = Path.Combine(folder, fileName);
-                if (System.IO.File.Exists(physicalPath))
-                    System.IO.File.Delete(physicalPath);
-            }
+           
 
             try
             {
-                _context.BookFiles.Remove(entity);
-                await _context.SaveChangesAsync();
-
-
-                var book = await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == bookId);
-                if (book != null && book.FileUrl == entity.FileUrl)
+                var entity = await ExecuteWithMigrationRetry(async () =>
                 {
-                    book.FileUrl = book.Files.FirstOrDefault()?.FileUrl ?? string.Empty;
-                    await _context.SaveChangesAsync();
+                    return await _context.BookFiles
+                        .Include(f => f.Book)
+                        .FirstOrDefaultAsync(f => f.Id == fileId);
+                });
+                if (entity == null)
+                    return NotFound(new { message = "File not found." });
+
+                var bookId = entity.BookId;
+                var folder = BookStorageHelper.GetFilesFolder(bookId);
+                var fileName = TryExtractFileName(entity.FileUrl);
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    var physicalPath = Path.Combine(folder, fileName);
+                    if (System.IO.File.Exists(physicalPath))
+                        System.IO.File.Delete(physicalPath);
                 }
 
-                return Ok(new { message = "File deleted." });
+                try
+                {
+                    await ExecuteWithMigrationRetry(async () =>
+                    {
+                        _context.BookFiles.Remove(entity);
+                        await _context.SaveChangesAsync();
+                    });
+
+
+                    var book = await ExecuteWithMigrationRetry(async () =>
+                    {
+                        return await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == bookId);
+                    });
+                    if (book != null && book.FileUrl == entity.FileUrl)
+                    {
+                        book.FileUrl = book.Files.FirstOrDefault()?.FileUrl ?? string.Empty;
+                        await ExecuteWithMigrationRetry(async () =>
+                        {
+                            await _context.SaveChangesAsync();
+                        });
+                    }
+
+                    return Ok(new { message = "File deleted." });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error while deleting file {FileId} for book {BookId}", fileId, bookId);
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while deleting the file." });
+                }
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-                _logger.LogError(ex, "Error while deleting file {FileId} for book {BookId}", fileId, bookId);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while deleting the file." });
+
+                _logger.LogError(ex, "Database unavailable while deleting file {FileId}.", fileId);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
             }
         }
 
@@ -429,6 +598,15 @@ namespace Backend.Controllers
 
                 return await action();
             }
+        }
+
+        private async Task ExecuteWithMigrationRetry(Func<Task> action)
+        {
+            await ExecuteWithMigrationRetry(async () =>
+            {
+                await action();
+                return true;
+            });
         }
 
         private async Task<bool> TryApplyMigrationsAsync()
