@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.Helpers;
 using Backend.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,13 +35,35 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetAll()
         {
-            var books = await _context.Books
-              .Include(b => b.Files)
-              .ToListAsync();
+            try
+            {
+                var books = await _context.Books
+                    .AsNoTracking()
+                    .Include(b => b.Files)
+                    .ToListAsync();
 
-            var result = books.Select(book => MapToDto(book)).ToList();
+                var result = books?.Select(MapToDto).ToList() ?? new List<BookDto>();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "Database unavailable while loading admin books list.");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error while loading admin books list.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "An unexpected error occurred while loading the books list. See server logs for details.",
+                    error = ex.Message
+                });
+            }
         }
 
         // =========================
@@ -50,14 +73,35 @@ namespace Backend.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<BookDto>> GetById(int id)
         {
-            var book = await _context.Books
-               .Include(b => b.Files)
-               .FirstOrDefaultAsync(b => b.Id == id);
+            try
+            {
+                var book = await _context.Books
+                    .AsNoTracking()
+                    .Include(b => b.Files)
+                    .FirstOrDefaultAsync(b => b.Id == id);
+                if (book == null)
+                    return NotFound(new { message = "Book not found." });
 
-            if (book == null)
-                return NotFound(new { message = "Book not found." });
-
-            return Ok(MapToDto(book));
+                return Ok(MapToDto(book));
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "Database unavailable while loading admin book {BookId}.", id);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "The database is unavailable. Please check the connection string and that the database server is running.",
+                    error = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled error while loading admin book {BookId}.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "An unexpected error occurred while loading the book. See server logs for details.",
+                    error = ex.Message
+                });
+            }
         }
 
         // =========================

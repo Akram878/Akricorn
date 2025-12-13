@@ -151,6 +151,8 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+    db.Database.Migrate();
+
     // لو ما في ولا حساب أدمن، ننشئ Owner افتراضي
     if (!db.AdminAccounts.Any())
     {
