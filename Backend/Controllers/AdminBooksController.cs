@@ -42,7 +42,9 @@ namespace Backend.Controllers
                     .Include(b => b.Files)
                     .ToListAsync();
 
-                var result = books?.Select(MapToDto).ToList() ?? new List<BookDto>();
+                var result = (books ?? new List<Book>())
+                             .Select(book => MapToDto(book))
+                             .ToList();
 
                 return Ok(result);
             }
