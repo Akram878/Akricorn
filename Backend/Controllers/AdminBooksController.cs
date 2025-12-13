@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
@@ -17,10 +19,12 @@ namespace Backend.Controllers
     public class AdminBooksController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<AdminBooksController> _logger;
 
-        public AdminBooksController(AppDbContext context)
+        public AdminBooksController(AppDbContext context, ILogger<AdminBooksController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // =========================
@@ -34,7 +38,7 @@ namespace Backend.Controllers
               .Include(b => b.Files)
               .ToListAsync();
 
-            var result = books.Select(MapToDto).ToList();
+            var result = books.Select(book => MapToDto(book)).ToList();
 
             return Ok(result);
         }
@@ -63,6 +67,10 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookRequest request)
         {
+
+            if (request == null)
+                return BadRequest(new { message = "Request body is required." });
+
             var validation = ValidateRequest(request);
             if (validation != null)
                 return validation;
@@ -91,6 +99,9 @@ namespace Backend.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateBookRequest request)
         {
+
+            if (request == null)
+                return BadRequest(new { message = "Request body is required." });
             var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null)
@@ -178,18 +189,27 @@ namespace Backend.Controllers
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var physicalPath = Path.Combine(folder, fileName);
 
-            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            try
+            {
+              
+                  using (var stream = new FileStream(physicalPath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            var relativePath = Path.Combine("books", $"book-{id}", "thumbnail", fileName).Replace("\\", "/");
-            var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+                var relativePath = Path.Combine("books", $"book-{id}", "thumbnail", fileName).Replace("\\", "/");
+                var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
 
-            book.ThumbnailUrl = url;
-            await _context.SaveChangesAsync();
+                book.ThumbnailUrl = url;
+                await _context.SaveChangesAsync();
 
-            return Ok(new { url });
+                return Ok(new { url });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while uploading thumbnail for book {BookId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while uploading the thumbnail." });
+            }
         }
 
         // =========================
@@ -214,33 +234,40 @@ namespace Backend.Controllers
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var physicalPath = Path.Combine(folder, fileName);
 
-            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(stream);
+                using (var stream = new FileStream(physicalPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                var relativePath = Path.Combine("books", $"book-{id}", "files", fileName).Replace("\\", "/");
+                var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+
+                var newFile = new BookFile
+                {
+                    BookId = id,
+                    FileName = file.FileName,
+                    FileUrl = url,
+                    SizeBytes = file.Length,
+                    ContentType = file.ContentType ?? "application/octet-stream"
+                };
+
+                _context.BookFiles.Add(newFile);
+
+                if (string.IsNullOrEmpty(book.FileUrl))
+                    book.FileUrl = url;
+
+                await _context.SaveChangesAsync();
+
+                var dto = MapToDto(book, newFile);
+
+                return Ok(new { message = "File uploaded.", fileId = newFile.Id, url, book = dto });
             }
-
-            var relativePath = Path.Combine("books", $"book-{id}", "files", fileName).Replace("\\", "/");
-            var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
-
-            var newFile = new BookFile
+            catch (Exception ex)
             {
-                BookId = id,
-                FileName = file.FileName,
-                FileUrl = url,
-                SizeBytes = file.Length,
-                ContentType = file.ContentType ?? "application/octet-stream"
-            };
-
-            _context.BookFiles.Add(newFile);
-
-            if (string.IsNullOrEmpty(book.FileUrl))
-                book.FileUrl = url;
-
-            await _context.SaveChangesAsync();
-
-            var dto = MapToDto(book, newFile);
-
-            return Ok(new { message = "File uploaded.", fileId = newFile.Id, url, book = dto });
+                _logger.LogError(ex, "Error while uploading file for book {BookId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while uploading the file." });
+            }
         }
 
         // =========================
@@ -267,21 +294,34 @@ namespace Backend.Controllers
                     System.IO.File.Delete(physicalPath);
             }
 
-            _context.BookFiles.Remove(entity);
-            await _context.SaveChangesAsync();
-
-            var book = await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == bookId);
-            if (book != null && book.FileUrl == entity.FileUrl)
+            try
             {
-                book.FileUrl = book.Files.FirstOrDefault()?.FileUrl ?? string.Empty;
+                _context.BookFiles.Remove(entity);
                 await _context.SaveChangesAsync();
-            }
 
-            return Ok(new { message = "File deleted." });
+
+                var book = await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == bookId);
+                if (book != null && book.FileUrl == entity.FileUrl)
+                {
+                    book.FileUrl = book.Files.FirstOrDefault()?.FileUrl ?? string.Empty;
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(new { message = "File deleted." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while deleting file {FileId} for book {BookId}", fileId, bookId);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred while deleting the file." });
+            }
         }
 
         private IActionResult? ValidateRequest(BaseBookRequest request)
         {
+
+            if (request == null)
+                return BadRequest(new { message = "Request body is required." });
+
             if (string.IsNullOrWhiteSpace(request.Title))
                 return BadRequest(new { message = "Title is required." });
 
@@ -296,7 +336,7 @@ namespace Backend.Controllers
 
         private static BookDto MapToDto(Book book, BookFile? extraFile = null)
         {
-            var files = book.Files.ToList();
+            var files = book.Files?.ToList() ?? new List<BookFile>();
             if (extraFile != null && files.All(f => f.Id != extraFile.Id))
                 files.Add(extraFile);
 

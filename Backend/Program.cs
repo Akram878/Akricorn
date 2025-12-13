@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 using System.Text;
 using System.Linq;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -104,6 +106,26 @@ builder.Services
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = signingKey
+        };
+
+        // أعد كتابة رد الـ 401 برسالة أوضح بدل الرد الافتراضي الفارغ
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                context.HandleResponse();
+
+                if (!context.Response.HasStarted)
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return context.Response.WriteAsJsonAsync(new
+                    {
+                        message = "Unauthorized: missing or invalid token. Make sure you are logged in as an admin before calling this endpoint."
+                    });
+                }
+
+                return Task.CompletedTask;
+            }
         };
     });
 

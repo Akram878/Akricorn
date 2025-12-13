@@ -100,6 +100,27 @@
   },
   {
     "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "UploadFile",
+    "RelativePath": "api/admin/books/{id}/files/upload",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
     "Method": "ToggleActive",
     "RelativePath": "api/admin/books/{id}/toggle",
     "HttpMethod": "PATCH",
@@ -108,6 +129,43 @@
     "Parameters": [
       {
         "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "UploadThumbnail",
+    "RelativePath": "api/admin/books/{id}/upload-thumbnail",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminBooksController",
+    "Method": "DeleteFile",
+    "RelativePath": "api/admin/books/files/{fileId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileId",
         "Type": "System.Int32",
         "IsRequired": true
       }
