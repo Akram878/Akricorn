@@ -1,4 +1,6 @@
-﻿namespace Backend.Models
+﻿using System.Collections.Generic;
+
+namespace Backend.Models
 {
     public class Book
     {
@@ -10,6 +12,10 @@
         public string FileUrl { get; set; }      // رابط الكتاب (PDF مثلاً)
         public bool IsActive { get; set; } = true;
 
-        // لاحقاً ممكن نضيف نوع الكتاب أو كاتيجوري الخ...
+        public string Category { get; set; } = string.Empty; // فئة الكتاب
+
+        public string? ThumbnailUrl { get; set; }
+
+        public List<BookFile> Files { get; set; } = new();
     }
 }

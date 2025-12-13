@@ -7,20 +7,34 @@ export interface AdminBookDto {
   id: number;
   title: string;
   description: string;
+  category: string;
   price: number;
   fileUrl: string;
+  thumbnailUrl?: string | null;
   isActive: boolean;
+
+  files: BookFileDto[];
 }
 
 export interface CreateBookRequest {
   title: string;
   description: string;
+  category: string;
   price: number;
   fileUrl: string;
+  thumbnailUrl?: string | null;
   isActive: boolean;
 }
 
 export interface UpdateBookRequest extends CreateBookRequest {}
+
+export interface BookFileDto {
+  id: number;
+  fileName: string;
+  fileUrl: string;
+  sizeBytes: number;
+  contentType: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -39,6 +53,12 @@ export class AdminBooksService {
 
   getAll(): Observable<AdminBookDto[]> {
     return this.http.get<AdminBookDto[]>(this.apiUrl, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  getById(id: number): Observable<AdminBookDto> {
+    return this.http.get<AdminBookDto>(`${this.apiUrl}/${id}`, {
       headers: this.getAuthHeaders(),
     });
   }
@@ -63,5 +83,26 @@ export class AdminBooksService {
 
   toggleActive(id: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}/toggle`, {}, { headers: this.getAuthHeaders() });
+  }
+  uploadThumbnail(bookId: number, file: File): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ url: string }>(`${this.apiUrl}/${bookId}/upload-thumbnail`, formData, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  uploadFile(bookId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<any>(`${this.apiUrl}/${bookId}/files/upload`, formData, {
+      headers: this.getAuthHeaders(),
+    });
+  }
+
+  deleteFile(fileId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/files/${fileId}`, { headers: this.getAuthHeaders() });
   }
 }

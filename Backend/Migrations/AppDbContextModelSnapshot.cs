@@ -52,6 +52,39 @@ namespace Backend.Migrations
                     b.ToTable("AdminAccounts");
                 });
 
+            modelBuilder.Entity("Backend.Models.BookFile", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                b.Property<int>("BookId")
+                    .HasColumnType("int");
+
+                b.Property<string>("ContentType")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<string>("FileName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<string>("FileUrl")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<long>("SizeBytes")
+                    .HasColumnType("bigint");
+
+                b.HasKey("Id");
+
+                b.HasIndex("BookId");
+
+                b.ToTable("BookFiles");
+            });
+
             modelBuilder.Entity("Backend.Models.Book", b =>
                 {
                     b.Property<int>("Id")
@@ -63,6 +96,11 @@ namespace Backend.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Category")
+                       .IsRequired()
+                       .HasColumnType("nvarchar(max)");
+
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
@@ -443,6 +481,18 @@ namespace Backend.Migrations
                     b.ToTable("UserCourses");
                 });
 
+            modelBuilder.Entity("Backend.Models.BookFile", b =>
+            {
+                b.HasOne("Backend.Models.Book", "Book")
+                    .WithMany("Files")
+                    .HasForeignKey("BookId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Book");
+            });
+
+
             modelBuilder.Entity("Backend.Models.CourseLesson", b =>
                 {
                     b.HasOne("Backend.Models.CourseSection", "Section")
@@ -550,6 +600,11 @@ namespace Backend.Migrations
 
                     b.Navigation("Sections");
                 });
+
+            modelBuilder.Entity("Backend.Models.Book", b =>
+            {
+                b.Navigation("Files");
+            });
 
             modelBuilder.Entity("Backend.Models.CourseLesson", b =>
                 {

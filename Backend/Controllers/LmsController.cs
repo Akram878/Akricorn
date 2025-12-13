@@ -101,7 +101,9 @@ namespace Backend.Controllers
                     b.Id,
                     b.Title,
                     b.Description,
-                    b.Price
+                    b.Price,
+                    b.Category,
+                    b.ThumbnailUrl
                 })
                 .ToListAsync();
 
@@ -231,6 +233,8 @@ namespace Backend.Controllers
                     ub.Book.Title,
                     ub.Book.Description,
                     ub.Book.Price,
+                    ub.Book.Category,
+                    ub.Book.ThumbnailUrl,
                     ub.Book.FileUrl,
                     ub.GrantedAt,
                     ub.IsFromCourse

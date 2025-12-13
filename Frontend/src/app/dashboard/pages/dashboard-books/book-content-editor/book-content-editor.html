@@ -1,0 +1,123 @@
+<div class="book-editor">
+  <div class="book-editor__header">
+    <div>
+      <h2>{{ isCreateMode ? 'Create Book' : 'Edit Book' }}</h2>
+      <p>Manage title, category, price, cover, and files.</p>
+    </div>
+
+    <button type="button" class="icon-btn" (click)="closeEditor.emit()" aria-label="Close">
+      ×
+    </button>
+  </div>
+
+  <div class="status" *ngIf="isLoadingDetails">Loading book details...</div>
+  <div class="status error" *ngIf="error">{{ error }}</div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="book-editor__body">
+    <div class="book-editor__grid">
+      <div class="form-field">
+        <label for="title">Title</label>
+        <input id="title" type="text" formControlName="title" placeholder="Book title" />
+      </div>
+
+      <div class="form-field">
+        <label for="category">Category</label>
+        <input id="category" type="text" formControlName="category" placeholder="e.g. Backend" />
+      </div>
+
+      <div class="form-field">
+        <label for="price">Price</label>
+        <input id="price" type="number" min="0" step="0.01" formControlName="price" />
+      </div>
+
+      <div class="form-field checkbox-field">
+        <label>
+          <input type="checkbox" formControlName="isActive" />
+          Active (visible in library)
+        </label>
+      </div>
+
+      <div class="form-field full-width">
+        <label for="description">Description</label>
+        <textarea id="description" rows="3" formControlName="description"></textarea>
+      </div>
+
+      <div class="form-field full-width">
+        <label for="fileUrl">Primary file URL</label>
+        <input
+          id="fileUrl"
+          type="text"
+          formControlName="fileUrl"
+          placeholder="Optional direct link"
+        />
+        <small class="field-hint">Will be auto-set from uploads if left empty.</small>
+      </div>
+    </div>
+
+    <div class="book-editor__panels">
+      <div class="book-editor__panel">
+        <h3>Cover</h3>
+        <div class="thumbnail" [class.thumbnail--empty]="!form.get('thumbnailUrl')?.value">
+          <img
+            *ngIf="form.get('thumbnailUrl')?.value"
+            [src]="form.get('thumbnailUrl')?.value"
+            alt="Thumbnail"
+          />
+          <span *ngIf="!form.get('thumbnailUrl')?.value">No image</span>
+        </div>
+
+        <label class="btn-secondary">
+          Change image
+          <input type="file" accept="image/*" hidden (change)="onThumbnailSelected($event)" />
+        </label>
+      </div>
+
+      <div class="book-editor__panel">
+        <div class="book-editor__panel-header">
+          <h3>Files</h3>
+          <label class="btn-primary" [class.disabled]="isCreateMode">
+            Upload
+            <input
+              type="file"
+              multiple
+              hidden
+              (change)="onFilesSelected($event)"
+              [disabled]="isCreateMode"
+            />
+          </label>
+        </div>
+
+        <p class="field-hint" *ngIf="isCreateMode">Save the book first to upload files.</p>
+        <p class="field-hint" *ngIf="uploading">Uploading...</p>
+
+        <ul class="file-list" *ngIf="bookFiles.length > 0">
+          <li *ngFor="let f of bookFiles" class="file-item">
+            <div>
+              <div class="file-name">{{ f.fileName }}</div>
+              <div class="file-meta">{{ f.sizeBytes | number }} bytes</div>
+            </div>
+            <button
+              type="button"
+              class="btn-danger"
+              (click)="deleteFile(f)"
+              [disabled]="deletingFileId === f.id"
+            >
+              {{ deletingFileId === f.id ? 'Deleting...' : 'Delete' }}
+            </button>
+          </li>
+        </ul>
+
+        <div class="status" *ngIf="!isCreateMode && bookFiles.length === 0">
+          No files uploaded yet.
+        </div>
+      </div>
+    </div>
+
+    <div class="book-editor__actions">
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || isSaving">
+        {{ isSaving ? 'Saving...' : 'Save' }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="closeEditor.emit()">Close</button>
+    </div>
+  </form>
+</div>

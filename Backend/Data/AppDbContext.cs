@@ -17,6 +17,8 @@ namespace Backend.Data
         public DbSet<Book> Books { get; set; }
         public DbSet<UserBook> UserBooks { get; set; }
 
+        public DbSet<BookFile> BookFiles { get; set; }
+
         public DbSet<UserCourse> UserCourses { get; set; }
 
         // ========== ADMIN ==========
@@ -81,6 +83,17 @@ namespace Backend.Data
             modelBuilder.Entity<UserBook>()
                 .Property(ub => ub.GrantedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
+
+
+            // ==========================================
+            // BOOK FILES
+            // ==========================================
+            modelBuilder.Entity<BookFile>()
+                .HasOne(bf => bf.Book)
+                .WithMany(b => b.Files)
+                .HasForeignKey(bf => bf.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
 
             // ==========================================

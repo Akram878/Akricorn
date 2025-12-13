@@ -1,40 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, CurrencyPipe, NgIf, NgForOf } from '@angular/common';
+
 import {
   AdminBooksService,
   AdminBookDto,
   CreateBookRequest,
-  UpdateBookRequest,
+  BookFileDto,
 } from '../../../core/services/admin-books.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-
+import { BookEditorComponent } from './book-content-editor/book-content-editor';
 @Component({
   selector: 'app-dashboard-books',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, CurrencyPipe, ReactiveFormsModule],
+  imports: [CommonModule, NgIf, NgForOf, CurrencyPipe, ReactiveFormsModule, BookEditorComponent],
   templateUrl: './dashboard-books.html',
   styleUrl: './dashboard-books.scss',
 })
 export class DashboardBooks implements OnInit {
+  @ViewChild(BookEditorComponent)
+  editorComponent!: BookEditorComponent;
+
   books: AdminBookDto[] = [];
-  isLoading = false;
-  error: string | null = null;
+  bookFiles: BookFileDto[] = [];
 
   // فورم إنشاء / تعديل كتاب
-  bookForm: FormGroup;
+  isLoading = false;
   isSaving = false;
-  editMode = false;
-  editingBookId: number | null = null;
+  isEditorOpen = false;
+  isCreateMode = false;
+  isLoadingDetails = false;
 
-  // هل المودال مفتوح؟
-  showForm = false;
+  error: string | null = null;
+  selectedBook: AdminBookDto | null = null;
+  selectedThumbnailFile: File | null = null;
+  bookForm: FormGroup;
 
   constructor(private adminBooks: AdminBooksService, private fb: FormBuilder) {
     this.bookForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
+      category: ['', [Validators.required, Validators.maxLength(150)]],
       description: ['', [Validators.required, Validators.maxLength(4000)]],
       price: [0, [Validators.required, Validators.min(0)]],
-      fileUrl: ['', [Validators.required, Validators.maxLength(500)]],
+      fileUrl: ['', [Validators.maxLength(500)]],
+      thumbnailUrl: [''],
       isActive: [true],
     });
   }
@@ -60,90 +68,87 @@ export class DashboardBooks implements OnInit {
   }
 
   // فتح المودال لإنشاء كتاب جديد
-  openCreateForm(): void {
-    this.editMode = false;
-    this.editingBookId = null;
+  openCreateEditor(): void {
+    this.isEditorOpen = true;
+    this.isCreateMode = true;
+    this.selectedBook = null;
+    this.selectedThumbnailFile = null;
+    this.bookFiles = [];
+
     this.bookForm.reset({
       title: '',
+      category: '',
       description: '',
       price: 0,
       fileUrl: '',
+      thumbnailUrl: '',
       isActive: true,
     });
-    this.error = null;
-    this.isSaving = false;
-    this.showForm = true;
   }
 
-  // تعبئة المودال للتعديل
-  onEdit(book: AdminBookDto): void {
-    this.editMode = true;
-    this.editingBookId = book.id;
+  openEditEditor(book: AdminBookDto): void {
+    this.isEditorOpen = true;
+    this.isCreateMode = false;
+    this.isLoadingDetails = true;
+    this.selectedBook = book;
+    this.selectedThumbnailFile = null;
+    this.bookFiles = [];
 
-    this.bookForm.setValue({
-      title: book.title,
-      description: book.description,
-      price: book.price,
-      fileUrl: book.fileUrl,
-      isActive: book.isActive,
+    this.adminBooks.getById(book.id).subscribe({
+      next: (res) => {
+        this.isLoadingDetails = false;
+        this.selectedBook = res;
+        this.bookFiles = res.files ?? [];
+
+        this.bookForm.setValue({
+          title: res.title,
+          category: res.category,
+          description: res.description,
+          price: res.price,
+          fileUrl: res.fileUrl,
+          thumbnailUrl: res.thumbnailUrl ?? '',
+          isActive: res.isActive,
+        });
+      },
+      error: () => {
+        this.error = 'Failed to load book details';
+        this.isLoadingDetails = false;
+      },
     });
-
-    this.error = null;
-    this.isSaving = false;
-    this.showForm = true;
-  }
-
-  // إغلاق المودال وإعادة الفورم
-  resetForm(): void {
-    this.editMode = false;
-    this.editingBookId = null;
-    this.bookForm.reset({
-      title: '',
-      description: '',
-      price: 0,
-      fileUrl: '',
-      isActive: true,
-    });
-    this.isSaving = false;
-    this.error = null;
-    this.showForm = false;
   }
 
   // إرسال الفورم (إنشاء أو تعديل)
-  onSubmit(): void {
+  onSubmitEditor(): void {
     if (this.bookForm.invalid || this.isSaving) return;
 
     this.isSaving = true;
-    this.error = null;
+    const v = this.bookForm.value;
 
-    const value = this.bookForm.value;
-    const payload: CreateBookRequest | UpdateBookRequest = {
-      title: value.title,
-      description: value.description,
-      price: value.price,
-      fileUrl: value.fileUrl,
-      isActive: value.isActive,
+    const payload: CreateBookRequest = {
+      title: v.title,
+      description: v.description,
+      category: v.category,
+      price: v.price,
+      fileUrl: v.fileUrl ?? '',
+      thumbnailUrl: this.selectedThumbnailFile
+        ? this.selectedBook?.thumbnailUrl ?? ''
+        : v.thumbnailUrl,
+      isActive: v.isActive,
     };
 
-    if (this.editMode && this.editingBookId != null) {
-      // تعديل
-      this.adminBooks.update(this.editingBookId, payload).subscribe({
-        next: () => {
-          this.isSaving = false;
-          this.resetForm();
-          this.loadBooks();
-        },
-        error: () => {
-          this.isSaving = false;
-          this.error = 'Failed to update book.';
-        },
-      });
-    } else {
-      // إنشاء
+    if (this.isCreateMode) {
       this.adminBooks.create(payload).subscribe({
-        next: () => {
+        next: (res) => {
           this.isSaving = false;
-          this.resetForm();
+          this.isCreateMode = false;
+
+          this.selectedBook = {
+            ...payload,
+            id: res.bookId,
+            files: [],
+          } as AdminBookDto;
+
+          this.uploadThumbnailIfNeeded(res.bookId);
           this.loadBooks();
         },
         error: () => {
@@ -151,10 +156,21 @@ export class DashboardBooks implements OnInit {
           this.error = 'Failed to create book.';
         },
       });
+    } else if (this.selectedBook) {
+      this.adminBooks.update(this.selectedBook.id, payload).subscribe({
+        next: () => {
+          this.isSaving = false;
+          this.uploadThumbnailIfNeeded(this.selectedBook!.id);
+          this.loadBooks();
+        },
+        error: () => {
+          this.isSaving = false;
+          this.error = 'Failed to update book.';
+        },
+      });
     }
   }
 
-  // تفعيل / تعطيل
   onToggle(book: AdminBookDto): void {
     this.adminBooks.toggleActive(book.id).subscribe({
       next: (res) => {
@@ -166,7 +182,6 @@ export class DashboardBooks implements OnInit {
     });
   }
 
-  // حذف
   onDelete(book: AdminBookDto): void {
     const confirmDelete = confirm(`Delete book "${book.title}" ?`);
     if (!confirmDelete) return;
@@ -177,6 +192,42 @@ export class DashboardBooks implements OnInit {
       },
       error: () => {
         this.error = 'Failed to delete book.';
+      },
+    });
+  }
+
+  closeEditor(): void {
+    this.isEditorOpen = false;
+  }
+
+  handleThumbnailSelected(file: File): void {
+    this.selectedThumbnailFile = file;
+  }
+
+  handleFilesUpdated(files: BookFileDto[]): void {
+    this.bookFiles = files;
+  }
+
+  reloadBooks(): void {
+    this.loadBooks();
+  }
+
+  private uploadThumbnailIfNeeded(bookId: number): void {
+    if (!this.selectedThumbnailFile) return;
+
+    const file = this.selectedThumbnailFile;
+    this.selectedThumbnailFile = null;
+
+    this.adminBooks.uploadThumbnail(bookId, file).subscribe({
+      next: (res) => {
+        this.bookForm.patchValue({ thumbnailUrl: res.url });
+        const updated = this.books.find((b) => b.id === bookId);
+        if (updated) {
+          updated.thumbnailUrl = res.url;
+        }
+      },
+      error: () => {
+        this.error = 'Failed to upload thumbnail';
       },
     });
   }
