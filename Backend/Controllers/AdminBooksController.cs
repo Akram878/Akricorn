@@ -37,10 +37,13 @@ namespace Backend.Controllers
         {
             try
             {
-                var books = await _context.Books
-                    .AsNoTracking()
-                    .Include(b => b.Files)
-                    .ToListAsync();
+                var books = await ExecuteWithMigrationRetry(async () =>
+                {
+                    return await _context.Books
+                        .AsNoTracking()
+                        .Include(b => b.Files)
+                        .ToListAsync();
+                });
 
                 var result = (books ?? new List<Book>())
                              .Select(book => MapToDto(book))
@@ -77,10 +80,13 @@ namespace Backend.Controllers
         {
             try
             {
-                var book = await _context.Books
-                    .AsNoTracking()
-                    .Include(b => b.Files)
-                    .FirstOrDefaultAsync(b => b.Id == id);
+                var book = await ExecuteWithMigrationRetry(async () =>
+                {
+                    return await _context.Books
+                        .AsNoTracking()
+                        .Include(b => b.Files)
+                        .FirstOrDefaultAsync(b => b.Id == id);
+                });
                 if (book == null)
                     return NotFound(new { message = "Book not found." });
 
@@ -406,6 +412,45 @@ namespace Backend.Controllers
                 }).ToList()
             };
         }
+
+        private async Task<T> ExecuteWithMigrationRetry<T>(Func<Task<T>> action)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (SqlException ex) when (IsMissingBookFilesTable(ex))
+            {
+                _logger.LogWarning(ex, "Detected missing BookFiles table. Applying migrations then retrying query.");
+
+                var migrated = await TryApplyMigrationsAsync();
+                if (!migrated)
+                    throw;
+
+                return await action();
+            }
+        }
+
+        private async Task<bool> TryApplyMigrationsAsync()
+        {
+            try
+            {
+                await _context.Database.MigrateAsync();
+                return true;
+            }
+            catch (Exception migrateEx)
+            {
+                _logger.LogError(migrateEx, "Failed to apply migrations after detecting missing BookFiles table.");
+                return false;
+            }
+        }
+
+        private static bool IsMissingBookFilesTable(SqlException ex)
+        {
+            // SQL Server error 208 = Invalid object name
+            return ex.Number == 208 && ex.Message.Contains("BookFiles", StringComparison.OrdinalIgnoreCase);
+        }
+
 
         private static string? TryExtractFileName(string url)
         {
