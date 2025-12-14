@@ -7,8 +7,9 @@ export interface PublicCourse {
   id: number;
   title: string;
   description: string;
-  price: number;
 
+  price: number;
+  thumbnailUrl?: string | null;
   // الحقول الإضافية (اختيارية حالياً)
   hours?: number; // عدد الساعات
   category?: string; // Beginner / Intermediate / ...
@@ -22,6 +23,7 @@ export interface MyCourse {
   title: string;
   description: string;
   price: number;
+  thumbnailUrl?: string | null;
   purchasedAt?: string;
 
   // 🆕 حقول إضافية مستخدمة في my-courses.html

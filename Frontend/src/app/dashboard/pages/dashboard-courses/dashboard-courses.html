@@ -24,7 +24,7 @@
           <th>ID</th>
           <th style="width: 16%">Title</th>
           <th>Category</th>
-          <th>Description</th>
+
           <th>Hours</th>
           <th>Price</th>
           <th>Path</th>
@@ -39,7 +39,7 @@
           <td>{{ c.id }}</td>
           <td>{{ c.title }}</td>
           <td>{{ c.category }}</td>
-          <td class="description-cell">{{ c.description }}</td>
+
           <td>{{ c.hours }}</td>
           <td>{{ c.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
           <td>{{ c.pathIds?.length ? c.pathIds[0] : '-' }}</td>

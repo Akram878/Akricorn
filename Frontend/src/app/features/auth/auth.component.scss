@@ -66,7 +66,7 @@ $gold-500: #b9822f;
   // height: 100%;
 
   display: grid;
-  grid-template-columns: 2fr 2fr 3fr;
+  grid-template-columns: 2fr 2fr 5fr;
   grid-template-rows: auto auto;
   grid-template-areas:
     'logo logo form'
@@ -110,11 +110,11 @@ $gold-500: #b9822f;
 .authBox {
   grid-area: form;
   align-self: stretch;
-  border-radius: 1.3rem;
+  border-radius: 0.3rem;
   padding: 0.5rem 1rem;
-
-  background: #041e16;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  border: 1px solid #f9e0a2;
+  // background: #041e16;
+  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 
   @include flex(column, center, center);
 }
@@ -123,12 +123,12 @@ $gold-500: #b9822f;
 .altBox {
   grid-area: social;
 
-  @include flex(row, space-between, center);
+  @include flex(row, space-evenly, center);
   gap: 1.5rem;
   align-self: end;
 
   padding-top: 1.4rem;
-  border-top: 1px solid rgba($gold-200, 0.22);
+  border-top: 1px solid #f9e0a2;
 
   p {
     margin: 0;

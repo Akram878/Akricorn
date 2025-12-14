@@ -53,14 +53,26 @@
     *ngIf="!isLoading && !error && filteredMyCourses.length > 0; else loadingOrEmpty"
   >
     <article class="lms-course-card" *ngFor="let c of filteredMyCourses; trackBy: trackByCourseId">
+      <div class="lms-course-card__thumb">
+        <img
+          *ngIf="c.thumbnailUrl?.trim(); else thumbNull"
+          [src]="c.thumbnailUrl"
+          [alt]="c.title ?? 'Course thumbnail'"
+          loading="lazy"
+        />
+        <ng-template #thumbNull>
+          <div class="lms-course-card__thumb-placeholder">null</div>
+        </ng-template>
+      </div>
+
       <header class="lms-course-card__header">
         <div class="lms-course-card__title-block">
           <h3 class="lms-course-card__title">
-            {{ c.title }}
+            {{ c.title ?? 'null' }}
           </h3>
-          <p class="lms-course-card__subtitle">
+          <!-- <p class="lms-course-card__subtitle">
             {{ c.description }}
-          </p>
+          </p> -->
         </div>
 
         <!-- level حسب الـ category (نفس نظام الكورسات العامة) -->
@@ -72,7 +84,7 @@
             'lms-course-card__level--advanced': c.category === 'Advanced'
           }"
         >
-          {{ c.category || 'General' }}
+          {{ c.category ?? 'null' }}
         </span>
       </header>
 
@@ -85,7 +97,12 @@
 
           <span>
             <span>📚</span>
-            <span>{{ c.pathTitle || 'No path' }}</span>
+            <span>{{ c.pathTitle?.trim() ? c.pathTitle : 'null' }}</span>
+          </span>
+
+          <span>
+            <span>🏷</span>
+            <span>{{ c.category ?? 'null' }}</span>
           </span>
 
           <span>
@@ -101,11 +118,6 @@
       </div>
 
       <footer class="lms-course-card__footer">
-        <div class="lms-course-card__price">
-          <span class="lms-course-card__price-label">Price paid</span>
-          <span class="lms-course-card__price-value"> {{ c.price | number : '1.2-2' }} $ </span>
-        </div>
-
         <button type="button" class="lms-primary-btn" (click)="openCourse(c)">
           Open course (soon)
         </button>

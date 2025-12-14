@@ -35,7 +35,14 @@ namespace Backend.Controllers
                     c.Id,
                     c.Title,
                     c.Description,
-                    c.Price
+                    c.ThumbnailUrl,
+                    c.Price,
+                    c.Hours,
+                    c.Category,
+                    c.Rating,
+                    pathTitle = c.LearningPathCourses
+                        .Select(lp => lp.LearningPath.Title)
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
@@ -190,12 +197,20 @@ namespace Backend.Controllers
             var myCourses = await _context.UserCourses
                 .Where(uc => uc.UserId == userId.Value)
                 .Include(uc => uc.Course)
+                  .ThenInclude(c => c.LearningPathCourses)
+                        .ThenInclude(lp => lp.LearningPath)
                 .Select(uc => new
                 {
                     uc.Course.Id,
                     uc.Course.Title,
                     uc.Course.Description,
                     uc.Course.Price,
+                    uc.Course.Hours,
+                    uc.Course.Category,
+                    uc.Course.ThumbnailUrl,
+                    pathTitle = uc.Course.LearningPathCourses
+                        .Select(lp => lp.LearningPath.Title)
+                        .FirstOrDefault(),
                     uc.PurchasedAt
                 })
                 .ToListAsync();

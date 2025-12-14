@@ -103,19 +103,25 @@
       *ngFor="let c of filteredCourses; trackBy: trackByCourseId"
       [class.lms-course-card--owned]="isCourseOwned(c)"
     >
-      <!-- overlay للكورس المملوك -->
-      <div class="lms-course-card__overlay" *ngIf="isCourseOwned(c)">
-        <span>You already own this course</span>
+      <div class="lms-course-card__thumb">
+        <img
+          *ngIf="c.thumbnailUrl?.trim(); else thumbNull"
+          [src]="c.thumbnailUrl"
+          [alt]="c.title ?? 'Course thumbnail'"
+          loading="lazy"
+        />
+        <ng-template #thumbNull>
+          <div class="lms-course-card__thumb-placeholder">null</div>
+        </ng-template>
       </div>
-
       <header class="lms-course-card__header">
         <div class="lms-course-card__title-block">
           <h3 class="lms-course-card__title">
-            {{ c.title }}
+            {{ c.title ?? 'null' }}
           </h3>
-          <p class="lms-course-card__subtitle">
-            {{ c.description }}
-          </p>
+          <!-- <p class="lms-course-card__subtitle">
+            {{ c.description?.trim() ? c.description : 'null' }}
+          </p> -->
         </div>
 
         <!-- level badge (نستخدم category لو حاب) -->
@@ -127,7 +133,7 @@
             'lms-course-card__level--advanced': c.category === 'Advanced'
           }"
         >
-          {{ c.category || 'General' }}
+          {{ c.category ?? 'null' }}
         </span>
       </header>
 
@@ -140,7 +146,7 @@
 
           <span>
             <span>📚</span>
-            <span>{{ c.pathTitle || 'No path' }}</span>
+            <span>{{ c.pathTitle?.trim() ? c.pathTitle : 'null' }}</span>
           </span>
 
           <span>
@@ -155,15 +161,20 @@
         </div>
 
         <!-- تقدر تستخدم التاغ لأي شيء (مثلاً فئة مختصرة) -->
-        <div class="lms-course-card__tag">
+        <!-- <div class="lms-course-card__tag">
           {{ c.category || 'Course' }}
-        </div>
+        </div> -->
       </div>
 
       <footer class="lms-course-card__footer">
         <div class="lms-course-card__price">
           <span class="lms-course-card__price-label">Price</span>
-          <span class="lms-course-card__price-value"> {{ c.price | number : '1.2-2' }} $ </span>
+          <span class="lms-course-card__price-value">
+            <ng-container *ngIf="c.price !== null && c.price !== undefined; else priceNull">
+              {{ c.price | number : '1.2-2' }} $
+            </ng-container>
+            <ng-template #priceNull>null</ng-template>
+          </span>
         </div>
 
         <button

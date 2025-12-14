@@ -454,3 +454,28 @@ $gold-500: #b9822f;
     margin-top: 0.25rem;
   }
 }
+.lms-course-card__thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.55rem;
+  overflow: hidden;
+  border: 1px solid rgba($gold-400, 0.35);
+  background: radial-gradient(circle at 30% 30%, rgba($gold-300, 0.1), transparent 60%),
+    linear-gradient(145deg, rgba($emerald-800, 0.8), rgba($emerald-700, 0.4));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.lms-course-card__thumb-placeholder {
+  color: rgba($gold-200, 0.7);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+}

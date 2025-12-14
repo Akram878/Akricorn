@@ -68,6 +68,12 @@ export class Courses implements OnInit {
   //       Load data
   // ============================
   loadCourses(): void {
+    const token = localStorage.getItem('auth_token');
+
+    // لو ما في توكن أو التوكن منتهي الصلاحية → لا تطلب /my-courses حتى لا يظهر تنبيه انتهاء الجلسة للضيوف
+    if (!token || this.isTokenExpired(token)) {
+      return;
+    }
     this.isLoading = true;
     this.error = null;
 
@@ -112,6 +118,33 @@ export class Courses implements OnInit {
 
     this.categories = Array.from(categorySet).sort();
     this.paths = Array.from(pathSet).sort();
+  }
+
+  // فحص انتهاء صلاحية الـ JWT حتى لا نرسل طلبات مصادقة بتوكن منتهي
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payloadSegment = token.split('.')[1];
+      if (!payloadSegment) {
+        return true;
+      }
+
+      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(
+        normalized.length + ((4 - (normalized.length % 4)) % 4),
+        '='
+      );
+      const payload = JSON.parse(atob(padded));
+
+      if (!payload?.exp) {
+        return true;
+      }
+
+      const expiryMs = payload.exp * 1000;
+      return Date.now() >= expiryMs;
+    } catch (e) {
+      console.error('Failed to decode token for expiry check', e);
+      return true;
+    }
   }
 
   // ============================
