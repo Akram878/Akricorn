@@ -1,0 +1,136 @@
+:host {
+  display: block;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: #0f172a;
+}
+
+.dashboard-users {
+  background: #ffffff;
+  border: 1px solid #e3e7ee;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.header-row h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.btn-primary,
+.btn-secondary {
+  border-radius: 12px;
+  border: 1px solid transparent;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease,
+    transform 120ms ease;
+}
+
+.btn-primary {
+  background: #3b6ae3;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #335ccc;
+}
+
+.btn-secondary {
+  background: #f5f7fb;
+  color: #1f2733;
+  border-color: #d8deea;
+}
+
+.btn-secondary:hover {
+  background: #e9edf5;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f5f7fb;
+  color: #4b5563;
+  border: 1px solid #e4e8f1;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.status.error {
+  background: #fef2f2;
+  color: #b42318;
+  border-color: #f2c7c9;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.users-table th,
+.users-table td {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #0f172a;
+  border-bottom: 1px solid #e9edf4;
+}
+
+.users-table thead {
+  background: #f5f7fb;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.users-table tbody tr:hover {
+  background: #f9fafc;
+}
+
+.badge-active,
+.badge-inactive {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+
+.badge-active {
+  background: #e8f3ec;
+  color: #2f855a;
+  border-color: #c7dfd2;
+}
+
+.badge-inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+  border-color: #e3e7ee;
+}
+
+.dashboard-users td button {
+  margin-right: 8px;
+  margin-bottom: 6px;
+}
