@@ -8,7 +8,7 @@ export interface AdminLearningPathDto {
   title: string;
   description: string;
   isActive: boolean;
-  displayOrder: number;
+
   thumbnailUrl?: string;
   courseIds: number[];
 }
@@ -17,7 +17,7 @@ export interface CreateLearningPathRequest {
   title: string;
   description: string;
   isActive: boolean;
-  displayOrder: number;
+
   thumbnailUrl?: string;
   courseIds: number[];
 }

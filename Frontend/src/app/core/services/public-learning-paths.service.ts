@@ -7,7 +7,6 @@ export interface PublicLearningPath {
   title: string;
   description: string;
   coursesCount: number;
-  displayOrder: number;
 }
 
 @Injectable({

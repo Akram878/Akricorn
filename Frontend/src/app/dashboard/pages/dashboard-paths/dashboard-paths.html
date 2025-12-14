@@ -23,7 +23,7 @@
         <th>ID</th>
         <th style="width: 18%">Title</th>
         <th>Description</th>
-        <th>Order</th>
+
         <th>Active</th>
         <th>Courses (ordered)</th>
         <th>Actions</th>
@@ -37,7 +37,7 @@
         <td class="description-cell">
           {{ p.description }}
         </td>
-        <td>{{ p.displayOrder }}</td>
+
         <td>
           <span [class.badge-active]="p.isActive" [class.badge-inactive]="!p.isActive">
             {{ p.isActive ? 'Active' : 'Inactive' }}
@@ -86,18 +86,6 @@
               type="text"
               formControlName="title"
               placeholder="e.g. Full Web Development Roadmap"
-            />
-          </div>
-
-          <!-- ترتيب العرض -->
-          <div class="form-field">
-            <label for="displayOrder">Display Order</label>
-            <input
-              id="displayOrder"
-              type="number"
-              formControlName="displayOrder"
-              min="0"
-              step="1"
             />
           </div>
 

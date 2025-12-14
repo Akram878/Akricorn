@@ -5,6 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using Backend.Helpers;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Backend.Controllers
 {
@@ -54,18 +59,16 @@ namespace Backend.Controllers
             if (string.IsNullOrWhiteSpace(request.Name))
                 return BadRequest(new { message = "Name is required." });
 
-            if (string.IsNullOrWhiteSpace(request.Url))
-                return BadRequest(new { message = "Url is required." });
-
+          
             var tool = new Tool
             {
                 Name = request.Name,
                 Description = request.Description,
                 Url = request.Url,
-                Category = request.Category,
+                Category = request.Category ?? string.Empty,
                 IsActive = request.IsActive,
                 DisplayOrder = request.DisplayOrder,
-                AvatarUrl = request.AvatarUrl,
+                AvatarUrl = request.AvatarUrl ?? string.Empty,
                 Files = new List<ToolFile>()
             };
 
@@ -104,24 +107,24 @@ namespace Backend.Controllers
             if (string.IsNullOrWhiteSpace(request.Name))
                 return BadRequest(new { message = "Name is required." });
 
-            if (string.IsNullOrWhiteSpace(request.Url))
-                return BadRequest(new { message = "Url is required." });
+           
 
             tool.Name = request.Name;
             tool.Description = request.Description;
             tool.Url = request.Url;
-            tool.Category = request.Category;
+            tool.Category = request.Category ?? string.Empty;
             tool.IsActive = request.IsActive;
             tool.DisplayOrder = request.DisplayOrder;
-            tool.AvatarUrl = request.AvatarUrl;
-
-            if (tool.Files != null && tool.Files.Any())
-            {
-                _context.ToolFiles.RemoveRange(tool.Files);
-            }
+            tool.AvatarUrl = string.IsNullOrWhiteSpace(request.AvatarUrl) ? tool.AvatarUrl : request.AvatarUrl;
 
             if (request.Files?.Any() == true)
             {
+
+                if (tool.Files != null && tool.Files.Any())
+                {
+                    _context.ToolFiles.RemoveRange(tool.Files);
+                }
+
                 var files = request.Files.Select(f => new ToolFile
                 {
                     ToolId = tool.Id,
@@ -161,6 +164,136 @@ namespace Backend.Controllers
 
             return Ok(new { message = "Tool deleted successfully." });
         }
+
+
+        // =========================
+        //  POST: /api/admin/tools/{id}/upload-avatar
+        //  رفع الصورة الرمزية للأداة
+        // =========================
+        [HttpPost("{id:int}/upload-avatar")]
+        [DisableRequestSizeLimit]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadAvatar(int id, IFormFile file)
+        {
+            var tool = await _context.Tools.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tool == null)
+                return NotFound(new { message = "Tool not found." });
+
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file uploaded." });
+
+            var folder = ToolStorageHelper.GetAvatarFolder(id);
+            Directory.CreateDirectory(folder);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var physicalPath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativePath = Path.Combine("tools", $"tool-{id}", "avatar", fileName).Replace("\\", "/");
+            var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+
+            tool.AvatarUrl = url;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { url });
+        }
+
+        // =========================
+        //  POST: /api/admin/tools/{id}/files/upload
+        //  رفع ملف أداة
+        // =========================
+        [HttpPost("{id:int}/files/upload")]
+        [DisableRequestSizeLimit]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadFile(int id, IFormFile file)
+        {
+            var tool = await _context.Tools.Include(t => t.Files).FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tool == null)
+                return NotFound(new { message = "Tool not found." });
+
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file uploaded." });
+
+            var folder = ToolStorageHelper.GetFilesFolder(id);
+            Directory.CreateDirectory(folder);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var physicalPath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativePath = Path.Combine("tools", $"tool-{id}", "files", fileName).Replace("\\", "/");
+            var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+
+            var newFile = new ToolFile
+            {
+                ToolId = id,
+                FileName = file.FileName,
+                FileUrl = url,
+                SizeBytes = file.Length,
+                ContentType = file.ContentType ?? "application/octet-stream"
+            };
+
+            _context.ToolFiles.Add(newFile);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "File uploaded.", fileId = newFile.Id, url });
+        }
+
+        // =========================
+        //  DELETE: /api/admin/tools/files/{fileId}
+        //  حذف ملف أداة
+        // =========================
+        [HttpDelete("files/{fileId:int}")]
+        public async Task<IActionResult> DeleteFile(int fileId)
+        {
+            var entity = await _context.ToolFiles.FirstOrDefaultAsync(f => f.Id == fileId);
+
+            if (entity == null)
+                return NotFound(new { message = "File not found." });
+
+            var folder = ToolStorageHelper.GetFilesFolder(entity.ToolId);
+            var fileName = TryExtractFileName(entity.FileUrl);
+
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                var physicalPath = Path.Combine(folder, fileName);
+                if (System.IO.File.Exists(physicalPath))
+                    System.IO.File.Delete(physicalPath);
+            }
+
+            _context.ToolFiles.Remove(entity);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "File deleted." });
+        }
+
+        private static string? TryExtractFileName(string fileUrl)
+        {
+            if (string.IsNullOrWhiteSpace(fileUrl))
+                return null;
+
+            try
+            {
+                var uri = new Uri(fileUrl);
+                return Path.GetFileName(uri.AbsolutePath);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+
         private static ToolDto MapToDto(Tool tool)
         {
             return new ToolDto
@@ -219,10 +352,10 @@ namespace Backend.Controllers
         public string Name { get; set; }
         public string Description { get; set; }
         public string Url { get; set; }
-        public string Category { get; set; }
+        public string Category { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public int DisplayOrder { get; set; } = 0;
-        public string AvatarUrl { get; set; }
+        public string AvatarUrl { get; set; } = string.Empty;
         public List<ToolFileDto> Files { get; set; } = new();
     }
 
@@ -231,10 +364,10 @@ namespace Backend.Controllers
         public string Name { get; set; }
         public string Description { get; set; }
         public string Url { get; set; }
-        public string Category { get; set; }
+        public string Category { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public int DisplayOrder { get; set; } = 0;
-        public string AvatarUrl { get; set; }
+        public string AvatarUrl { get; set; } = string.Empty;
         public List<ToolFileDto> Files { get; set; } = new();
     }
 

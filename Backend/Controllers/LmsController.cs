@@ -279,15 +279,13 @@ namespace Backend.Controllers
             var paths = await _context.LearningPaths
                 .Where(p => p.IsActive)
                 .Include(p => p.LearningPathCourses)
-                .OrderBy(p => p.DisplayOrder)
-                .ThenBy(p => p.Title)
+              .OrderBy(p => p.Title)
                 .Select(p => new
                 {
                     p.Id,
                     p.Title,
                     p.Description,
-                    CoursesCount = p.LearningPathCourses.Count,
-                    p.DisplayOrder
+                    CoursesCount = p.LearningPathCourses.Count
                 })
                 .ToListAsync();
 

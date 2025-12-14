@@ -719,6 +719,27 @@
   },
   {
     "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "UploadFile",
+    "RelativePath": "api/admin/tools/{id}/files/upload",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
     "Method": "ToggleActive",
     "RelativePath": "api/admin/tools/{id}/toggle",
     "HttpMethod": "PATCH",
@@ -727,6 +748,43 @@
     "Parameters": [
       {
         "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "UploadAvatar",
+    "RelativePath": "api/admin/tools/{id}/upload-avatar",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "DeleteFile",
+    "RelativePath": "api/admin/tools/files/{fileId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileId",
         "Type": "System.Int32",
         "IsRequired": true
       }

@@ -7,18 +7,12 @@ import {
   ToolFileDto,
   UpdateToolRequest,
 } from '../../../core/services/admin-tools.service';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-  FormsModule,
-} from '@angular/forms';
-
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-dashboard-tools',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, NgIf, NgForOf, ReactiveFormsModule],
   templateUrl: './dashboard-tools.html',
   styleUrl: './dashboard-tools.scss',
 })
@@ -31,19 +25,19 @@ export class DashboardTools implements OnInit {
   isSaving = false;
   isEditMode = false;
   editingToolId: number | null = null;
+  editingTool: AdminToolDto | null = null;
   toolForm: FormGroup;
 
-  files: ToolFileDto[] = [];
-  newFile: ToolFileDto = { fileName: '', fileUrl: '', sizeBytes: 0, contentType: '' };
+  toolFiles: ToolFileDto[] = [];
+  pendingFiles: File[] = [];
+  avatarFile: File | null = null;
+  avatarPreview: string | null = null;
 
   constructor(private adminTools: AdminToolsService, private fb: FormBuilder) {
     this.toolForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.required, Validators.maxLength(2000)]],
-      url: ['', [Validators.required, Validators.maxLength(500)]],
-      category: ['', [Validators.required, Validators.maxLength(150)]],
-      avatarUrl: ['', [Validators.maxLength(500)]],
-      displayOrder: [0, [Validators.required, Validators.min(0)]],
+      url: ['', [Validators.maxLength(500)]],
       isActive: [true],
     });
   }
@@ -71,15 +65,16 @@ export class DashboardTools implements OnInit {
   openCreate(): void {
     this.isEditMode = false;
     this.editingToolId = null;
-    this.files = [];
-    this.newFile = { fileName: '', fileUrl: '', sizeBytes: 0, contentType: '' };
+    this.editingTool = null;
+    this.toolFiles = [];
+    this.pendingFiles = [];
+    this.avatarFile = null;
+    this.avatarPreview = null;
     this.toolForm.reset({
       name: '',
       description: '',
       url: '',
-      category: '',
-      avatarUrl: '',
-      displayOrder: this.tools.length + 1,
+
       isActive: true,
     });
     this.showForm = true;
@@ -89,16 +84,17 @@ export class DashboardTools implements OnInit {
   onEdit(tool: AdminToolDto): void {
     this.isEditMode = true;
     this.editingToolId = tool.id;
-    this.files = [...(tool.files || [])];
-    this.newFile = { fileName: '', fileUrl: '', sizeBytes: 0, contentType: '' };
+    this.editingTool = tool;
+    this.toolFiles = [...(tool.files || [])];
+    this.pendingFiles = [];
+    this.avatarFile = null;
+    this.avatarPreview = tool.avatarUrl ?? null;
 
     this.toolForm.setValue({
       name: tool.name,
       description: tool.description,
       url: tool.url,
-      category: tool.category,
-      avatarUrl: tool.avatarUrl ?? '',
-      displayOrder: tool.displayOrder,
+
       isActive: tool.isActive,
     });
 
@@ -111,69 +107,94 @@ export class DashboardTools implements OnInit {
     this.isSaving = false;
     this.isEditMode = false;
     this.editingToolId = null;
+    this.editingTool = null;
     this.toolForm.reset({
       name: '',
       description: '',
       url: '',
-      category: '',
-      avatarUrl: '',
-      displayOrder: 0,
+
       isActive: true,
     });
-    this.files = [];
+    this.toolFiles = [];
+    this.pendingFiles = [];
+    this.avatarFile = null;
+    this.avatarPreview = null;
   }
 
-  addFile(): void {
-    if (!this.newFile.fileName || !this.newFile.fileUrl) return;
-    this.files.push({ ...this.newFile });
-    this.newFile = { fileName: '', fileUrl: '', sizeBytes: 0, contentType: '' };
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    this.avatarFile = input.files[0];
+    this.avatarPreview = URL.createObjectURL(this.avatarFile);
   }
 
-  removeFile(index: number): void {
-    this.files.splice(index, 1);
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    this.pendingFiles.push(...Array.from(input.files));
+    input.value = '';
   }
 
-  onSubmit(): void {
+  removePendingFile(index: number): void {
+    this.pendingFiles.splice(index, 1);
+  }
+
+  removeExistingFile(fileId: number, index: number): void {
+    this.adminTools.deleteFile(fileId).subscribe({
+      next: () => {
+        this.toolFiles.splice(index, 1);
+      },
+      error: () => {
+        this.error = 'Failed to delete tool file.';
+      },
+    });
+  }
+
+  async onSubmit(): Promise<void> {
     if (this.toolForm.invalid || this.isSaving) return;
 
     this.isSaving = true;
+    this.error = null;
     const value = this.toolForm.value;
 
     const payload: CreateToolRequest | UpdateToolRequest = {
       name: value.name,
       description: value.description,
       url: value.url,
-      category: value.category,
-      avatarUrl: value.avatarUrl,
-      displayOrder: value.displayOrder,
+
       isActive: value.isActive,
-      files: [...this.files],
+      category: this.editingTool?.category ?? 'General',
+      displayOrder: this.editingTool?.displayOrder ?? this.tools.length + 1,
     };
 
-    if (this.isEditMode && this.editingToolId != null) {
-      this.adminTools.update(this.editingToolId, payload).subscribe({
-        next: () => {
-          this.isSaving = false;
-          this.closeForm();
-          this.loadTools();
-        },
-        error: () => {
-          this.isSaving = false;
-          this.error = 'Failed to update tool.';
-        },
-      });
-    } else {
-      this.adminTools.create(payload).subscribe({
-        next: () => {
-          this.isSaving = false;
-          this.closeForm();
-          this.loadTools();
-        },
-        error: () => {
-          this.isSaving = false;
-          this.error = 'Failed to create tool.';
-        },
-      });
+    try {
+      let toolId = this.editingToolId;
+
+      if (this.isEditMode && toolId != null) {
+        await firstValueFrom(this.adminTools.update(toolId, payload));
+      } else {
+        const res = await firstValueFrom(this.adminTools.create(payload));
+        toolId = res?.toolId ?? null;
+      }
+
+      if (toolId == null) throw new Error('Could not determine tool id after save.');
+
+      if (this.avatarFile) {
+        await firstValueFrom(this.adminTools.uploadAvatar(toolId, this.avatarFile));
+      }
+
+      for (const file of this.pendingFiles) {
+        await firstValueFrom(this.adminTools.uploadFile(toolId, file));
+      }
+
+      this.isSaving = false;
+      this.closeForm();
+      this.loadTools();
+    } catch (err) {
+      this.isSaving = false;
+      this.error = 'Failed to save tool.';
     }
   }
 

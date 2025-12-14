@@ -46,7 +46,7 @@ export class DashboardPaths implements OnInit {
       title: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.required, Validators.maxLength(2000)]],
       thumbnailUrl: ['', [Validators.maxLength(500)]],
-      displayOrder: [0, [Validators.required, Validators.min(0)]],
+
       isActive: [true],
     });
   }
@@ -100,7 +100,7 @@ export class DashboardPaths implements OnInit {
       title: '',
       description: '',
       thumbnailUrl: '',
-      displayOrder: this.paths.length + 1,
+
       isActive: true,
     });
     this.selectedCourseIds = [];
@@ -118,7 +118,7 @@ export class DashboardPaths implements OnInit {
       title: path.title,
       description: path.description,
       thumbnailUrl: path.thumbnailUrl ?? '',
-      displayOrder: path.displayOrder,
+
       isActive: path.isActive,
     });
 
@@ -137,7 +137,7 @@ export class DashboardPaths implements OnInit {
       title: '',
       description: '',
       thumbnailUrl: '',
-      displayOrder: 0,
+
       isActive: true,
     });
     this.selectedCourseIds = [];
@@ -187,7 +187,7 @@ export class DashboardPaths implements OnInit {
       title: value.title,
       description: value.description,
       thumbnailUrl: value.thumbnailUrl,
-      displayOrder: value.displayOrder,
+
       isActive: value.isActive,
       courseIds: [...this.selectedCourseIds], // الترتيب مهم هنا
     };

@@ -17,11 +17,11 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Avatar</th>
+
         <th>Name</th>
         <th>Description</th>
         <th>Url</th>
-        <th>Category</th>
+
         <th>Files</th>
         <th>Active</th>
         <th>Actions</th>
@@ -32,16 +32,12 @@
       <tr *ngFor="let t of tools">
         <td>{{ t.id }}</td>
 
-        <td>
-          <img *ngIf="t.avatarUrl" [src]="t.avatarUrl" alt="avatar" class="avatar" />
-          <span *ngIf="!t.avatarUrl">—</span>
-        </td>
         <td>{{ t.name }}</td>
         <td class="description-cell">{{ t.description }}</td>
         <td><a [href]="t.url" target="_blank">Open</a></td>
-        <td>{{ t.category }}</td>
+
         <td>{{ t.files?.length || 0 }}</td>
-        <td>{{ t.displayOrder }}</td>
+
         <td>
           <span [class.badge-active]="t.isActive" [class.badge-inactive]="!t.isActive">
             {{ t.isActive ? 'Active' : 'Inactive' }}
@@ -76,23 +72,8 @@
           </label>
 
           <label>
-            <span>Category</span>
-            <input type="text" formControlName="category" placeholder="Category" />
-          </label>
-
-          <label>
-            <span>URL</span>
+            <span>Official URL</span>
             <input type="text" formControlName="url" placeholder="https://..." />
-          </label>
-
-          <label>
-            <span>Avatar URL</span>
-            <input type="text" formControlName="avatarUrl" placeholder="https://..." />
-          </label>
-
-          <label>
-            <span>Display order</span>
-            <input type="number" formControlName="displayOrder" min="0" step="1" />
           </label>
 
           <label class="checkbox-label">
@@ -111,51 +92,57 @@
 
         <div class="files-section">
           <div class="files-header">
-            <h4>Files</h4>
-            <small>Attach related files or links.</small>
+            <h4>Tool icon</h4>
+            <small>Upload a thumbnail for the tool.</small>
           </div>
 
-          <div class="file-inputs">
-            <input
-              type="text"
-              placeholder="File name"
-              [(ngModel)]="newFile.fileName"
-              [ngModelOptions]="{ standalone: true }"
-              name="fileName"
-              required
-            />
-            <input
-              type="text"
-              placeholder="File URL"
-              [(ngModel)]="newFile.fileUrl"
-              [ngModelOptions]="{ standalone: true }"
-              name="fileUrl"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Content type"
-              [(ngModel)]="newFile.contentType"
-              [ngModelOptions]="{ standalone: true }"
-              name="contentType"
-            />
-            <input
-              type="number"
-              placeholder="Size (bytes)"
-              [(ngModel)]="newFile.sizeBytes"
-              [ngModelOptions]="{ standalone: true }"
-              name="sizeBytes"
-              min="0"
-            />
-            <button type="button" class="btn-small" (click)="addFile()">Add file</button>
+          <div class="avatar-preview" [class.empty]="!avatarPreview">
+            <img *ngIf="avatarPreview" [src]="avatarPreview" alt="Tool avatar" />
+            <span *ngIf="!avatarPreview">No image selected</span>
           </div>
 
-          <ul class="file-list" *ngIf="files.length">
-            <li *ngFor="let f of files; let i = index">
-              <span class="file-title">{{ f.fileName }}</span>
-              <span class="file-url">{{ f.fileUrl }}</span>
-              <button type="button" class="btn-danger btn-small" (click)="removeFile(i)">
+          <label class="btn-secondary">
+            Choose image
+            <input type="file" accept="image/*" hidden (change)="onAvatarSelected($event)" />
+          </label>
+        </div>
+
+        <div class="files-section">
+          <div class="files-header">
+            <h4>Tool files</h4>
+            <small>Upload one or more files for the tool.</small>
+          </div>
+
+          <label class="btn-primary">
+            Upload files
+            <input type="file" hidden multiple (change)="onFilesSelected($event)" />
+          </label>
+
+          <ul class="file-list" *ngIf="pendingFiles.length">
+            <li *ngFor="let file of pendingFiles; let i = index">
+              <span class="file-title">{{ file.name }}</span>
+              <span class="file-url">{{ file.size | number }} bytes</span>
+              <button type="button" class="btn-danger btn-small" (click)="removePendingFile(i)">
                 Remove
+              </button>
+            </li>
+          </ul>
+
+          <div class="files-header" *ngIf="toolFiles.length">
+            <h4>Existing files</h4>
+            <small>Remove any file you no longer need.</small>
+          </div>
+
+          <ul class="file-list" *ngIf="toolFiles.length">
+            <li *ngFor="let f of toolFiles; let i = index">
+              <span class="file-title">{{ f.fileName }}</span>
+              <span class="file-url">{{ f.sizeBytes | number }} bytes</span>
+              <button
+                type="button"
+                class="btn-danger btn-small"
+                (click)="removeExistingFile(f.id!, i)"
+              >
+                Delete
               </button>
             </li>
           </ul>

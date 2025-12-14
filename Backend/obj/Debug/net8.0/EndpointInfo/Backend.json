@@ -1232,6 +1232,111 @@
         }
       }
     },
+    "/api/admin/tools/{id}/upload-avatar": {
+      "post": {
+        "tags": [
+          "AdminTools"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/tools/{id}/files/upload": {
+      "post": {
+        "tags": [
+          "AdminTools"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/tools/files/{fileId}": {
+      "delete": {
+        "tags": [
+          "AdminTools"
+        ],
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/tools/{id}/toggle": {
       "patch": {
         "tags": [
@@ -2069,10 +2174,6 @@
           "isActive": {
             "type": "boolean"
           },
-          "displayOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
           "thumbnailUrl": {
             "type": "string",
             "nullable": true
@@ -2189,10 +2290,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "displayOrder": {
-            "type": "integer",
-            "format": "int32"
           },
           "thumbnailUrl": {
             "type": "string",
@@ -2449,10 +2546,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "displayOrder": {
-            "type": "integer",
-            "format": "int32"
           },
           "thumbnailUrl": {
             "type": "string",
