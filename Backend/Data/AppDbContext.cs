@@ -21,6 +21,8 @@ namespace Backend.Data
 
         public DbSet<UserCourse> UserCourses { get; set; }
 
+        public DbSet<UserLearningPathCourseProgress> UserLearningPathCourseProgresses { get; set; }
+
         // ========== ADMIN ==========
         public DbSet<AdminAccount> AdminAccounts { get; set; }
         public DbSet<LearningPath> LearningPaths { get; set; }
@@ -62,6 +64,37 @@ namespace Backend.Data
                 .Property(uc => uc.PurchasedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
+
+
+
+            modelBuilder.Entity<UserCourse>()
+                .Property(uc => uc.CompletedAt)
+                .HasColumnType("datetime2");
+
+
+            // ==========================================
+            // UserLearningPathCourseProgress (per-path completion tracking)
+            // ==========================================
+            modelBuilder.Entity<UserLearningPathCourseProgress>()
+                .HasKey(p => new { p.UserId, p.LearningPathId, p.CourseId });
+
+            modelBuilder.Entity<UserLearningPathCourseProgress>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.LearningPathCourseProgresses)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserLearningPathCourseProgress>()
+                .HasOne(p => p.LearningPath)
+                .WithMany()
+                .HasForeignKey(p => p.LearningPathId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserLearningPathCourseProgress>()
+                .HasOne(p => p.Course)
+                .WithMany()
+                .HasForeignKey(p => p.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // ==========================================
             // UserBook (many-to-many: User ↔ Book)

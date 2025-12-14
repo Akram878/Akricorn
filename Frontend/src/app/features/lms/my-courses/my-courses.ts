@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PublicCoursesService, MyCourse } from '../../../core/services/public-courses.service';
-import { NotificationService } from '../../../core/services/notification.service';
 
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-my-courses',
   standalone: true,
@@ -25,10 +25,7 @@ export class MyCourses implements OnInit {
   minHours: number | null = null;
   selectedCategory: string = 'all';
 
-  constructor(
-    private publicCoursesService: PublicCoursesService,
-    private notification: NotificationService
-  ) {}
+  constructor(private publicCoursesService: PublicCoursesService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadMyCourses();
@@ -97,6 +94,6 @@ export class MyCourses implements OnInit {
 
   // مجرد placeholder لو حبّينا نضيف زر "Open course"
   openCourse(course: MyCourse): void {
-    this.notification.showInfo('Course player is not implemented yet.');
+    this.router.navigate(['/lms/my-courses', course.id]);
   }
 }

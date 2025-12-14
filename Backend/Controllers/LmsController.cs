@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Backend.Controllers
 {
@@ -211,11 +212,230 @@ namespace Backend.Controllers
                     pathTitle = uc.Course.LearningPathCourses
                         .Select(lp => lp.LearningPath.Title)
                         .FirstOrDefault(),
-                    uc.PurchasedAt
+                    uc.PurchasedAt,
+                    uc.CompletedAt
                 })
                 .ToListAsync();
 
             return Ok(myCourses);
+        }
+
+        [HttpGet("my-courses/{courseId}")]
+        [Authorize]
+        public async Task<IActionResult> GetMyCourseDetails(int courseId)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "Invalid token." });
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+            if (user == null)
+                return Unauthorized(new { message = "User not found." });
+
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
+
+            var userCourse = await _context.UserCourses
+                .Where(uc => uc.UserId == userId.Value && uc.CourseId == courseId)
+                .Include(uc => uc.Course)
+                    .ThenInclude(c => c.Sections)
+                        .ThenInclude(s => s.Lessons)
+                            .ThenInclude(l => l.Files)
+                .Include(uc => uc.Course)
+                    .ThenInclude(c => c.LearningPathCourses)
+                        .ThenInclude(lp => lp.LearningPath)
+                .FirstOrDefaultAsync();
+
+            if (userCourse == null)
+                return NotFound(new { message = "Course not found in your library." });
+
+            var course = userCourse.Course;
+            var pathIds = course.LearningPathCourses?.Select(lp => lp.LearningPathId).Distinct().ToList() ?? new List<int>();
+
+            var totalByPath = pathIds.Count == 0
+                ? new Dictionary<int, int>()
+                : await _context.LearningPathCourses
+                    .Where(lpc => pathIds.Contains(lpc.LearningPathId))
+                    .GroupBy(lpc => lpc.LearningPathId)
+                    .Select(g => new { PathId = g.Key, TotalCourses = g.Count() })
+                    .ToDictionaryAsync(x => x.PathId, x => x.TotalCourses);
+
+            var completedByPath = pathIds.Count == 0
+                ? new Dictionary<int, int>()
+                : await _context.UserLearningPathCourseProgresses
+                    .Where(p => p.UserId == userId.Value && pathIds.Contains(p.LearningPathId))
+                    .GroupBy(p => p.LearningPathId)
+                    .Select(g => new { PathId = g.Key, CompletedCourses = g.Count() })
+                    .ToDictionaryAsync(x => x.PathId, x => x.CompletedCourses);
+
+            var sections = course.Sections
+                .OrderBy(s => s.Order)
+                .Select(s => new
+                {
+                    id = s.Id,
+                    title = s.Title,
+                    order = s.Order,
+                    lessons = s.Lessons
+                        .OrderBy(l => l.Order)
+                        .Select(l => new
+                        {
+                            id = l.Id,
+                            title = l.Title,
+                            order = l.Order,
+                            files = l.Files
+                                .OrderBy(f => f.Id)
+                                .Select(f => new
+                                {
+                                    id = f.Id,
+                                    name = f.FileName,
+                                    url = f.FileUrl,
+                                    uploadedAt = f.UploadedAt
+                                })
+                        })
+                });
+
+            var learningPaths = course.LearningPathCourses?
+                .Select(lp => lp.LearningPath)
+                .Where(lp => lp != null)
+                .Distinct()
+                .Select(lp => new
+                {
+                    learningPathId = lp.Id,
+                    learningPathTitle = lp.Title,
+                    totalCourses = totalByPath.TryGetValue(lp.Id, out var total) ? total : 0,
+                    completedCourses = completedByPath.TryGetValue(lp.Id, out var completed) ? completed : 0,
+                    completionPercent = totalByPath.TryGetValue(lp.Id, out var totalCourses) && totalCourses > 0
+                        ? Math.Min(
+                            100,
+                            Math.Round(
+                                (double)(completedByPath.TryGetValue(lp.Id, out var done) ? done : 0) / totalCourses * 100,
+                                2))
+                        : 0
+                })
+                : Array.Empty<object>();
+
+            return Ok(new
+            {
+                id = course.Id,
+                title = course.Title,
+                description = course.Description,
+                price = course.Price,
+                hours = course.Hours,
+                category = course.Category,
+                rating = course.Rating,
+                thumbnailUrl = course.ThumbnailUrl,
+                purchasedAt = userCourse.PurchasedAt,
+                completedAt = userCourse.CompletedAt,
+                sections,
+                learningPaths
+            });
+        }
+
+        [HttpPost("my-courses/{courseId}/complete")]
+        [Authorize]
+        public async Task<IActionResult> CompleteMyCourse(int courseId)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "Invalid token." });
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+            if (user == null)
+                return Unauthorized(new { message = "User not found." });
+
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
+
+            var userCourse = await _context.UserCourses
+                .Where(uc => uc.UserId == userId.Value && uc.CourseId == courseId)
+                .Include(uc => uc.Course)
+                    .ThenInclude(c => c.LearningPathCourses)
+                        .ThenInclude(lp => lp.LearningPath)
+                .FirstOrDefaultAsync();
+
+            if (userCourse == null)
+                return NotFound(new { message = "Course not found in your library." });
+
+            var now = DateTime.UtcNow;
+            userCourse.CompletedAt = now;
+
+            var pathIds = userCourse.Course.LearningPathCourses?
+                .Select(lp => lp.LearningPathId)
+                .Distinct()
+                .ToList() ?? new List<int>();
+
+            if (pathIds.Count > 0)
+            {
+                var existingProgress = await _context.UserLearningPathCourseProgresses
+                    .Where(p => p.UserId == userId.Value && p.CourseId == courseId && pathIds.Contains(p.LearningPathId))
+                    .ToListAsync();
+
+                foreach (var pathId in pathIds)
+                {
+                    var alreadyRecorded = existingProgress.Any(p => p.LearningPathId == pathId);
+                    if (!alreadyRecorded)
+                    {
+                        _context.UserLearningPathCourseProgresses.Add(new UserLearningPathCourseProgress
+                        {
+                            UserId = userId.Value,
+                            CourseId = courseId,
+                            LearningPathId = pathId,
+                            CompletedAt = now
+                        });
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            var totalByPath = pathIds.Count == 0
+                ? new Dictionary<int, int>()
+                : await _context.LearningPathCourses
+                    .Where(lpc => pathIds.Contains(lpc.LearningPathId))
+                    .GroupBy(lpc => lpc.LearningPathId)
+                    .Select(g => new { PathId = g.Key, TotalCourses = g.Count() })
+                    .ToDictionaryAsync(x => x.PathId, x => x.TotalCourses);
+
+            var completedByPath = pathIds.Count == 0
+                ? new Dictionary<int, int>()
+                : await _context.UserLearningPathCourseProgresses
+                    .Where(p => p.UserId == userId.Value && pathIds.Contains(p.LearningPathId))
+                    .GroupBy(p => p.LearningPathId)
+                    .Select(g => new { PathId = g.Key, CompletedCourses = g.Count() })
+                    .ToDictionaryAsync(x => x.PathId, x => x.CompletedCourses);
+
+            var pathStatuses = userCourse.Course.LearningPathCourses?
+                .Select(lp => lp.LearningPath)
+                .Where(lp => lp != null)
+                .Distinct()
+                .Select(lp => new
+                {
+                    learningPathId = lp.Id,
+                    learningPathTitle = lp.Title,
+                    totalCourses = totalByPath.TryGetValue(lp.Id, out var total) ? total : 0,
+                    completedCourses = completedByPath.TryGetValue(lp.Id, out var completed) ? completed : 0,
+                    completionPercent = totalByPath.TryGetValue(lp.Id, out var totalCourses) && totalCourses > 0
+                        ? Math.Min(
+                            100,
+                            Math.Round(
+                                (double)(completedByPath.TryGetValue(lp.Id, out var done) ? done : 0) / totalCourses * 100,
+                                2))
+                        : 0
+                })
+                : Array.Empty<object>();
+
+            return Ok(new
+            {
+                message = "Course marked as completed.",
+                completedAt = userCourse.CompletedAt,
+                learningPaths = pathStatuses
+            });
         }
 
         // ============================

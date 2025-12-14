@@ -26,10 +26,53 @@ export interface MyCourse {
   thumbnailUrl?: string | null;
   purchasedAt?: string;
 
+  completedAt?: string | null;
+
   // 🆕 حقول إضافية مستخدمة في my-courses.html
   category?: string; // Beginner / Intermediate / Advanced / ... (اختياري)
   hours?: number; // عدد الساعات (اختياري)
   pathTitle?: string | null; // اسم الـ learning path إن وجد (اختياري)
+}
+
+export interface CourseLessonFile {
+  id: number;
+  name: string;
+  url: string;
+  uploadedAt?: string;
+}
+
+export interface CourseLessonView {
+  id: number;
+  title: string;
+  order: number;
+  files: CourseLessonFile[];
+}
+
+export interface CourseSectionView {
+  id: number;
+  title: string;
+  order: number;
+  lessons: CourseLessonView[];
+}
+
+export interface CourseLearningPathProgress {
+  learningPathId: number;
+  learningPathTitle: string;
+  totalCourses: number;
+  completedCourses: number;
+  completionPercent: number;
+}
+
+export interface MyCourseDetail extends MyCourse {
+  rating?: number;
+  sections: CourseSectionView[];
+  learningPaths: CourseLearningPathProgress[];
+}
+
+export interface CourseCompletionResponse {
+  message: string;
+  completedAt?: string;
+  learningPaths: CourseLearningPathProgress[];
 }
 // رد الـ API عند شراء كورس عبر نظام الدفع
 export interface CoursePaymentResponse {
@@ -67,5 +110,18 @@ export class PublicCoursesService {
   // كورسات المستخدم (My Courses)
   getMyCourses(): Observable<MyCourse[]> {
     return this.http.get<MyCourse[]>(`${this.baseUrl}/my-courses`);
+  }
+
+  // تفاصيل كورس مملوك مع المحتوى والملفات
+  getMyCourse(courseId: number): Observable<MyCourseDetail> {
+    return this.http.get<MyCourseDetail>(`${this.baseUrl}/my-courses/${courseId}`);
+  }
+
+  // إنهاء كورس وتحديث تقدّم المسارات
+  completeMyCourse(courseId: number): Observable<CourseCompletionResponse> {
+    return this.http.post<CourseCompletionResponse>(
+      `${this.baseUrl}/my-courses/${courseId}/complete`,
+      {}
+    );
   }
 }

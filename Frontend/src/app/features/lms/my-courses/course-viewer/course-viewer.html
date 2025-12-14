@@ -1,0 +1,143 @@
+<div class="course-viewer" *ngIf="!isLoading && course; else viewerState">
+  <div class="course-viewer__hero">
+    <a routerLink="/lms/my-courses" class="course-viewer__back">← Back to my courses</a>
+
+    <div class="course-viewer__hero-body">
+      <div class="course-viewer__thumb" *ngIf="course?.thumbnailUrl; else thumbPlaceholder">
+        <img [src]="course?.thumbnailUrl" [alt]="course?.title || 'Course cover'" loading="lazy" />
+      </div>
+      <ng-template #thumbPlaceholder>
+        <div class="course-viewer__thumb course-viewer__thumb--placeholder">No image</div>
+      </ng-template>
+
+      <div class="course-viewer__summary">
+        <p class="course-viewer__eyebrow">My course</p>
+        <h1>{{ course?.title }}</h1>
+        <p class="course-viewer__description">{{ course?.description }}</p>
+
+        <div class="course-viewer__meta">
+          <span>⏱ {{ course?.hours || 0 }} h</span>
+          <span>🏷 {{ course?.category || 'Uncategorized' }}</span>
+          <span *ngIf="course?.rating">⭐ {{ course?.rating | number : '1.1-1' }} / 5</span>
+          <span *ngIf="course?.completedAt" class="course-viewer__badge">Completed</span>
+        </div>
+
+        <div class="course-viewer__dates">
+          <span *ngIf="course?.purchasedAt"
+            >Purchased {{ course?.purchasedAt | date : 'mediumDate' }}</span
+          >
+          <span *ngIf="course?.completedAt"
+            >Finished {{ course?.completedAt | date : 'mediumDate' }}</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="course-viewer__body">
+    <section class="course-viewer__sections" *ngIf="hasSections; else emptySections">
+      <div class="course-viewer__sections-header">
+        <div>
+          <p class="course-viewer__eyebrow">Course outline</p>
+          <h2>Lessons & files</h2>
+        </div>
+        <span class="course-viewer__count">{{ course?.sections?.length || 0 }} sections</span>
+      </div>
+
+      <div class="course-viewer__section" *ngFor="let section of course?.sections">
+        <div class="course-viewer__section-head">
+          <div>
+            <p class="course-viewer__eyebrow">Section {{ section.order }}</p>
+            <h3>{{ section.title }}</h3>
+          </div>
+          <span class="course-viewer__count">{{ section.lessons.length }} lessons</span>
+        </div>
+
+        <div class="course-viewer__lesson" *ngFor="let lesson of section.lessons">
+          <div class="course-viewer__lesson-title">{{ lesson.title }}</div>
+          <div class="course-viewer__files">
+            <button
+              type="button"
+              class="course-viewer__file"
+              *ngFor="let file of lesson.files"
+              [class.course-viewer__file--active]="selectedFile?.id === file.id"
+              (click)="selectFile(file, lesson.title, section.title)"
+            >
+              {{ file.name }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <ng-template #emptySections>
+      <div class="course-viewer__empty">لا يوجد محتوى بعد لهذا الكورس.</div>
+    </ng-template>
+
+    <aside class="course-viewer__viewer">
+      <div class="course-viewer__viewer-card" *ngIf="selectedFile; else viewerPlaceholder">
+        <p class="course-viewer__viewer-meta">
+          {{ selectedFile?.sectionTitle }} • {{ selectedFile?.lessonTitle }}
+        </p>
+        <h3 class="course-viewer__viewer-title">{{ selectedFile?.name }}</h3>
+
+        <div class="course-viewer__player" [ngSwitch]="selectedFile?.type">
+          <video *ngSwitchCase="'video'" [src]="selectedFile?.safeUrl" controls playsinline></video>
+          <audio *ngSwitchCase="'audio'" [src]="selectedFile?.safeUrl" controls></audio>
+          <iframe *ngSwitchCase="'pdf'" [src]="selectedFile?.safeUrl" title="PDF preview"></iframe>
+          <img *ngSwitchCase="'image'" [src]="selectedFile?.url" [alt]="selectedFile?.name" />
+          <iframe
+            *ngSwitchCase="'embed'"
+            [src]="selectedFile?.safeUrl"
+            title="Lesson resource"
+          ></iframe>
+          <div class="course-viewer__download" *ngSwitchDefault>
+            <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>
+            <a class="lms-primary-btn" [href]="selectedFile?.url" target="_blank" rel="noreferrer"
+              >Download</a
+            >
+          </div>
+        </div>
+      </div>
+      <ng-template #viewerPlaceholder>
+        <div class="course-viewer__viewer-card course-viewer__viewer-card--empty">
+          <p>اختر ملفًا من الدروس لبدء المشاهدة.</p>
+        </div>
+      </ng-template>
+    </aside>
+  </div>
+
+  <section class="course-viewer__paths" *ngIf="hasLearningPaths">
+    <div class="course-viewer__paths-header">
+      <h3>Learning paths</h3>
+      <p>إحراز التقدم يتم تلقائياً عند إنهاء الكورس.</p>
+    </div>
+
+    <div class="course-viewer__path" *ngFor="let path of course?.learningPaths">
+      <div class="course-viewer__path-head">
+        <span class="course-viewer__path-title">{{ path.learningPathTitle }}</span>
+        <span class="course-viewer__path-meta">{{ formatPathProgress(path) }}</span>
+      </div>
+      <div class="course-viewer__progress">
+        <span class="course-viewer__progress-bar" [style.width.%]="path.completionPercent"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="course-viewer__footer">
+    <button
+      type="button"
+      class="lms-primary-btn"
+      [disabled]="isCompleting"
+      (click)="finishCourse()"
+    >
+      {{ isCompleting ? 'Finishing…' : 'Finish course' }}
+    </button>
+  </div>
+</div>
+
+<ng-template #viewerState>
+  <div class="course-viewer__state" *ngIf="isLoading">Loading course…</div>
+  <div class="course-viewer__state course-viewer__state--error" *ngIf="!isLoading && error">
+    {{ error }}
+  </div>
+</ng-template>
