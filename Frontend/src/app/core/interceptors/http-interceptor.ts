@@ -19,11 +19,11 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
 
   // الطلبات العامة في الـ LMS المفروض تشتغل بدون مصادقة حتى لو كان في توكن منتهي الصلاحية مخزن في المتصفح
   const isPublicLmsRequest =
-    req.url.includes('/api/lms/courses') ||
-    req.url.includes('/api/lms/books') ||
-    req.url.includes('/api/lms/tools') ||
-    req.url.includes('/api/lms/paths');
-
+    req.method === 'GET' &&
+    (req.url.includes('/api/lms/courses') ||
+      req.url.includes('/api/lms/books') ||
+      req.url.includes('/api/lms/tools') ||
+      req.url.includes('/api/lms/paths'));
   let tokenToUse: string | null = null;
 
   // لو الطلب رايح إلى /api/admin → حاول تستخدم adminToken أولاً
