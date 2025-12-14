@@ -7,17 +7,23 @@ import {
   MyBook,
 } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
-
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-lms-library',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, NgIf, NgForOf],
+  imports: [CommonModule, DecimalPipe, NgIf, NgForOf, FormsModule],
   templateUrl: './library.html',
   styleUrl: './library.scss',
 })
 export class Library implements OnInit {
   // كل الكتب المتاحة (حتى للزائر)
   books: PublicBook[] = [];
+
+  filteredBooks: PublicBook[] = [];
+
+  categories: string[] = [];
+  selectedCategory: string = 'all';
+  searchTerm = '';
 
   // IDs للكتب المملوكة
   private ownedBookIds: Set<number> = new Set<number>();
@@ -45,6 +51,8 @@ export class Library implements OnInit {
     this.booksService.getBooks().subscribe({
       next: (data) => {
         this.books = data;
+        this.buildCategories();
+        this.applyFilters();
         this.isLoading = false;
       },
       error: () => {
@@ -73,6 +81,50 @@ export class Library implements OnInit {
 
   trackByBookId(index: number, book: PublicBook): number {
     return book.id;
+  }
+
+  onCategoryChange(): void {
+    this.applyFilters();
+  }
+
+  onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  private buildCategories(): void {
+    const categorySet = new Set<string>();
+
+    for (const b of this.books) {
+      if (b.category && b.category.trim() !== '') {
+        categorySet.add(b.category);
+      }
+    }
+
+    this.categories = Array.from(categorySet).sort();
+  }
+
+  private applyFilters(): void {
+    const search = this.searchTerm.trim().toLowerCase();
+
+    this.filteredBooks = this.books.filter((b) => {
+      if (this.selectedCategory !== 'all') {
+        const category = b.category || '';
+        if (category !== this.selectedCategory) {
+          return false;
+        }
+      }
+
+      if (search) {
+        const title = b.title?.toLowerCase() || '';
+        const desc = b.description?.toLowerCase() || '';
+
+        if (!title.includes(search) && !desc.includes(search)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 
   // المنطق: شراء / عرض في My Books

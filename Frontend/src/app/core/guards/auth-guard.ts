@@ -13,7 +13,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   // لو ما في توكن → رجّعه على صفحة اللوجين الصحيحة
-  return router.createUrlTree(['/auth/login'], {
+  const redirectToSign = route.data?.['redirectToSign'] === true;
+  const target = redirectToSign ? '/auth/sign' : '/auth/login';
+
+  return router.createUrlTree([target], {
     queryParams: { returnUrl: state.url },
   });
 };

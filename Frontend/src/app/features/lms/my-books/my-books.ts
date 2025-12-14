@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-lms-my-books',
   standalone: true,
@@ -17,10 +17,19 @@ export class MyBooks implements OnInit {
 
   constructor(
     private booksService: PublicBooksService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    const token = localStorage.getItem('auth_token');
+
+    if (!token || this.isTokenExpired(token)) {
+      this.router.navigate(['/auth/sign'], {
+        queryParams: { returnUrl: '/lms/my-books' },
+      });
+      return;
+    }
     this.loadBooks();
   }
 
@@ -37,7 +46,9 @@ export class MyBooks implements OnInit {
         this.isLoading = false;
 
         if (err?.status === 401) {
-          this.error = 'Please log in to see your books.';
+          this.router.navigate(['/auth/sign'], {
+            queryParams: { returnUrl: '/lms/my-books' },
+          });
         } else if (err?.error?.message) {
           this.error = err.error.message;
         } else {
@@ -45,6 +56,31 @@ export class MyBooks implements OnInit {
         }
       },
     });
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payloadSegment = token.split('.')[1];
+      if (!payloadSegment) {
+        return true;
+      }
+
+      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(
+        normalized.length + ((4 - (normalized.length % 4)) % 4),
+        '='
+      );
+      const payload = JSON.parse(atob(padded));
+
+      if (!payload?.exp) {
+        return true;
+      }
+
+      const expiryMs = payload.exp * 1000;
+      return Date.now() >= expiryMs;
+    } catch {
+      return true;
+    }
   }
 
   openFile(book: MyBook): void {

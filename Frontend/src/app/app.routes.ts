@@ -89,6 +89,7 @@ export const routes: Routes = [
         path: 'lms/my-books',
         component: MyBooks,
         canActivate: [authGuard],
+        data: { redirectToSign: true },
       },
       {
         path: 'services-section',
