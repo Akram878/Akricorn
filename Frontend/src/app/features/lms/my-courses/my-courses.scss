@@ -159,39 +159,33 @@ $gold-500: #b9822f;
 
 .lms-courses-grid {
   margin-top: 0.5rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 1rem 1.3rem;
 }
 
 /* =================== COURSE CARD (نفس الكورسات العامة) =================== */
 
 .lms-course-card {
-  position: relative;
-  overflow: hidden;
-
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-
   padding: 1.25rem 1.35rem;
-  border-radius: 0.7rem;
-
-  border: 1px solid rgba(6, 95, 70, 0.95);
-  background: radial-gradient(circle at top left, rgba(217, 167, 74, 0.12), transparent 60%),
-    radial-gradient(circle at bottom right, rgba(8, 52, 42, 0.9), $emerald-900);
-  color: $gold-100;
+  border-radius: 0.3rem;
+  text-decoration: none;
+  border: 1px solid hsl(165, 93%, 11%);
+  background: #041e16;
+  color: #fff4cf;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease,
     background 0.16s ease;
 
   &:hover {
     transform: translateY(-3px);
-    border-color: rgba($gold-400, 0.95);
-    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.8);
-    background: radial-gradient(circle at top left, rgba(217, 167, 74, 0.2), transparent 60%),
-      radial-gradient(circle at bottom right, rgba(8, 52, 42, 0.96), $emerald-900);
+    border-color: hsl(44deg 47.87% 63.14%);
   }
 }
 
@@ -233,14 +227,13 @@ $gold-500: #b9822f;
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
 
-  padding: 0.25rem 0.8rem;
-  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  border-radius: 0.3rem;
 
-  border: 1px solid rgba($gold-300, 0.8);
-  color: $gold-100;
-  background: radial-gradient(circle at top left, rgba($gold-400, 0.45), transparent 70%);
+  border: 1px solid hsl(43.33deg 46.96% 54.9%);
+  color: hsl(43.33deg 46.96% 54.9%);
 }
 
 .lms-course-card__level--beginner {
@@ -274,20 +267,17 @@ $gold-500: #b9822f;
   flex-wrap: wrap;
   gap: 0.45rem 0.9rem;
   font-size: 0.78rem;
-  color: rgba($gold-200, 0.95);
+  color: rgba($gold-200, 0.9);
 
-  span {
+  > span {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     padding: 0.18rem 0.55rem;
-    border-radius: 999px;
-    background: radial-gradient(circle at top left, rgba(12, 148, 136, 0.25), transparent 70%);
-    border: 1px solid rgba(15, 118, 110, 0.9);
   }
 
   span span:first-child {
-    font-size: 0.9rem; // الأيقونات ⏱ 📚 🗓
+    font-size: 0.88rem; // الأيقونات ⏱ 📚 🗓
   }
 }
 
@@ -331,6 +321,11 @@ $gold-500: #b9822f;
   color: rgba($gold-200, 0.7);
 }
 
+.lms-course-card__price-subtext {
+  font-size: 0.8rem;
+  color: rgba($gold-200, 0.8);
+}
+
 .lms-course-card__price-value {
   font-size: 1rem;
   font-weight: 700;
@@ -340,38 +335,26 @@ $gold-500: #b9822f;
 /* زر Open course */
 
 .lms-course-card .lms-primary-btn {
-  min-width: 7.3rem;
+  border-radius: 0.3rem;
+  color: hsl(168, 78.95%, 3.73%);
+  padding: 0.75rem;
+  background: linear-gradient(
+    180deg,
+    hsl(45, 48.78%, 67.84%) 0%,
+    hsl(43.33, 46.96%, 54.9%) 40%,
+    #c89445 100%
+  );
   justify-content: center;
-  padding: 0.55rem 1rem;
-  font-size: 0.85rem;
-  border-radius: 999px;
-  border: none;
+
   cursor: pointer;
   white-space: nowrap;
 
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  border: none;
 
-  background: linear-gradient(135deg, $gold-400, $gold-500);
-  color: #020617;
-  font-weight: 600;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8);
-
-  transition: transform 0.14s ease-out, box-shadow 0.14s ease-out, filter 0.14s ease-out,
-    opacity 0.14s ease-out;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    filter: brightness(1.04);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: default;
-    box-shadow: none;
-  }
+  margin-left: auto;
 }
 
 /* =================== STATES (Loading / Empty / Error) =================== */
@@ -455,20 +438,19 @@ $gold-500: #b9822f;
   }
 }
 .lms-course-card__thumb {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 0.55rem;
+  margin-left: auto;
+  max-width: 250px;
+  border-radius: 0.3rem;
   overflow: hidden;
-  border: 1px solid rgba($gold-400, 0.35);
-  background: radial-gradient(circle at 30% 30%, rgba($gold-300, 0.1), transparent 60%),
-    linear-gradient(145deg, rgba($emerald-800, 0.8), rgba($emerald-700, 0.4));
+  border: 1px solid rgba(217, 167, 74, 0.35);
+  background: radial-gradient(circle at 30% 30%, rgba(240, 203, 122, 0.1), transparent 60%),
+    linear-gradient(145deg, rgba(2, 24, 19, 0.8), rgba(8, 52, 42, 0.4));
   display: flex;
   align-items: center;
   justify-content: center;
 
   img {
     width: 100%;
-    height: 100%;
     object-fit: cover;
     display: block;
   }

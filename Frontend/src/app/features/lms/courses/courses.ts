@@ -68,12 +68,6 @@ export class Courses implements OnInit {
   //       Load data
   // ============================
   loadCourses(): void {
-    const token = localStorage.getItem('auth_token');
-
-    // لو ما في توكن أو التوكن منتهي الصلاحية → لا تطلب /my-courses حتى لا يظهر تنبيه انتهاء الجلسة للضيوف
-    if (!token || this.isTokenExpired(token)) {
-      return;
-    }
     this.isLoading = true;
     this.error = null;
 
@@ -92,6 +86,12 @@ export class Courses implements OnInit {
   }
 
   loadMyCourses(): void {
+    const token = localStorage.getItem('auth_token');
+
+    // لو ما في توكن أو التوكن منتهي الصلاحية → لا تطلب /my-courses حتى لا يظهر تنبيه انتهاء الجلسة للضيوف
+    if (!token || this.isTokenExpired(token)) {
+      return;
+    }
     this.publicCoursesService.getMyCourses().subscribe({
       next: (data: MyCourse[]) => {
         this.ownedCourseIds = new Set(data.map((c) => c.id));
