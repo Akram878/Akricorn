@@ -253,7 +253,11 @@ namespace Backend.Controllers
                 return NotFound(new { message = "Course not found in your library." });
 
             var course = userCourse.Course;
-            var pathIds = course.LearningPathCourses?.Select(lp => lp.LearningPathId).Distinct().ToList() ?? new List<int>();
+
+            var pathIds = course.LearningPathCourses?
+                .Select(lp => lp.LearningPathId)
+                .Distinct()
+                .ToList() ?? new List<int>();
 
             var totalByPath = pathIds.Count == 0
                 ? new Dictionary<int, int>()
@@ -297,25 +301,20 @@ namespace Backend.Controllers
                         })
                 });
 
-            var learningPaths = course.LearningPathCourses?
-                .Select(lp => lp.LearningPath)
-                .Where(lp => lp != null)
-                .Distinct()
-                .Select(lp => new
-                {
-                    learningPathId = lp.Id,
-                    learningPathTitle = lp.Title,
-                    totalCourses = totalByPath.TryGetValue(lp.Id, out var total) ? total : 0,
-                    completedCourses = completedByPath.TryGetValue(lp.Id, out var completed) ? completed : 0,
-                    completionPercent = totalByPath.TryGetValue(lp.Id, out var totalCourses) && totalCourses > 0
-                        ? Math.Min(
-                            100,
-                            Math.Round(
-                                (double)(completedByPath.TryGetValue(lp.Id, out var done) ? done : 0) / totalCourses * 100,
-                                2))
-                        : 0
-                })
-                : Array.Empty<object>();
+            var learningPaths =
+                (course.LearningPathCourses?
+                    .Select(lp => lp.LearningPath)
+                    .Where(lp => lp != null)
+                    .Distinct()
+                    .Select(lp => new
+                    {
+                        learningPathId = lp.Id,
+                        learningPathTitle = lp.Title,
+                        totalCourses = totalByPath.TryGetValue(lp.Id, out var total) ? total : 0,
+                        completedCourses = completedByPath.TryGetValue(lp.Id, out var completed) ? completed : 0,
+                        completionPercent = CalculateCompletionPercent(totalByPath, completedByPath, lp.Id)
+                    })
+                ) ?? Enumerable.Empty<object>();
 
             return Ok(new
             {
@@ -333,6 +332,7 @@ namespace Backend.Controllers
                 learningPaths
             });
         }
+
 
         [HttpPost("my-courses/{courseId}/complete")]
         [Authorize]
@@ -373,21 +373,23 @@ namespace Backend.Controllers
             if (pathIds.Count > 0)
             {
                 var existingProgress = await _context.UserLearningPathCourseProgresses
-                    .Where(p => p.UserId == userId.Value && p.CourseId == courseId && pathIds.Contains(p.LearningPathId))
+                    .Where(p => p.UserId == userId.Value &&
+                                p.CourseId == courseId &&
+                                pathIds.Contains(p.LearningPathId))
                     .ToListAsync();
 
                 foreach (var pathId in pathIds)
                 {
-                    var alreadyRecorded = existingProgress.Any(p => p.LearningPathId == pathId);
-                    if (!alreadyRecorded)
+                    if (!existingProgress.Any(p => p.LearningPathId == pathId))
                     {
-                        _context.UserLearningPathCourseProgresses.Add(new UserLearningPathCourseProgress
-                        {
-                            UserId = userId.Value,
-                            CourseId = courseId,
-                            LearningPathId = pathId,
-                            CompletedAt = now
-                        });
+                        _context.UserLearningPathCourseProgresses.Add(
+                            new UserLearningPathCourseProgress
+                            {
+                                UserId = userId.Value,
+                                CourseId = courseId,
+                                LearningPathId = pathId,
+                                CompletedAt = now
+                            });
                     }
                 }
             }
@@ -410,25 +412,20 @@ namespace Backend.Controllers
                     .Select(g => new { PathId = g.Key, CompletedCourses = g.Count() })
                     .ToDictionaryAsync(x => x.PathId, x => x.CompletedCourses);
 
-            var pathStatuses = userCourse.Course.LearningPathCourses?
-                .Select(lp => lp.LearningPath)
-                .Where(lp => lp != null)
-                .Distinct()
-                .Select(lp => new
-                {
-                    learningPathId = lp.Id,
-                    learningPathTitle = lp.Title,
-                    totalCourses = totalByPath.TryGetValue(lp.Id, out var total) ? total : 0,
-                    completedCourses = completedByPath.TryGetValue(lp.Id, out var completed) ? completed : 0,
-                    completionPercent = totalByPath.TryGetValue(lp.Id, out var totalCourses) && totalCourses > 0
-                        ? Math.Min(
-                            100,
-                            Math.Round(
-                                (double)(completedByPath.TryGetValue(lp.Id, out var done) ? done : 0) / totalCourses * 100,
-                                2))
-                        : 0
-                })
-                : Array.Empty<object>();
+            var pathStatuses =
+                (userCourse.Course.LearningPathCourses?
+                    .Select(lp => lp.LearningPath)
+                    .Where(lp => lp != null)
+                    .Distinct()
+                    .Select(lp => new
+                    {
+                        learningPathId = lp.Id,
+                        learningPathTitle = lp.Title,
+                        totalCourses = totalByPath.TryGetValue(lp.Id, out var total) ? total : 0,
+                        completedCourses = completedByPath.TryGetValue(lp.Id, out var completed) ? completed : 0,
+                        completionPercent = CalculateCompletionPercent(totalByPath, completedByPath, lp.Id)
+                    })
+                ) ?? Enumerable.Empty<object>();
 
             return Ok(new
             {
@@ -437,6 +434,8 @@ namespace Backend.Controllers
                 learningPaths = pathStatuses
             });
         }
+
+
 
         // ============================
         //         My Books
@@ -526,6 +525,25 @@ namespace Backend.Controllers
 
             return Ok(paths);
         }
+
+        // ============================
+        //         Utilities
+        // ============================
+        private double CalculateCompletionPercent(
+            IDictionary<int, int> totalByPath,
+            IDictionary<int, int> completedByPath,
+            int pathId)
+        {
+            if (!totalByPath.TryGetValue(pathId, out var totalCourses) || totalCourses == 0)
+                return 0;
+
+            completedByPath.TryGetValue(pathId, out var completedCourses);
+            var percent = (double)completedCourses / totalCourses * 100;
+
+            return Math.Min(100, Math.Round(percent, 2));
+        }
+
+
 
         // ============================
         //         Helper
