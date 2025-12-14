@@ -72,38 +72,6 @@
     <ng-template #emptySections>
       <div class="course-viewer__empty">لا يوجد محتوى بعد لهذا الكورس.</div>
     </ng-template>
-
-    <aside class="course-viewer__viewer">
-      <div class="course-viewer__viewer-card" *ngIf="selectedFile; else viewerPlaceholder">
-        <p class="course-viewer__viewer-meta">
-          {{ selectedFile?.sectionTitle }} • {{ selectedFile?.lessonTitle }}
-        </p>
-        <h3 class="course-viewer__viewer-title">{{ selectedFile?.name }}</h3>
-
-        <div class="course-viewer__player" [ngSwitch]="selectedFile?.type">
-          <video *ngSwitchCase="'video'" [src]="selectedFile?.safeUrl" controls playsinline></video>
-          <audio *ngSwitchCase="'audio'" [src]="selectedFile?.safeUrl" controls></audio>
-          <iframe *ngSwitchCase="'pdf'" [src]="selectedFile?.safeUrl" title="PDF preview"></iframe>
-          <img *ngSwitchCase="'image'" [src]="selectedFile?.url" [alt]="selectedFile?.name" />
-          <iframe
-            *ngSwitchCase="'embed'"
-            [src]="selectedFile?.safeUrl"
-            title="Lesson resource"
-          ></iframe>
-          <div class="course-viewer__download" *ngSwitchDefault>
-            <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>
-            <a class="lms-primary-btn" [href]="selectedFile?.url" target="_blank" rel="noreferrer"
-              >Download</a
-            >
-          </div>
-        </div>
-      </div>
-      <ng-template #viewerPlaceholder>
-        <div class="course-viewer__viewer-card course-viewer__viewer-card--empty">
-          <p>اختر ملفًا من الدروس لبدء المشاهدة.</p>
-        </div>
-      </ng-template>
-    </aside>
   </div>
 
   <section class="course-viewer__paths" *ngIf="hasLearningPaths">
@@ -132,6 +100,41 @@
     >
       {{ isCompleting ? 'Finishing…' : 'Finish course' }}
     </button>
+  </div>
+
+  <div class="course-viewer__overlay" *ngIf="selectedFile" aria-modal="true" role="dialog">
+    <div class="course-viewer__overlay-card">
+      <div class="course-viewer__overlay-head">
+        <button type="button" class="course-viewer__overlay-close" (click)="closeViewer()">
+          ← رجوع إلى الدروس
+        </button>
+
+        <div class="course-viewer__overlay-meta">
+          <p class="course-viewer__viewer-meta">
+            {{ selectedFile?.sectionTitle }} • {{ selectedFile?.lessonTitle }}
+          </p>
+          <h3 class="course-viewer__viewer-title">{{ selectedFile?.name }}</h3>
+        </div>
+      </div>
+
+      <div class="course-viewer__player" [ngSwitch]="selectedFile?.type">
+        <video *ngSwitchCase="'video'" [src]="selectedFile?.safeUrl" controls playsinline></video>
+        <audio *ngSwitchCase="'audio'" [src]="selectedFile?.safeUrl" controls></audio>
+        <iframe *ngSwitchCase="'pdf'" [src]="selectedFile?.safeUrl" title="PDF preview"></iframe>
+        <img *ngSwitchCase="'image'" [src]="selectedFile?.url" [alt]="selectedFile?.name" />
+        <iframe
+          *ngSwitchCase="'embed'"
+          [src]="selectedFile?.safeUrl"
+          title="Lesson resource"
+        ></iframe>
+        <div class="course-viewer__download" *ngSwitchDefault>
+          <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>
+          <a class="lms-primary-btn" [href]="selectedFile?.url" target="_blank" rel="noreferrer"
+            >Download</a
+          >
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

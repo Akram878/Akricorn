@@ -66,7 +66,6 @@ export class CourseViewer implements OnInit {
       next: (course) => {
         this.course = course;
         this.isLoading = false;
-        this.preselectFirstFile();
       },
       error: (err) => {
         if (err?.error?.message) {
@@ -77,21 +76,6 @@ export class CourseViewer implements OnInit {
         this.isLoading = false;
       },
     });
-  }
-
-  private preselectFirstFile(): void {
-    if (!this.course || !this.course.sections?.length) {
-      return;
-    }
-
-    for (const section of this.course.sections) {
-      for (const lesson of section.lessons) {
-        if (lesson.files?.length) {
-          this.selectFile(lesson.files[0], lesson.title, section.title);
-          return;
-        }
-      }
-    }
   }
 
   selectFile(file: CourseLessonFile, lessonTitle: string, sectionTitle: string): void {
@@ -108,6 +92,9 @@ export class CourseViewer implements OnInit {
     };
   }
 
+  closeViewer(): void {
+    this.selectedFile = null;
+  }
   finishCourse(): void {
     if (this.isCompleting) {
       return;

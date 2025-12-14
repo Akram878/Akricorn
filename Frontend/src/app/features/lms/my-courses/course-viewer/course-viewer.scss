@@ -105,9 +105,7 @@
   }
 
   &__body {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 16px;
+    display: block;
   }
 
   &__sections {
@@ -182,44 +180,27 @@
     }
   }
 
-  &__viewer {
-    position: sticky;
-    top: 12px;
-  }
-
-  &__viewer-card {
-    background: #0b1120;
-    color: #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.35);
-
-    &--empty {
-      text-align: center;
-      color: #94a3b8;
-    }
-  }
-
   &__viewer-meta {
     color: #cbd5e1;
     margin: 0 0 4px;
   }
 
   &__viewer-title {
-    margin: 0 0 12px;
+    margin: 0;
   }
 
   &__player {
-    border-radius: 10px;
+    border-radius: 14px;
     overflow: hidden;
-    background: #111827;
+    background: #0f172a;
+    box-shadow: 0 14px 45px rgba(0, 0, 0, 0.35);
 
     video,
     audio,
     iframe,
     img {
       width: 100%;
-      min-height: 280px;
+      min-height: 340px;
       border: none;
       display: block;
       background: #0f172a;
@@ -299,6 +280,63 @@
     justify-content: flex-end;
   }
 
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 50;
+  }
+
+  &__overlay-card {
+    background: #0b1120;
+    color: #e2e8f0;
+    border-radius: 18px;
+    padding: 18px;
+    width: min(1100px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    border: 1px solid #1e293b;
+  }
+
+  &__overlay-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__overlay-close {
+    border: 1px solid #1d4ed8;
+    background: linear-gradient(90deg, #0ea5e9 0%, #2563eb 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(37, 99, 235, 0.45);
+    }
+  }
+
+  &__overlay-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
   &__state {
     background: #f1f5f9;
     color: #0f172a;
@@ -316,12 +354,8 @@
 
 @media (max-width: 1024px) {
   .course-viewer {
-    &__body {
-      grid-template-columns: 1fr;
-    }
-
-    &__viewer {
-      position: static;
+    &__overlay {
+      padding: 16px;
     }
   }
 }
@@ -353,6 +387,14 @@
 
     &__footer {
       justify-content: center;
+    }
+
+    &__overlay {
+      padding: 12px;
+    }
+
+    &__overlay-card {
+      padding: 14px;
     }
   }
 }

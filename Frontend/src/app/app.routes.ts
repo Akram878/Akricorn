@@ -41,7 +41,7 @@ import { DashboardUsers } from './dashboard/pages/dashboard-users/dashboard-user
 
 import { MyCourses } from './features/lms/my-courses/my-courses';
 import { MyBooks } from './features/lms/my-books/my-books';
-
+import { CourseViewer } from './features/lms/my-courses/course-viewer/course-viewer';
 export const routes: Routes = [
   {
     path: 'auth',
@@ -79,6 +79,11 @@ export const routes: Routes = [
       {
         path: 'lms/learning-path',
         component: LearningPath,
+      },
+      {
+        path: 'lms/my-courses/:id',
+        component: CourseViewer,
+        canActivate: [authGuard],
       },
       {
         path: 'lms/my-courses',
