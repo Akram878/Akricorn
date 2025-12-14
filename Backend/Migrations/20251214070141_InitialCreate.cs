@@ -77,6 +77,7 @@ namespace Backend.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     DisplayOrder = table.Column<int>(type: "int", nullable: false),
+                    ThumbnailUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -95,7 +96,8 @@ namespace Backend.Migrations
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false)
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
+                    AvatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -190,6 +192,29 @@ namespace Backend.Migrations
                         name: "FK_LearningPathCourses_LearningPaths_LearningPathId",
                         column: x => x.LearningPathId,
                         principalTable: "LearningPaths",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ToolFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ToolId = table.Column<int>(type: "int", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ToolFiles_Tools_ToolId",
+                        column: x => x.ToolId,
+                        principalTable: "Tools",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -350,6 +375,11 @@ namespace Backend.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ToolFiles_ToolId",
+                table: "ToolFiles",
+                column: "ToolId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserBooks_BookId",
                 table: "UserBooks",
                 column: "BookId");
@@ -379,7 +409,7 @@ namespace Backend.Migrations
                 name: "Payments");
 
             migrationBuilder.DropTable(
-                name: "Tools");
+                name: "ToolFiles");
 
             migrationBuilder.DropTable(
                 name: "UserBooks");
@@ -392,6 +422,9 @@ namespace Backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "LearningPaths");
+
+            migrationBuilder.DropTable(
+                name: "Tools");
 
             migrationBuilder.DropTable(
                 name: "Books");

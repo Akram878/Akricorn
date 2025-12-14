@@ -11,5 +11,10 @@
         public string Category { get; set; }      // تصنيف (برمجة، دراسة، إنتاجية...)
         public bool IsActive { get; set; } = true;
         public int DisplayOrder { get; set; } = 0; // لترتيب الظهور
+
+
+        public string AvatarUrl { get; set; }     // الصورة الرمزية للأداة
+
+        public ICollection<ToolFile> Files { get; set; }
     }
 }

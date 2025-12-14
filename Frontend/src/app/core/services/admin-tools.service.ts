@@ -11,6 +11,8 @@ export interface AdminToolDto {
   category: string;
   isActive: boolean;
   displayOrder: number;
+  avatarUrl?: string;
+  files?: ToolFileDto[];
 }
 
 export interface CreateToolRequest {
@@ -20,9 +22,19 @@ export interface CreateToolRequest {
   category: string;
   isActive: boolean;
   displayOrder: number;
+  avatarUrl?: string;
+  files?: ToolFileDto[];
 }
 
 export interface UpdateToolRequest extends CreateToolRequest {}
+
+export interface ToolFileDto {
+  id?: number;
+  fileName: string;
+  fileUrl: string;
+  sizeBytes: number;
+  contentType: string;
+}
 
 @Injectable({
   providedIn: 'root',

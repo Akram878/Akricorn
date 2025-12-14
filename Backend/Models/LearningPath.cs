@@ -12,6 +12,7 @@ namespace Backend.Models
         public bool IsActive { get; set; } = true;
 
         public int DisplayOrder { get; set; }    // لترتيب المسارات في الواجهة
+        public string ThumbnailUrl { get; set; } // صورة رمزية للمسار
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // الكورسات المرتبطة بهذا المسار

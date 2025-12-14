@@ -2073,6 +2073,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "courseIds": {
             "type": "array",
             "items": {
@@ -2143,6 +2147,17 @@
           "displayOrder": {
             "type": "integer",
             "format": "int32"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolFileDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -2178,6 +2193,10 @@
           "displayOrder": {
             "type": "integer",
             "format": "int32"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
           },
           "courseIds": {
             "type": "array",
@@ -2272,6 +2291,43 @@
           "displayOrder": {
             "type": "integer",
             "format": "int32"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolFileDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ToolFileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -2398,6 +2454,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "courseIds": {
             "type": "array",
             "items": {
@@ -2489,6 +2549,17 @@
           "displayOrder": {
             "type": "integer",
             "format": "int32"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolFileDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

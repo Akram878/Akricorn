@@ -1,22 +1,29 @@
 <div class="dashboard-tools">
   <div class="header-row">
-    <h2>Tools</h2>
-    <button class="btn-primary" (click)="loadTools()">Reload</button>
+    <div>
+      <h2>Tools</h2>
+      <p class="subtitle">Manage external tools/resources shown in the dashboard.</p>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" type="button" (click)="openCreate()">Add tool</button>
+      <button class="btn-secondary" type="button" (click)="loadTools()">Reload</button>
+    </div>
   </div>
 
   <div class="status" *ngIf="isLoading">Loading...</div>
   <div class="status error" *ngIf="error">{{ error }}</div>
 
-  <table *ngIf="!isLoading && tools.length > 0" class="tools-table">
+  <table *ngIf="!isLoading && tools.length" class="tools-table">
     <thead>
       <tr>
         <th>ID</th>
+        <th>Avatar</th>
         <th>Name</th>
         <th>Description</th>
         <th>Url</th>
         <th>Category</th>
+        <th>Files</th>
         <th>Active</th>
-        <th>Order</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -24,19 +31,24 @@
     <tbody>
       <tr *ngFor="let t of tools">
         <td>{{ t.id }}</td>
+
+        <td>
+          <img *ngIf="t.avatarUrl" [src]="t.avatarUrl" alt="avatar" class="avatar" />
+          <span *ngIf="!t.avatarUrl">—</span>
+        </td>
         <td>{{ t.name }}</td>
         <td class="description-cell">{{ t.description }}</td>
-        <td>
-          <a [href]="t.url" target="_blank">Open</a>
-        </td>
+        <td><a [href]="t.url" target="_blank">Open</a></td>
         <td>{{ t.category }}</td>
+        <td>{{ t.files?.length || 0 }}</td>
+        <td>{{ t.displayOrder }}</td>
         <td>
           <span [class.badge-active]="t.isActive" [class.badge-inactive]="!t.isActive">
             {{ t.isActive ? 'Active' : 'Inactive' }}
           </span>
         </td>
-        <td>{{ t.displayOrder }}</td>
-        <td>
+        <td class="actions-cell">
+          <button class="btn-small" (click)="onEdit(t)">Edit</button>
           <button class="btn-secondary" (click)="onToggle(t)">
             {{ t.isActive ? 'Disable' : 'Enable' }}
           </button>
@@ -46,5 +58,116 @@
     </tbody>
   </table>
 
-  <div *ngIf="!isLoading && tools.length === 0" class="status">No tools found.</div>
+  <div *ngIf="!isLoading && !tools.length" class="status">No tools yet.</div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" *ngIf="showForm" (click)="closeForm()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ isEditMode ? 'Edit tool' : 'Create tool' }}</h3>
+        <button class="icon-btn" type="button" (click)="closeForm()">×</button>
+      </div>
+
+      <form [formGroup]="toolForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <label>
+            <span>Name</span>
+            <input type="text" formControlName="name" placeholder="Tool title" />
+          </label>
+
+          <label>
+            <span>Category</span>
+            <input type="text" formControlName="category" placeholder="Category" />
+          </label>
+
+          <label>
+            <span>URL</span>
+            <input type="text" formControlName="url" placeholder="https://..." />
+          </label>
+
+          <label>
+            <span>Avatar URL</span>
+            <input type="text" formControlName="avatarUrl" placeholder="https://..." />
+          </label>
+
+          <label>
+            <span>Display order</span>
+            <input type="number" formControlName="displayOrder" min="0" step="1" />
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="isActive" /> Active
+          </label>
+        </div>
+
+        <label class="full-width">
+          <span>Description</span>
+          <textarea
+            rows="3"
+            formControlName="description"
+            placeholder="Short description"
+          ></textarea>
+        </label>
+
+        <div class="files-section">
+          <div class="files-header">
+            <h4>Files</h4>
+            <small>Attach related files or links.</small>
+          </div>
+
+          <div class="file-inputs">
+            <input
+              type="text"
+              placeholder="File name"
+              [(ngModel)]="newFile.fileName"
+              [ngModelOptions]="{ standalone: true }"
+              name="fileName"
+              required
+            />
+            <input
+              type="text"
+              placeholder="File URL"
+              [(ngModel)]="newFile.fileUrl"
+              [ngModelOptions]="{ standalone: true }"
+              name="fileUrl"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Content type"
+              [(ngModel)]="newFile.contentType"
+              [ngModelOptions]="{ standalone: true }"
+              name="contentType"
+            />
+            <input
+              type="number"
+              placeholder="Size (bytes)"
+              [(ngModel)]="newFile.sizeBytes"
+              [ngModelOptions]="{ standalone: true }"
+              name="sizeBytes"
+              min="0"
+            />
+            <button type="button" class="btn-small" (click)="addFile()">Add file</button>
+          </div>
+
+          <ul class="file-list" *ngIf="files.length">
+            <li *ngFor="let f of files; let i = index">
+              <span class="file-title">{{ f.fileName }}</span>
+              <span class="file-url">{{ f.fileUrl }}</span>
+              <button type="button" class="btn-danger btn-small" (click)="removeFile(i)">
+                Remove
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="toolForm.invalid || isSaving">
+            {{ isSaving ? 'Saving...' : 'Save' }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

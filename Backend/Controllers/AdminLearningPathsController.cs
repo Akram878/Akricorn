@@ -39,6 +39,7 @@ namespace Backend.Controllers
                 Description = lp.Description,
                 IsActive = lp.IsActive,
                 DisplayOrder = lp.DisplayOrder,
+                ThumbnailUrl = lp.ThumbnailUrl,
                 CourseIds = lp.LearningPathCourses?
                     .OrderBy(pc => pc.StepOrder)
                     .Select(pc => pc.CourseId)
@@ -69,6 +70,7 @@ namespace Backend.Controllers
                 Description = path.Description,
                 IsActive = path.IsActive,
                 DisplayOrder = path.DisplayOrder,
+                ThumbnailUrl = path.ThumbnailUrl,
                 CourseIds = path.LearningPathCourses?
                     .OrderBy(pc => pc.StepOrder)
                     .Select(pc => pc.CourseId)
@@ -93,7 +95,8 @@ namespace Backend.Controllers
                 Title = request.Title,
                 Description = request.Description,
                 IsActive = request.IsActive,
-                DisplayOrder = request.DisplayOrder
+                DisplayOrder = request.DisplayOrder,
+                ThumbnailUrl = request.ThumbnailUrl
             };
 
             _context.LearningPaths.Add(path);
@@ -152,6 +155,8 @@ namespace Backend.Controllers
             path.Description = request.Description;
             path.IsActive = request.IsActive;
             path.DisplayOrder = request.DisplayOrder;
+            path.ThumbnailUrl = request.ThumbnailUrl;
+
 
             // Update Courses
             if (path.LearningPathCourses != null && path.LearningPathCourses.Any())
@@ -245,6 +250,7 @@ namespace Backend.Controllers
         public string Description { get; set; }
         public bool IsActive { get; set; }
         public int DisplayOrder { get; set; }
+        public string ThumbnailUrl { get; set; }
         public List<int> CourseIds { get; set; } = new();
     }
 
@@ -254,6 +260,7 @@ namespace Backend.Controllers
         public string Description { get; set; }
         public bool IsActive { get; set; } = true;
         public int DisplayOrder { get; set; } = 0;
+        public string ThumbnailUrl { get; set; }
         public List<int> CourseIds { get; set; } = new();
     }
 
@@ -263,6 +270,7 @@ namespace Backend.Controllers
         public string Description { get; set; }
         public bool IsActive { get; set; } = true;
         public int DisplayOrder { get; set; } = 0;
+        public string ThumbnailUrl { get; set; }
         public List<int> CourseIds { get; set; } = new();
     }
 }

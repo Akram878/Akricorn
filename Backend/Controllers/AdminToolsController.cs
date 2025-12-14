@@ -3,6 +3,8 @@ using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Backend.Controllers
 {
@@ -23,19 +25,11 @@ namespace Backend.Controllers
         public async Task<ActionResult<IEnumerable<ToolDto>>> GetAll()
         {
             var tools = await _context.Tools
+                   .Include(t => t.Files)
                 .OrderBy(t => t.DisplayOrder)
                 .ToListAsync();
 
-            var result = tools.Select(t => new ToolDto
-            {
-                Id = t.Id,
-                Name = t.Name,
-                Description = t.Description,
-                Url = t.Url,
-                Category = t.Category,
-                IsActive = t.IsActive,
-                DisplayOrder = t.DisplayOrder
-            }).ToList();
+            var result = tools.Select(t => MapToDto(t)).ToList();
 
             return Ok(result);
         }
@@ -44,23 +38,13 @@ namespace Backend.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ToolDto>> GetById(int id)
         {
-            var tool = await _context.Tools.FirstOrDefaultAsync(t => t.Id == id);
+            var tool = await _context.Tools
+               .Include(t => t.Files)
+               .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tool == null)
                 return NotFound(new { message = "Tool not found." });
-
-            var dto = new ToolDto
-            {
-                Id = tool.Id,
-                Name = tool.Name,
-                Description = tool.Description,
-                Url = tool.Url,
-                Category = tool.Category,
-                IsActive = tool.IsActive,
-                DisplayOrder = tool.DisplayOrder
-            };
-
-            return Ok(dto);
+            return Ok(MapToDto(tool));
         }
 
         // POST: /api/admin/tools
@@ -80,11 +64,28 @@ namespace Backend.Controllers
                 Url = request.Url,
                 Category = request.Category,
                 IsActive = request.IsActive,
-                DisplayOrder = request.DisplayOrder
+                DisplayOrder = request.DisplayOrder,
+                AvatarUrl = request.AvatarUrl,
+                Files = new List<ToolFile>()
             };
 
             _context.Tools.Add(tool);
             await _context.SaveChangesAsync();
+
+            if (request.Files?.Any() == true)
+            {
+                var files = request.Files.Select(f => new ToolFile
+                {
+                    ToolId = tool.Id,
+                    FileName = f.FileName,
+                    FileUrl = f.FileUrl,
+                    SizeBytes = f.SizeBytes,
+                    ContentType = f.ContentType
+                }).ToList();
+
+                _context.ToolFiles.AddRange(files);
+                await _context.SaveChangesAsync();
+            }
 
             return Ok(new { message = "Tool created successfully.", toolId = tool.Id });
         }
@@ -93,7 +94,9 @@ namespace Backend.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateToolRequest request)
         {
-            var tool = await _context.Tools.FirstOrDefaultAsync(t => t.Id == id);
+            var tool = await _context.Tools
+              .Include(t => t.Files)
+              .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tool == null)
                 return NotFound(new { message = "Tool not found." });
@@ -110,6 +113,26 @@ namespace Backend.Controllers
             tool.Category = request.Category;
             tool.IsActive = request.IsActive;
             tool.DisplayOrder = request.DisplayOrder;
+            tool.AvatarUrl = request.AvatarUrl;
+
+            if (tool.Files != null && tool.Files.Any())
+            {
+                _context.ToolFiles.RemoveRange(tool.Files);
+            }
+
+            if (request.Files?.Any() == true)
+            {
+                var files = request.Files.Select(f => new ToolFile
+                {
+                    ToolId = tool.Id,
+                    FileName = f.FileName,
+                    FileUrl = f.FileUrl,
+                    SizeBytes = f.SizeBytes,
+                    ContentType = f.ContentType
+                }).ToList();
+
+                _context.ToolFiles.AddRange(files);
+            }
 
             await _context.SaveChangesAsync();
 
@@ -120,15 +143,45 @@ namespace Backend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var tool = await _context.Tools.FirstOrDefaultAsync(t => t.Id == id);
+            var tool = await _context.Tools
+                .Include(t => t.Files)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tool == null)
                 return NotFound(new { message = "Tool not found." });
+
+            if (tool.Files != null && tool.Files.Any())
+            {
+                _context.ToolFiles.RemoveRange(tool.Files);
+            }
+
 
             _context.Tools.Remove(tool);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Tool deleted successfully." });
+        }
+        private static ToolDto MapToDto(Tool tool)
+        {
+            return new ToolDto
+            {
+                Id = tool.Id,
+                Name = tool.Name,
+                Description = tool.Description,
+                Url = tool.Url,
+                Category = tool.Category,
+                IsActive = tool.IsActive,
+                DisplayOrder = tool.DisplayOrder,
+                AvatarUrl = tool.AvatarUrl,
+                Files = tool.Files?.Select(f => new ToolFileDto
+                {
+                    Id = f.Id,
+                    FileName = f.FileName,
+                    FileUrl = f.FileUrl,
+                    SizeBytes = f.SizeBytes,
+                    ContentType = f.ContentType
+                }).ToList() ?? new List<ToolFileDto>()
+            };
         }
 
         // PATCH: /api/admin/tools/{id}/toggle
@@ -157,6 +210,8 @@ namespace Backend.Controllers
         public string Category { get; set; }
         public bool IsActive { get; set; }
         public int DisplayOrder { get; set; }
+        public string AvatarUrl { get; set; }
+        public List<ToolFileDto> Files { get; set; } = new();
     }
 
     public class CreateToolRequest
@@ -167,6 +222,8 @@ namespace Backend.Controllers
         public string Category { get; set; }
         public bool IsActive { get; set; } = true;
         public int DisplayOrder { get; set; } = 0;
+        public string AvatarUrl { get; set; }
+        public List<ToolFileDto> Files { get; set; } = new();
     }
 
     public class UpdateToolRequest
@@ -177,5 +234,16 @@ namespace Backend.Controllers
         public string Category { get; set; }
         public bool IsActive { get; set; } = true;
         public int DisplayOrder { get; set; } = 0;
+        public string AvatarUrl { get; set; }
+        public List<ToolFileDto> Files { get; set; } = new();
+    }
+
+    public class ToolFileDto
+    {
+        public int Id { get; set; }
+        public string FileName { get; set; }
+        public string FileUrl { get; set; }
+        public long SizeBytes { get; set; }
+        public string ContentType { get; set; }
     }
 }

@@ -271,6 +271,10 @@ namespace Backend.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ThumbnailUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -359,6 +363,10 @@ namespace Backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -384,6 +392,39 @@ namespace Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tools");
+                });
+
+            modelBuilder.Entity("Backend.Models.ToolFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ToolId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ToolId");
+
+                    b.ToTable("ToolFiles");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>
@@ -557,6 +598,17 @@ namespace Backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Backend.Models.ToolFile", b =>
+                {
+                    b.HasOne("Backend.Models.Tool", "Tool")
+                        .WithMany("Files")
+                        .HasForeignKey("ToolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tool");
+                });
+
             modelBuilder.Entity("Backend.Models.UserBook", b =>
                 {
                     b.HasOne("Backend.Models.Book", "Book")
@@ -620,6 +672,11 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.LearningPath", b =>
                 {
                     b.Navigation("LearningPathCourses");
+                });
+
+            modelBuilder.Entity("Backend.Models.Tool", b =>
+                {
+                    b.Navigation("Files");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>

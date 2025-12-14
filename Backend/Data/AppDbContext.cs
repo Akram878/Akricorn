@@ -26,6 +26,7 @@ namespace Backend.Data
         public DbSet<LearningPath> LearningPaths { get; set; }
         public DbSet<LearningPathCourse> LearningPathCourses { get; set; }
         public DbSet<Tool> Tools { get; set; }
+        public DbSet<ToolFile> ToolFiles { get; set; }
 
         public DbSet<Payment> Payments { get; set; }
 
@@ -92,6 +93,17 @@ namespace Backend.Data
                 .HasOne(bf => bf.Book)
                 .WithMany(b => b.Files)
                 .HasForeignKey(bf => bf.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+
+            // ==========================================
+            // TOOL FILES
+            // ==========================================
+            modelBuilder.Entity<ToolFile>()
+                .HasOne(tf => tf.Tool)
+                .WithMany(t => t.Files)
+                .HasForeignKey(tf => tf.ToolId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 
