@@ -23,7 +23,15 @@ interface SelectedLessonFile {
 }
 interface PdfJsLib {
   GlobalWorkerOptions: { workerSrc: string };
-  getDocument: (src: string | { url: string; withCredentials?: boolean }) => PDFLoadingTask;
+  getDocument: (
+    src:
+      | string
+      | {
+          url: string;
+          withCredentials?: boolean;
+          httpHeaders?: Record<string, string>;
+        }
+  ) => PDFLoadingTask;
 }
 
 interface PDFLoadingTask {
@@ -207,11 +215,20 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
+      const userToken = localStorage.getItem('auth_token');
+      const adminToken = localStorage.getItem('adminToken');
+      const tokenToUse = userToken || adminToken;
+
       container.innerHTML = '';
 
       this.pdfLoadingTask = pdfjsLib.getDocument({
         url: this.selectedFile.url,
         withCredentials: true,
+        httpHeaders: tokenToUse
+          ? {
+              Authorization: `Bearer ${tokenToUse}`,
+            }
+          : undefined,
       });
       this.pdfDocument = await this.pdfLoadingTask.promise;
 
