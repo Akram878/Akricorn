@@ -28,7 +28,9 @@ interface SelectedLessonFile {
   lessonTitle: string;
   sectionTitle: string;
 }
+
 interface PdfJsLib {
+  version?: string;
   GlobalWorkerOptions: { workerSrc: string };
   getDocument: (
     src:
@@ -199,13 +201,26 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
       container.innerHTML = '';
 
       const pdfBytes = await this.fetchPdfBytes(this.selectedFile.url, tokenToUse);
-
+      console.info('[PDF] Fetched bytes length', pdfBytes.byteLength);
       this.pdfLoadingTask = pdfjsLib.getDocument({ data: pdfBytes });
+      const workerReadyPromise: Promise<unknown> | undefined =
+        (this.pdfLoadingTask as any)?._worker?.promise ||
+        (this.pdfLoadingTask as any)?._transport?.workerReadyPromise;
+
+      if (workerReadyPromise) {
+        workerReadyPromise
+          .then(() => console.info('[PDF] Worker responded'))
+          .catch((err) => console.error('[PDF] Worker failed to start', err));
+      } else {
+        console.warn('[PDF] Worker readiness promise not detected');
+      }
       this.pdfDocument = await this.pdfLoadingTask.promise;
 
       if (!this.pdfDocument) {
         throw new Error('Failed to load PDF document');
       }
+
+      console.info('[PDF] Loaded document pages', this.pdfDocument.numPages);
 
       const page = await this.pdfDocument.getPage(1);
       const viewport: PageViewport = page.getViewport({ scale: 1 });
@@ -241,13 +256,16 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   private async loadPdfJs(): Promise<PdfJsLib | null> {
     if (this.pdfjsLib) return this.pdfjsLib;
     if (this.pdfjsLibPromise) return this.pdfjsLibPromise;
-    this.pdfjsLibPromise = import('pdfjs-dist')
+    const workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.449/pdf.worker.min.js';
+
+    this.pdfjsLibPromise = import('pdfjs-dist/legacy/build/pdf')
       .then((module: any) => {
         const lib = (module?.default as PdfJsLib) || (module as PdfJsLib | null);
         if (lib?.GlobalWorkerOptions) {
-          lib.GlobalWorkerOptions.workerSrc =
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
+          lib.GlobalWorkerOptions.workerSrc = workerSrc;
         }
+        console.info('[PDF] pdf.js version', lib?.version);
+        console.info('[PDF] workerSrc configured', lib?.GlobalWorkerOptions?.workerSrc);
         this.pdfjsLib = lib ?? null;
         return lib ?? null;
       })
