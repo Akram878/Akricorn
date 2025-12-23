@@ -196,20 +196,19 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.cleanupPdf();
-    this.isRenderingPdf = true;
-    this.pdfRenderError = null;
-
-    const pdfjsLib = await this.loadPdfJs();
-
-    if (!pdfjsLib || !this.selectedFile) {
-      this.isRenderingPdf = false;
-      return;
-    }
-
     const container = this.pdfContainer.nativeElement;
-    container.innerHTML = '';
-
     try {
+      this.isRenderingPdf = true;
+      this.pdfRenderError = null;
+
+      const pdfjsLib = await this.loadPdfJs();
+
+      if (!pdfjsLib || !this.selectedFile) {
+        return;
+      }
+
+      container.innerHTML = '';
+
       this.pdfLoadingTask = pdfjsLib.getDocument({
         url: this.selectedFile.url,
         withCredentials: true,
