@@ -23,6 +23,7 @@ interface SelectedLessonFile {
   id: number;
   name: string;
   url: string;
+  displayUrl: string;
   safeUrl: SafeResourceUrl;
   type: ViewerType;
   lessonTitle: string;
@@ -72,6 +73,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   private pdfLoadingTask: PDFDocumentLoadingTask | null = null;
   private renderTask: RenderTask | null = null;
   private pdfObjectUrl: string | null = null;
+  private mediaObjectUrl: string | null = null;
   constructor(
     private route: ActivatedRoute,
     private coursesService: PublicCoursesService,
@@ -122,14 +124,35 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  selectFile(file: CourseLessonFile, lessonTitle: string, sectionTitle: string): void {
+  async selectFile(
+    file: CourseLessonFile,
+    lessonTitle: string,
+    sectionTitle: string
+  ): Promise<void> {
     const type = this.detectFileType(file);
+    this.cleanupPdf();
 
+    const token = this.getAuthToken();
+    let displayUrl = file.url;
+    let safeUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(file.url);
+
+    if (type !== 'embed' && type !== 'pdf') {
+      try {
+        const objectUrl = await this.createObjectUrl(file.url, token);
+        displayUrl = objectUrl;
+        safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl);
+        this.mediaObjectUrl = objectUrl;
+      } catch (err) {
+        console.error('Failed to prepare media URL', err);
+        this.notifications.showError('تعذر تحميل الملف. الرجاء المحاولة مرة أخرى.');
+      }
+    }
     this.selectedFile = {
       id: file.id,
       name: file.name,
       url: file.url,
-      safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(file.url),
+      displayUrl,
+      safeUrl,
       type,
       lessonTitle,
       sectionTitle,
@@ -137,8 +160,6 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
 
     if (type === 'pdf') {
       setTimeout(() => this.renderSelectedPdf());
-    } else {
-      this.cleanupPdf();
     }
   }
 
@@ -194,9 +215,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
       if (!pdfjsLib || !this.selectedFile) {
         return;
       }
-      const userToken = localStorage.getItem('auth_token');
-      const adminToken = localStorage.getItem('adminToken');
-      const tokenToUse = userToken ?? adminToken ?? undefined;
+      const tokenToUse = this.getAuthToken();
 
       container.innerHTML = '';
 
@@ -256,10 +275,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   private async loadPdfJs(): Promise<PdfJsLib | null> {
     if (this.pdfjsLib) return this.pdfjsLib;
     if (this.pdfjsLibPromise) return this.pdfjsLibPromise;
-    const workerSrc = new URL(
-      'pdfjs-dist/legacy/build/pdf.worker.min.js',
-      import.meta.url
-    ).toString();
+    const workerSrc = `${window.location.origin}/pdfjs/pdf.worker.mjs`;
 
     this.pdfjsLibPromise = import('pdfjs-dist/legacy/build/pdf')
       .then((module: any) => {
@@ -325,6 +341,11 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
         console.warn('Failed to destroy pdf document', err);
       }
     }
+
+    if (this.mediaObjectUrl) {
+      URL.revokeObjectURL(this.mediaObjectUrl);
+      this.mediaObjectUrl = null;
+    }
     if (this.pdfObjectUrl) {
       URL.revokeObjectURL(this.pdfObjectUrl);
       this.pdfObjectUrl = null;
@@ -360,6 +381,30 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
 
     const buffer = await response.arrayBuffer();
     return new Uint8Array(buffer);
+  }
+
+  private async createObjectUrl(url: string, token?: string): Promise<string> {
+    const response = await fetch(url, {
+      credentials: 'include',
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : undefined,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Media request failed with status ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  private getAuthToken(): string | undefined {
+    const userToken = localStorage.getItem('auth_token');
+    const adminToken = localStorage.getItem('adminToken');
+    return userToken ?? adminToken ?? undefined;
   }
   private detectFileType(file: Pick<CourseLessonFile, 'name' | 'url'>): ViewerType {
     const normalizedName = file.name.toLowerCase();

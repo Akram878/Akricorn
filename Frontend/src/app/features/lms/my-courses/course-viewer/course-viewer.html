@@ -164,7 +164,11 @@
             [src]="selectedFile?.safeUrl"
             title="Lesson resource"
           ></iframe>
-          <img *ngSwitchCase="'image'" [src]="selectedFile?.url" [alt]="selectedFile?.name" />
+          <img
+            *ngSwitchCase="'image'"
+            [src]="selectedFile?.displayUrl || selectedFile?.url"
+            [alt]="selectedFile?.name"
+          />
           <div class="course-viewer__download" *ngSwitchDefault>
             <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>
           </div>
