@@ -3,6 +3,7 @@
     "",
     "\\Controllers",
     "\\Data",
+    "\\Helpers",
     "\\Models"
   ],
   "SelectedNode": "\\Backend.sln",

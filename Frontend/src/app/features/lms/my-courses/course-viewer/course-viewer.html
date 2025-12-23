@@ -130,32 +130,76 @@
   </div>
 
   <div class="course-viewer__overlay" *ngIf="selectedFile" aria-modal="true" role="dialog">
-    <div class="course-viewer__overlay-card">
-      <div class="course-viewer__overlay-head">
+    <div class="course-viewer__overlay-shell" dir="rtl">
+      <div class="course-viewer__overlay-top">
+        <button type="button" class="course-viewer__back" (click)="closeViewer()" aria-label="رجوع">
+          ←
+        </button>
         <div class="course-viewer__overlay-meta">
           <p class="course-viewer__viewer-meta">
             {{ selectedFile?.sectionTitle }} • {{ selectedFile?.lessonTitle }}
           </p>
           <h3 class="course-viewer__viewer-title">{{ selectedFile?.name }}</h3>
         </div>
-        <button type="button" class="course-viewer__overlay-close" (click)="closeViewer()">
-          إغلاق المشغل
-        </button>
       </div>
 
-      <div class="course-viewer__player" [ngSwitch]="selectedFile?.type">
-        <video *ngSwitchCase="'video'" [src]="selectedFile?.safeUrl" controls playsinline></video>
-        <audio *ngSwitchCase="'audio'" [src]="selectedFile?.safeUrl" controls></audio>
-        <iframe *ngSwitchCase="'pdf'" [src]="selectedFile?.safeUrl" title="PDF preview"></iframe>
-        <img *ngSwitchCase="'image'" [src]="selectedFile?.url" [alt]="selectedFile?.name" />
-        <iframe
-          *ngSwitchCase="'embed'"
-          [src]="selectedFile?.safeUrl"
-          title="Lesson resource"
-        ></iframe>
-        <div class="course-viewer__download" *ngSwitchDefault>
-          <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>
+      <div class="course-viewer__overlay-body">
+        <div class="course-viewer__player" [ngSwitch]="selectedFile?.type">
+          <div class="course-viewer__pdf" *ngSwitchCase="'pdf'">
+            <div class="course-viewer__pdf-surface" #pdfContainer></div>
+            <div class="course-viewer__pdf-state" *ngIf="isRenderingPdf && !pdfRenderError">
+              جاري تحميل ملف PDF…
+            </div>
+            <div
+              class="course-viewer__pdf-state course-viewer__pdf-state--error"
+              *ngIf="pdfRenderError"
+            >
+              {{ pdfRenderError }}
+            </div>
+          </div>
+          <video *ngSwitchCase="'video'" [src]="selectedFile?.safeUrl" controls playsinline></video>
+          <audio *ngSwitchCase="'audio'" [src]="selectedFile?.safeUrl" controls></audio>
+          <iframe
+            *ngSwitchCase="'embed'"
+            [src]="selectedFile?.safeUrl"
+            title="Lesson resource"
+          ></iframe>
+          <img *ngSwitchCase="'image'" [src]="selectedFile?.url" [alt]="selectedFile?.name" />
+          <div class="course-viewer__download" *ngSwitchDefault>
+            <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>
+          </div>
         </div>
+        <aside class="course-viewer__sidebar" aria-label="التنقل بين ملفات الكورس">
+          <div class="course-viewer__sidebar-head">
+            <p class="course-viewer__eyebrow">محتوى الكورس</p>
+            <h4>{{ course?.title }}</h4>
+          </div>
+
+          <div class="course-viewer__sidebar-section" *ngFor="let section of course?.sections">
+            <div class="course-viewer__sidebar-section-head">
+              <div>
+                <p class="course-viewer__eyebrow">Section {{ section.order }}</p>
+                <h5>{{ section.title }}</h5>
+              </div>
+              <span class="course-viewer__count">{{ section.lessons.length }} دروس</span>
+            </div>
+
+            <div class="course-viewer__sidebar-lesson" *ngFor="let lesson of section.lessons">
+              <div class="course-viewer__sidebar-lesson-title">{{ lesson.title }}</div>
+              <div class="course-viewer__sidebar-files">
+                <button
+                  type="button"
+                  class="course-viewer__file"
+                  *ngFor="let file of lesson.files"
+                  [class.course-viewer__file--active]="selectedFile?.id === file.id"
+                  (click)="selectFile(file, lesson.title, section.title)"
+                >
+                  {{ file.name }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   </div>
