@@ -144,8 +144,10 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
         this.mediaObjectUrl = objectUrl;
       } catch (err) {
         console.error('Failed to prepare media URL', err);
-        this.notifications.showError('تعذر تحميل الملف. الرجاء المحاولة مرة أخرى.');
-        return;
+        // حافظ على الرابط الأصلي في حال فشل إنشاء Blob URL حتى يتمكن المتصفح من محاولة تحميله مباشرة
+        displayUrl = file.url;
+        safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(file.url);
+        this.mediaObjectUrl = null;
       }
     }
     this.selectedFile = {
@@ -381,8 +383,8 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const contentType = response.headers.get('content-type')?.toLowerCase() || '';
-    if (!contentType.includes('pdf')) {
-      throw new Error('Unexpected content when fetching PDF');
+    if (!contentType.includes('pdf') && !contentType.includes('octet-stream')) {
+      console.warn('Unexpected PDF content-type', contentType || 'unknown');
     }
 
     const buffer = await response.arrayBuffer();
