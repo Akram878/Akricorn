@@ -38,6 +38,7 @@ interface PdfJsLib {
           withCredentials?: boolean;
           httpHeaders?: Record<string, string>;
         }
+      | { data: Uint8Array }
   ) => PDFDocumentLoadingTask;
 }
 @Component({
@@ -187,66 +188,19 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.isRenderingPdf = true;
       this.pdfRenderError = null;
-
-      // const pdfjsLib = await this.loadPdfJs();
-
-      // if (!pdfjsLib || !this.selectedFile) {
-      //   return;
-      // }
-
+      const pdfjsLib = await this.loadPdfJs();
+      if (!pdfjsLib || !this.selectedFile) {
+        return;
+      }
       const userToken = localStorage.getItem('auth_token');
       const adminToken = localStorage.getItem('adminToken');
       const tokenToUse = userToken ?? adminToken ?? undefined;
 
       container.innerHTML = '';
 
-      // this.pdfLoadingTask = pdfjsLib.getDocument({
-      //   url: this.selectedFile.url,
-      //   withCredentials: true,
-      //   httpHeaders: tokenToUse
-      //     ? {
-      //         Authorization: `Bearer ${tokenToUse}`,
-      //       }
-      //     : undefined,
-      // });
-      // this.pdfDocument = await this.pdfLoadingTask.promise;
+      const pdfBytes = await this.fetchPdfBytes(this.selectedFile.url, tokenToUse);
 
-      // const page = await this.pdfDocument.getPage(1);
-      // const viewport = page.getViewport({ scale: 1 });
-      // const containerWidth = container.clientWidth || viewport.width;
-      // const scale = containerWidth / viewport.width;
-      // const scaledViewport = page.getViewport({ scale });
-
-      // const canvas = document.createElement('canvas');
-      // const context = canvas.getContext('2d');
-
-      // if (!context) {
-      //   throw new Error('Cannot render PDF: missing canvas context');
-      // }
-
-      // canvas.width = scaledViewport.width;
-      // canvas.height = scaledViewport.height;
-
-      // container.appendChild(canvas);
-
-      // this.renderTask = page.render({ canvasContext: context, viewport: scaledViewport });
-      // await this.renderTask.promise;
-
-      const pdfjsLib = await this.loadPdfJs();
-
-      if (!pdfjsLib || !this.selectedFile) {
-        return;
-      }
-
-      this.pdfLoadingTask = pdfjsLib.getDocument({
-        url: this.selectedFile.url,
-        withCredentials: true,
-        httpHeaders: tokenToUse
-          ? {
-              Authorization: `Bearer ${tokenToUse}`,
-            }
-          : undefined,
-      });
+      this.pdfLoadingTask = pdfjsLib.getDocument({ data: pdfBytes });
       this.pdfDocument = await this.pdfLoadingTask.promise;
 
       if (!this.pdfDocument) {
@@ -284,41 +238,15 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // private async loadPdfJs(): Promise<PdfJsLib | null> {
-  //   if (this.pdfjsLib) return this.pdfjsLib;
-  //   if (this.pdfjsLibPromise) return this.pdfjsLibPromise;
-
-  //   const dynamicImport = new Function('return import("/pdfjs/pdf.mjs")');
-
-  //   this.pdfjsLibPromise = Promise.resolve(dynamicImport())
-  //     .then((module: any) => {
-  //       const lib = (module?.default as PdfJsLib) || (module as PdfJsLib | null);
-
-  //       if (lib?.GlobalWorkerOptions) {
-  //         lib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
-  //       }
-
-  //       this.pdfjsLib = lib ?? null;
-  //       return lib ?? null;
-  //     })
-  //     .catch((err) => {
-  //       console.error('Failed to load PDF.js', err);
-  //       this.pdfRenderError = 'لم يتم تحميل مكتبة PDF.js. تأكد من تواجدها في مجلد public/pdfjs.';
-  //       return null;
-  //     });
-
-  //   return this.pdfjsLibPromise;
-  // }
-
   private async loadPdfJs(): Promise<PdfJsLib | null> {
     if (this.pdfjsLib) return this.pdfjsLib;
     if (this.pdfjsLibPromise) return this.pdfjsLibPromise;
-    const dynamicImport = new Function('return import("/pdfjs/pdf.mjs")');
-    this.pdfjsLibPromise = Promise.resolve(dynamicImport())
+    this.pdfjsLibPromise = import('pdfjs-dist')
       .then((module: any) => {
         const lib = (module?.default as PdfJsLib) || (module as PdfJsLib | null);
         if (lib?.GlobalWorkerOptions) {
-          lib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
+          lib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
         }
         this.pdfjsLib = lib ?? null;
         return lib ?? null;
