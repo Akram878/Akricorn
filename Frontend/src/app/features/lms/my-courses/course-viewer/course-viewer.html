@@ -157,17 +157,30 @@
               {{ pdfRenderError }}
             </div>
           </div>
-          <video *ngSwitchCase="'video'" [src]="selectedFile?.safeUrl" controls playsinline></video>
-          <audio *ngSwitchCase="'audio'" [src]="selectedFile?.safeUrl" controls></audio>
+          <video
+            *ngSwitchCase="'video'"
+            [src]="selectedFile?.safeUrl"
+            controls
+            playsinline
+            (error)="handleMediaError('video')"
+          ></video>
+          <audio
+            *ngSwitchCase="'audio'"
+            [src]="selectedFile?.safeUrl"
+            controls
+            (error)="handleMediaError('audio')"
+          ></audio>
           <iframe
             *ngSwitchCase="'embed'"
             [src]="selectedFile?.safeUrl"
             title="Lesson resource"
+            (error)="handleMediaError('embed')"
           ></iframe>
           <img
             *ngSwitchCase="'image'"
             [src]="selectedFile?.displayUrl || selectedFile?.url"
             [alt]="selectedFile?.name"
+            (error)="handleMediaError('image')"
           />
           <div class="course-viewer__download" *ngSwitchDefault>
             <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>

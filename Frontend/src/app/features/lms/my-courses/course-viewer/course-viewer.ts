@@ -145,6 +145,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
       } catch (err) {
         console.error('Failed to prepare media URL', err);
         this.notifications.showError('تعذر تحميل الملف. الرجاء المحاولة مرة أخرى.');
+        return;
       }
     }
     this.selectedFile = {
@@ -379,6 +380,11 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
       throw new Error(`PDF request failed with status ${response.status}`);
     }
 
+    const contentType = response.headers.get('content-type')?.toLowerCase() || '';
+    if (!contentType.includes('pdf')) {
+      throw new Error('Unexpected content when fetching PDF');
+    }
+
     const buffer = await response.arrayBuffer();
     return new Uint8Array(buffer);
   }
@@ -428,5 +434,19 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   formatPathProgress(path: CourseLearningPathProgress): string {
     if (!path.totalCourses) return '0%';
     return `${path.completedCourses}/${path.totalCourses} · ${path.completionPercent}%`;
+  }
+
+  handleMediaError(type: ViewerType): void {
+    const messageMap: Record<ViewerType, string> = {
+      video: 'تعذر تحميل الفيديو حالياً. حاول مرة أخرى لاحقاً.',
+      audio: 'تعذر تشغيل الملف الصوتي حالياً.',
+      image: 'تعذر تحميل الصورة.',
+      pdf: 'تعذر تحميل ملف PDF.',
+      embed: 'تعذر تحميل المحتوى الخارجي.',
+      download: 'تعذر تحميل الملف.',
+    };
+
+    const message = messageMap[type] || 'تعذر تحميل الملف.';
+    this.notifications.showError(message);
   }
 }
