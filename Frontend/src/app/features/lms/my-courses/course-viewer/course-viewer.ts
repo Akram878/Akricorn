@@ -10,6 +10,13 @@ import {
 } from '../../../../core/services/public-courses.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { fromEvent, Subscription } from 'rxjs';
+import type {
+  PDFDocumentLoadingTask,
+  PDFDocumentProxy,
+  PDFPageProxy,
+  RenderTask,
+} from 'pdfjs-dist/types/src/display/api';
+import type { PageViewport } from 'pdfjs-dist/types/src/display/display_utils';
 type ViewerType = 'video' | 'pdf' | 'image' | 'audio' | 'embed' | 'download';
 
 interface SelectedLessonFile {
@@ -21,46 +28,18 @@ interface SelectedLessonFile {
   lessonTitle: string;
   sectionTitle: string;
 }
-// interface PdfJsLib {
-//   GlobalWorkerOptions: { workerSrc: string };
-//   getDocument: (
-//     src:
-//       | string
-//       | {
-//           url: string;
-//           withCredentials?: boolean;
-//           httpHeaders?: Record<string, string>;
-//         }
-//   ) => PDFLoadingTask;
-// }
-
-// interface PDFLoadingTask {
-//   promise: Promise<PDFDocumentProxy>;
-//   destroy: () => void;
-// }
-
-// interface PDFDocumentProxy {
-//   getPage: (pageNumber: number) => Promise<PDFPageProxy>;
-//   destroy: () => void;
-// }
-
-// interface PDFPageProxy {
-//   getViewport: (params: { scale: number }) => PDFPageViewport;
-//   render: (params: {
-//     canvasContext: CanvasRenderingContext2D;
-//     viewport: PDFPageViewport;
-//   }) => RenderTask;
-// }
-
-// interface PDFPageViewport {
-//   width: number;
-//   height: number;
-// }
-
-// interface RenderTask {
-//   promise: Promise<void>;
-//   cancel: () => void;
-// }
+interface PdfJsLib {
+  GlobalWorkerOptions: { workerSrc: string };
+  getDocument: (
+    src:
+      | string
+      | {
+          url: string;
+          withCredentials?: boolean;
+          httpHeaders?: Record<string, string>;
+        }
+  ) => PDFDocumentLoadingTask;
+}
 @Component({
   selector: 'app-course-viewer',
   standalone: true,
@@ -84,11 +63,11 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   isRenderingPdf = false;
 
   private resizeListener?: Subscription;
-  // private pdfjsLib: PdfJsLib | null = null;
-  // private pdfjsLibPromise?: Promise<PdfJsLib | null>;
-  // private pdfDocument: PDFDocumentProxy | null = null;
-  // private pdfLoadingTask: PDFLoadingTask | null = null;
-  // private renderTask: RenderTask | null = null;
+  private pdfjsLib: PdfJsLib | null = null;
+  private pdfjsLibPromise?: Promise<PdfJsLib | null>;
+  private pdfDocument: PDFDocumentProxy | null = null;
+  private pdfLoadingTask: PDFDocumentLoadingTask | null = null;
+  private renderTask: RenderTask | null = null;
   private pdfObjectUrl: string | null = null;
   constructor(
     private route: ActivatedRoute,
@@ -217,7 +196,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
 
       const userToken = localStorage.getItem('auth_token');
       const adminToken = localStorage.getItem('adminToken');
-      const tokenToUse = userToken || adminToken;
+      const tokenToUse = userToken ?? adminToken ?? undefined;
 
       container.innerHTML = '';
 
@@ -252,18 +231,50 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
 
       // this.renderTask = page.render({ canvasContext: context, viewport: scaledViewport });
       // await this.renderTask.promise;
-      const pdfData = await this.fetchPdfBytes(this.selectedFile.url, tokenToUse);
-      const blob = new Blob([pdfData], { type: 'application/pdf' });
-      this.pdfObjectUrl = URL.createObjectURL(blob);
 
-      const iframe = document.createElement('iframe');
-      iframe.src = this.pdfObjectUrl;
-      iframe.title = this.selectedFile.name;
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.loading = 'lazy';
+      const pdfjsLib = await this.loadPdfJs();
 
-      container.appendChild(iframe);
+      if (!pdfjsLib || !this.selectedFile) {
+        return;
+      }
+
+      this.pdfLoadingTask = pdfjsLib.getDocument({
+        url: this.selectedFile.url,
+        withCredentials: true,
+        httpHeaders: tokenToUse
+          ? {
+              Authorization: `Bearer ${tokenToUse}`,
+            }
+          : undefined,
+      });
+      this.pdfDocument = await this.pdfLoadingTask.promise;
+
+      if (!this.pdfDocument) {
+        throw new Error('Failed to load PDF document');
+      }
+
+      const page = await this.pdfDocument.getPage(1);
+      const viewport: PageViewport = page.getViewport({ scale: 1 });
+      const containerWidth = container.clientWidth || viewport.width;
+      const scale = containerWidth / viewport.width;
+      const scaledViewport: PageViewport = page.getViewport({ scale });
+
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      if (!context) {
+        throw new Error('Cannot render PDF: missing canvas context');
+      }
+
+      canvas.width = scaledViewport.width;
+      canvas.height = scaledViewport.height;
+      canvas.style.width = '100%';
+      canvas.style.height = 'auto';
+
+      container.appendChild(canvas);
+
+      this.renderTask = page.render({ canvasContext: context, viewport: scaledViewport, canvas });
+      await this.renderTask.promise;
     } catch (err) {
       console.error(err);
       this.pdfRenderError = 'تعذر تحميل ملف PDF حالياً. حاول مرة أخرى لاحقاً.';
@@ -299,6 +310,26 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   //   return this.pdfjsLibPromise;
   // }
 
+  private async loadPdfJs(): Promise<PdfJsLib | null> {
+    if (this.pdfjsLib) return this.pdfjsLib;
+    if (this.pdfjsLibPromise) return this.pdfjsLibPromise;
+    const dynamicImport = new Function('return import("/pdfjs/pdf.mjs")');
+    this.pdfjsLibPromise = Promise.resolve(dynamicImport())
+      .then((module: any) => {
+        const lib = (module?.default as PdfJsLib) || (module as PdfJsLib | null);
+        if (lib?.GlobalWorkerOptions) {
+          lib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.mjs';
+        }
+        this.pdfjsLib = lib ?? null;
+        return lib ?? null;
+      })
+      .catch((err) => {
+        console.error('Failed to load PDF.js', err);
+        this.pdfRenderError = 'لم يتم تحميل مكتبة PDF.js. تأكد من تواجدها في مجلد public/pdfjs.';
+        return null;
+      });
+    return this.pdfjsLibPromise;
+  }
   private cleanupPdf(): void {
     // if (this.renderTask) {
     //   try {
@@ -322,6 +353,29 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     //   } catch (err) {
     //     console.warn('Failed to destroy pdf document', err);
     //   }
+    if (this.renderTask) {
+      try {
+        this.renderTask.cancel();
+      } catch (err) {
+        console.warn('Failed to cancel pdf render task', err);
+      }
+    }
+
+    if (this.pdfLoadingTask) {
+      try {
+        this.pdfLoadingTask.destroy();
+      } catch (err) {
+        console.warn('Failed to destroy pdf loading task', err);
+      }
+    }
+
+    if (this.pdfDocument) {
+      try {
+        this.pdfDocument.destroy();
+      } catch (err) {
+        console.warn('Failed to destroy pdf document', err);
+      }
+    }
     if (this.pdfObjectUrl) {
       URL.revokeObjectURL(this.pdfObjectUrl);
       this.pdfObjectUrl = null;
@@ -334,6 +388,9 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     // this.renderTask = null;
     // this.pdfDocument = null;
     // this.pdfLoadingTask = null;
+    this.renderTask = null;
+    this.pdfDocument = null;
+    this.pdfLoadingTask = null;
     this.isRenderingPdf = false;
     this.pdfRenderError = null;
   }
