@@ -256,7 +256,10 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   private async loadPdfJs(): Promise<PdfJsLib | null> {
     if (this.pdfjsLib) return this.pdfjsLib;
     if (this.pdfjsLibPromise) return this.pdfjsLibPromise;
-    const workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.449/pdf.worker.min.js';
+    const workerSrc = new URL(
+      'pdfjs-dist/legacy/build/pdf.worker.min.js',
+      import.meta.url
+    ).toString();
 
     this.pdfjsLibPromise = import('pdfjs-dist/legacy/build/pdf')
       .then((module: any) => {
