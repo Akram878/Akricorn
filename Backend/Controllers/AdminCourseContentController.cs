@@ -72,13 +72,18 @@ public class AdminCourseContentController : ControllerBase
                             {
                                 id = f.Id,
                                 fileName = f.FileName,
-                                fileUrl = f.FileUrl
+                                fileUrl = BuildLessonFileUrl(f.Id)
                             })
                         })
                 })
         };
 
 
+    }
+
+    private string BuildLessonFileUrl(int fileId)
+    {
+        return Url.Content($"/api/lessons/files/{fileId}");
     }
 
     // ============================================================
@@ -339,12 +344,13 @@ public class AdminCourseContentController : ControllerBase
             await _context.SaveChangesAsync();
 
             var content = await BuildCourseContentDto(lesson.Section.CourseId);
+            var fileAccessUrl = BuildLessonFileUrl(newFile.Id);
 
             return Ok(new
             {
                 message = "File uploaded.",
                 id = newFile.Id,
-                url,
+                url = fileAccessUrl,
                 content
             });
         }

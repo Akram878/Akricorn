@@ -123,7 +123,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
   }
 
   selectFile(file: CourseLessonFile, lessonTitle: string, sectionTitle: string): void {
-    const type = this.detectFileType(file.url);
+    const type = this.detectFileType(file);
 
     this.selectedFile = {
       id: file.id,
@@ -358,9 +358,13 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     const buffer = await response.arrayBuffer();
     return new Uint8Array(buffer);
   }
-  private detectFileType(url: string): ViewerType {
-    const normalized = url.toLowerCase();
-    const extension = normalized.split('.').pop()?.split('?')[0] || '';
+  private detectFileType(file: Pick<CourseLessonFile, 'name' | 'url'>): ViewerType {
+    const normalizedName = file.name.toLowerCase();
+    const normalizedUrl = file.url.toLowerCase();
+    const extension =
+      normalizedName.split('.').pop()?.split('?')[0] ||
+      normalizedUrl.split('.').pop()?.split('?')[0] ||
+      '';
 
     if (['mp4', 'webm', 'ogg'].includes(extension)) return 'video';
     if (['mp3', 'wav', 'aac', 'm4a'].includes(extension)) return 'audio';
@@ -368,7 +372,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
     if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'].includes(extension)) return 'image';
 
     // لو رابط خارجي يمكن تضمينه
-    if (normalized.startsWith('http')) return 'embed';
+    if (normalizedUrl.startsWith('http')) return 'embed';
 
     return 'download';
   }

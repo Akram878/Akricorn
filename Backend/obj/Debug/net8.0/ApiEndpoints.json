@@ -995,6 +995,22 @@
     ]
   },
   {
+    "ContainingType": "Backend.Controllers.LessonFilesController",
+    "Method": "GetLessonFile",
+    "RelativePath": "api/lessons/files/{fileId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Backend.Controllers.LmsController",
     "Method": "GetBooks",
     "RelativePath": "api/lms/books",

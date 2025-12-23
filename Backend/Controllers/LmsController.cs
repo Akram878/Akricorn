@@ -86,7 +86,7 @@ namespace Backend.Controllers
                                 {
                                     fileId = f.Id,
                                     fileName = f.FileName,
-                                    fileUrl = f.FileUrl,
+                                    fileUrl = BuildLessonFileUrl(f.Id),
                                     uploadedAt = f.UploadedAt
                                 })
                         })
@@ -295,7 +295,7 @@ namespace Backend.Controllers
                                 {
                                     id = f.Id,
                                     name = f.FileName,
-                                    url = f.FileUrl,
+                                    url = BuildLessonFileUrl(f.Id),
                                     uploadedAt = f.UploadedAt
                                 })
                         })
@@ -529,6 +529,11 @@ namespace Backend.Controllers
         // ============================
         //         Utilities
         // ============================
+
+        private string BuildLessonFileUrl(int fileId)
+        {
+            return Url.Content($"/api/lessons/files/{fileId}");
+        }
         private double CalculateCompletionPercent(
             IDictionary<int, int> totalByPath,
             IDictionary<int, int> completedByPath,
