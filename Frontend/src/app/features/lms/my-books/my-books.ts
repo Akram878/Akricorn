@@ -89,32 +89,17 @@ export class MyBooks implements OnInit {
       return;
     }
 
-    const token = localStorage.getItem('auth_token');
+    const url = this.withAuthToken(book.fileUrl);
+    window.open(url, '_blank', 'noopener');
+  }
 
-    fetch(book.fileUrl, {
-      credentials: 'include',
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : undefined,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
-            this.notification.showError('لا يمكنك الوصول إلى هذا الكتاب.');
-          }
-          throw new Error(`Download failed with status ${response.status}`);
-        }
-        return response.blob();
-      })
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
-      })
-      .catch(() => {
-        this.notification.showError('تعذر تحميل الكتاب.');
-      });
+  private withAuthToken(url: string): string {
+    const token = localStorage.getItem('auth_token');
+    if (!token || url.includes('token=')) {
+      return url;
+    }
+
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}token=${encodeURIComponent(token)}`;
   }
 }

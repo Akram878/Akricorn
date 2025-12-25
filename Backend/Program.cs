@@ -114,6 +114,32 @@ builder.Services
         // أعد كتابة رد الـ 401 برسالة أوضح بدل الرد الافتراضي الفارغ
         options.Events = new JwtBearerEvents
         {
+
+            OnMessageReceived = context =>
+            {
+                if (!string.IsNullOrWhiteSpace(context.Token))
+                {
+                    return Task.CompletedTask;
+                }
+
+                var path = context.HttpContext.Request.Path;
+                var isMediaFileRequest =
+                    path.StartsWithSegments("/api/lessons/files") ||
+                    path.StartsWithSegments("/api/books/files");
+
+                if (!isMediaFileRequest)
+                {
+                    return Task.CompletedTask;
+                }
+
+                if (context.Request.Query.TryGetValue("token", out var tokenValue))
+                {
+                    context.Token = tokenValue.ToString();
+                }
+
+                return Task.CompletedTask;
+            },
+
             OnChallenge = context =>
             {
                 context.HandleResponse();

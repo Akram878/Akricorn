@@ -146,27 +146,22 @@
       <div class="course-viewer__overlay-body">
         <div class="course-viewer__player" [ngSwitch]="selectedFile?.type">
           <div class="course-viewer__pdf" *ngSwitchCase="'pdf'">
-            <div class="course-viewer__pdf-surface" #pdfContainer></div>
-            <div class="course-viewer__pdf-state" *ngIf="isRenderingPdf && !pdfRenderError">
-              جاري تحميل ملف PDF…
-            </div>
-            <div
-              class="course-viewer__pdf-state course-viewer__pdf-state--error"
-              *ngIf="pdfRenderError"
-            >
-              {{ pdfRenderError }}
-            </div>
+            <iframe
+              [src]="selectedFile?.safeUrl"
+              title="ملف PDF"
+              (error)="handleMediaError('pdf')"
+            ></iframe>
           </div>
           <video
             *ngSwitchCase="'video'"
-            [src]="selectedFile?.safeUrl"
+            [src]="selectedFile?.displayUrl"
             controls
             playsinline
             (error)="handleMediaError('video')"
           ></video>
           <audio
             *ngSwitchCase="'audio'"
-            [src]="selectedFile?.safeUrl"
+            [src]="selectedFile?.displayUrl"
             controls
             (error)="handleMediaError('audio')"
           ></audio>
@@ -184,6 +179,7 @@
           />
           <div class="course-viewer__download" *ngSwitchDefault>
             <p>لا يمكن عرض هذا الملف هنا، يمكنك تنزيله وفتحه.</p>
+            <a [href]="selectedFile?.displayUrl" target="_blank" rel="noopener">فتح الملف</a>
           </div>
         </div>
         <aside class="course-viewer__sidebar" aria-label="التنقل بين ملفات الكورس">

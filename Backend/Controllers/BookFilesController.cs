@@ -10,7 +10,7 @@ using System.IO;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
-
+using Microsoft.AspNetCore.StaticFiles;
 namespace Backend.Controllers
 {
     [ApiController]
@@ -69,9 +69,16 @@ namespace Backend.Controllers
             }
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var contentType = string.IsNullOrWhiteSpace(file.ContentType)
-                ? "application/octet-stream"
-                : file.ContentType;
+
+            var contentType = file.ContentType;
+            if (string.IsNullOrWhiteSpace(contentType))
+            {
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(physicalPath, out contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+            }
 
             _logger.LogInformation("Book file request: userId={UserId}, fileId={FileId}, bookId={BookId}", userContext.UserId, fileId, file.BookId);
 

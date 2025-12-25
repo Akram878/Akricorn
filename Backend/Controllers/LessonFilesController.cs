@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.IO;
-
+using Microsoft.AspNetCore.StaticFiles;
 namespace Backend.Controllers
 {
     [ApiController]
@@ -69,10 +69,15 @@ namespace Backend.Controllers
             }
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var contentType = string.IsNullOrWhiteSpace(file.ContentType)
-                ? "application/octet-stream"
-                : file.ContentType;
-
+            var contentType = file.ContentType;
+            if (string.IsNullOrWhiteSpace(contentType))
+            {
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(physicalPath, out contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+            }
             _logger.LogInformation("Lesson file request: userId={UserId}, fileId={FileId}, courseId={CourseId}", userContext.UserId, fileId, courseId);
 
             return File(stream, contentType, enableRangeProcessing: true);
