@@ -15,11 +15,12 @@ $gold-400: #d9a74a;
 $gold-500: #b9822f;
 
 .Home {
-  padding: 5rem;
+  // padding: 5rem;
   width: 100%;
   height: 100%;
 
   .Large_brochure {
+    padding: 5rem 5rem 0 5rem;
     .Brochure {
       @include flex(row, space-between, center);
       gap: 1rem;
@@ -64,6 +65,7 @@ $gold-500: #b9822f;
   }
 
   .Small_brochure {
+    padding: 0rem 5rem 5rem 5rem;
     @include flex(row, center, center);
     gap: 5rem;
     flex-wrap: wrap;
@@ -106,7 +108,6 @@ $gold-500: #b9822f;
   flex-grow: 1;
   width: 30rem;
   height: 20rem;
-
   position: relative;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -138,6 +139,7 @@ $gold-500: #b9822f;
 
 .featured-courses {
   margin-top: 2.5rem;
+  padding: 1.5rem 1.8rem 2.2rem;
 
   &__header {
     margin-bottom: 1.75rem;
@@ -157,18 +159,22 @@ $gold-500: #b9822f;
     width: 100%;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 1rem;
     justify-content: space-between;
   }
 }
 
 @media (max-width: 900px) {
+  .hero-velvet-plate {
+    width: 100%;
+  }
+  .Home .Small_brochure,
+  .Home .Large_brochure {
+    padding: 1.5rem;
+  }
   h1 {
     font-size: 1rem;
     font-weight: 200;
-  }
-  .Home {
-    padding: 1rem;
   }
 
   .featured-courses__grid {
@@ -177,8 +183,12 @@ $gold-500: #b9822f;
 }
 
 @media (max-width: 600px) {
-  .home {
-    padding: 1rem;
+  .hero-velvet-plate {
+    width: 100%;
+  }
+  .Home .Small_brochure,
+  .Home .Large_brochure {
+    padding: 1.5rem;
   }
 
   .featured-courses__grid {

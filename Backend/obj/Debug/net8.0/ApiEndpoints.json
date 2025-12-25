@@ -1028,6 +1028,16 @@
   },
   {
     "ContainingType": "Backend.Controllers.CoursesController",
+    "Method": "GetCourses",
+    "RelativePath": "api/courses",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.CoursesController",
     "Method": "GetFeaturedCourses",
     "RelativePath": "api/courses/featured",
     "HttpMethod": "GET",

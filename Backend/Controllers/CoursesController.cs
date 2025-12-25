@@ -18,15 +18,35 @@ namespace Backend.Controllers
             _context = context;
         }
 
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCourses()
+        {
+            var courses = await BuildCoursesQuery()
+                .ToListAsync();
+
+            return Ok(courses);
+        }
+
         [HttpGet("featured")]
         [AllowAnonymous]
         public async Task<IActionResult> GetFeaturedCourses()
         {
-            var courses = await _context.Courses
+            var courses = await BuildCoursesQuery()
+                          .Take(4)
+                          .ToListAsync();
+
+            return Ok(courses);
+        }
+
+        private IQueryable<object> BuildCoursesQuery()
+        {
+            return _context.Courses
                 .AsNoTracking()
                 .Where(c => c.IsActive)
                 .OrderByDescending(c => c.CreatedAt)
-                .Take(4)
+            
                 .Select(c => new
                 {
                     c.Id,
@@ -40,10 +60,7 @@ namespace Backend.Controllers
                     pathTitle = c.LearningPathCourses
                         .Select(lp => lp.LearningPath.Title)
                         .FirstOrDefault()
-                })
-                .ToListAsync();
-
-            return Ok(courses);
+                });
         }
     }
 }

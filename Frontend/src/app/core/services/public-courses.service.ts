@@ -99,7 +99,7 @@ export class PublicCoursesService {
 
   // جلب قائمة الكورسات العامة
   getCourses(): Observable<PublicCourse[]> {
-    return this.http.get<PublicCourse[]>(`${this.baseUrl}/courses`);
+    return this.http.get<PublicCourse[]>(`${this.coursesBaseUrl}`);
   }
 
   // Latest featured courses (published only)

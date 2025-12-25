@@ -3,7 +3,11 @@ import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
-import { PublicCoursesService, MyCourse } from '../../../core/services/public-courses.service';
+import {
+  PublicCoursesService,
+  MyCourse,
+  PublicCourse,
+} from '../../../core/services/public-courses.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 
@@ -17,14 +21,15 @@ import { CourseCardComponent } from '../course-card/course-card';
   styleUrl: './my-courses.scss',
 })
 export class MyCourses implements OnInit, OnDestroy {
-  myCourses: MyCourse[] = [];
-  filteredMyCourses: MyCourse[] = [];
+  myCourses: PublicCourse[] = [];
+  filteredMyCourses: PublicCourse[] = [];
 
   isLoading = false;
   error: string | null = null;
 
   // خيارات الفئات الموجودة فعلياً
   categories: string[] = [];
+  private ownedCourseIds: Set<number> = new Set<number>();
   courseThumbnails: Record<number, string> = {};
   private thumbnailObjectUrls: Map<number, string> = new Map();
   private thumbnailSubscriptions: Map<number, Subscription> = new Map();
@@ -58,9 +63,8 @@ export class MyCourses implements OnInit, OnDestroy {
   loadMyCourses(): void {
     this.isLoading = true;
     this.error = null;
-
-    this.publicCoursesService.getMyCourses().subscribe({
-      next: (data: MyCourse[]) => {
+    this.publicCoursesService.getCourses().subscribe({
+      next: (data: PublicCourse[]) => {
         this.resetThumbnails();
         this.myCourses = data;
         this.buildFilterOptions();
@@ -72,6 +76,19 @@ export class MyCourses implements OnInit, OnDestroy {
         console.error('Error loading my courses', err);
         this.error = 'حدث خطأ أثناء تحميل كورساتك. حاول مرة أخرى لاحقاً.';
         this.isLoading = false;
+      },
+    });
+
+    this.loadOwnedCourses();
+  }
+
+  private loadOwnedCourses(): void {
+    this.publicCoursesService.getMyCourses().subscribe({
+      next: (data: MyCourse[]) => {
+        this.ownedCourseIds = new Set(data.map((course) => course.id));
+      },
+      error: () => {
+        this.ownedCourseIds.clear();
       },
     });
   }
@@ -114,11 +131,19 @@ export class MyCourses implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  trackByCourseId(index: number, course: MyCourse): number {
+  trackByCourseId(index: number, course: PublicCourse): number {
     return course.id;
   }
 
-  private loadCourseThumbnails(courses: MyCourse[]): void {
+  isCourseOwned(course: PublicCourse): boolean {
+    return this.ownedCourseIds.has(course.id);
+  }
+
+  onCoursePurchased(courseId: number): void {
+    this.ownedCourseIds.add(courseId);
+  }
+
+  private loadCourseThumbnails(courses: PublicCourse[]): void {
     const token = this.authService.getToken();
     if (!token) {
       return;
