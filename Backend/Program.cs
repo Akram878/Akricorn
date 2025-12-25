@@ -233,7 +233,18 @@ app.Use(async (context, next) =>
     await next();
 });
 // ملفات Angular الـ static (لو حاطط الـ build هنا)
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        var origin = context.Context.Request.Headers.Origin.ToString();
+        if (origin == "http://localhost:4200")
+        {
+            context.Context.Response.Headers["Access-Control-Allow-Origin"] = origin;
+            context.Context.Response.Headers["Vary"] = "Origin";
+        }
+    }
+});
 
 app.UseRouting();
 

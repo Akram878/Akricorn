@@ -55,8 +55,13 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
       })
     : req;
 
+  const isApiRequest = req.url.includes('/api/');
   return next(authReq).pipe(
     catchError((error) => {
+      if (!isApiRequest) {
+        return throwError(() => error);
+      }
+
       console.error('HTTP Interceptor Error:', error);
 
       // ⛔ "Failed to fetch" (مثلاً السيرفر طافي)
