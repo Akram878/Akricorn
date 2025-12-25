@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DecimalPipe } from '@angular/common';
-import { Router } from '@angular/router';
+
 import { FormsModule } from '@angular/forms'; // 👈 مهم جداً
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -9,9 +9,11 @@ import {
   PublicCourse,
   MyCourse,
 } from '../../../core/services/public-courses.service';
-import { NotificationService } from '../../../core/services/notification.service';
+
 import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
+import { CourseCardComponent } from '../course-card/course-card';
+import { isTokenExpired } from '../../../core/utils/auth-token';
 @Component({
   selector: 'app-lms-courses',
   standalone: true,
@@ -21,6 +23,7 @@ import { resolveMediaUrl } from '../../../core/utils/media-url';
     NgForOf,
     DecimalPipe,
     FormsModule, // 👈 هنا نضيف الـ FormsModule
+    CourseCardComponent,
   ],
   templateUrl: './courses.html',
   styleUrl: './courses.scss',
@@ -34,9 +37,6 @@ export class Courses implements OnInit, OnDestroy {
 
   isLoading = false;
   error: string | null = null;
-
-  // لمنع الضغط المكرر على زر الشراء
-  processingCourseId: number | null = null;
 
   // IDs للكورسات المملوكة
   private ownedCourseIds: Set<number> = new Set<number>();
@@ -60,8 +60,7 @@ export class Courses implements OnInit, OnDestroy {
 
   constructor(
     private publicCoursesService: PublicCoursesService,
-    private notification: NotificationService,
-    private router: Router,
+
     private http: HttpClient,
     private authService: AuthService
   ) {}
@@ -102,7 +101,7 @@ export class Courses implements OnInit, OnDestroy {
     const token = localStorage.getItem('auth_token');
 
     // لو ما في توكن أو التوكن منتهي الصلاحية → لا تطلب /my-courses حتى لا يظهر تنبيه انتهاء الجلسة للضيوف
-    if (!token || this.isTokenExpired(token)) {
+    if (!token || isTokenExpired(token)) {
       return;
     }
     this.publicCoursesService.getMyCourses().subscribe({
@@ -131,33 +130,6 @@ export class Courses implements OnInit, OnDestroy {
 
     this.categories = Array.from(categorySet).sort();
     this.paths = Array.from(pathSet).sort();
-  }
-
-  // فحص انتهاء صلاحية الـ JWT حتى لا نرسل طلبات مصادقة بتوكن منتهي
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payloadSegment = token.split('.')[1];
-      if (!payloadSegment) {
-        return true;
-      }
-
-      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
-      const padded = normalized.padEnd(
-        normalized.length + ((4 - (normalized.length % 4)) % 4),
-        '='
-      );
-      const payload = JSON.parse(atob(padded));
-
-      if (!payload?.exp) {
-        return true;
-      }
-
-      const expiryMs = payload.exp * 1000;
-      return Date.now() >= expiryMs;
-    } catch (e) {
-      console.error('Failed to decode token for expiry check', e);
-      return true;
-    }
   }
 
   // ============================
@@ -228,40 +200,8 @@ export class Courses implements OnInit, OnDestroy {
     return course.id;
   }
 
-  // ============================
-  //      Purchase logic
-  // ============================
-  onPurchase(course: PublicCourse): void {
-    // لو الكورس مملوك → ودّيه مباشرة إلى My Courses
-    if (this.isCourseOwned(course)) {
-      this.router.navigate(['/lms/my-courses']);
-      return;
-    }
-
-    if (this.processingCourseId) {
-      return;
-    }
-
-    this.processingCourseId = course.id;
-
-    this.publicCoursesService.purchaseCourse(course.id).subscribe({
-      next: () => {
-        this.notification.showSuccess('Course purchased successfully.');
-        this.ownedCourseIds.add(course.id); // يظهر Owned بدون ريفرش
-        this.processingCourseId = null;
-      },
-      error: (err) => {
-        if (err?.status === 401) {
-          this.notification.showError('Please log in to purchase this course.');
-        } else if (err?.error?.message) {
-          this.notification.showError(err.error.message);
-        } else {
-          this.notification.showError('Failed to purchase course.');
-        }
-
-        this.processingCourseId = null;
-      },
-    });
+  onCoursePurchased(courseId: number): void {
+    this.ownedCourseIds.add(courseId);
   }
   private loadCourseThumbnails(courses: PublicCourse[]): void {
     const token = this.authService.getToken();

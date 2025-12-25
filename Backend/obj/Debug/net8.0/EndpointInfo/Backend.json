@@ -1770,6 +1770,18 @@
         }
       }
     },
+    "/api/courses/featured": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/lessons/files/{fileId}": {
       "get": {
         "tags": [

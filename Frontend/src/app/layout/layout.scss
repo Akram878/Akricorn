@@ -152,7 +152,8 @@
       li {
         margin: 0.3rem 0;
 
-        a {
+        a,
+        .lms-footer__link {
           color: rgba(245, 201, 106, 0.85);
           text-decoration: none;
           font-size: 0.9rem;
@@ -163,6 +164,12 @@
             color: #f5c96a;
             padding-left: 4px;
           }
+        }
+
+        .lms-footer__link--disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          pointer-events: none;
         }
       }
     }

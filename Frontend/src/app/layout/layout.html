@@ -133,18 +133,18 @@
       <div class="lms-footer__col">
         <h4>Explore</h4>
         <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#">My Courses</a></li>
-          <li><a href="#">Library</a></li>
+          <li><a [routerLink]="'/home'">Home</a></li>
+          <li><a [routerLink]="'/lms/my-courses'">My Courses</a></li>
+          <li><a [routerLink]="'/lms/library'">Library</a></li>
         </ul>
       </div>
 
       <div class="lms-footer__col">
         <h4>Resources</h4>
         <ul>
-          <li><a href="#">YouTube</a></li>
-          <li><a href="#">Documentation</a></li>
-          <li><a href="#">Support</a></li>
+          <li><span class="lms-footer__link lms-footer__link--disabled">YouTube</span></li>
+          <li><span class="lms-footer__link lms-footer__link--disabled">Documentation</span></li>
+          <li><span class="lms-footer__link lms-footer__link--disabled">Support</span></li>
         </ul>
       </div>
 

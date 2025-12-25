@@ -7,7 +7,7 @@
           <p>Start a course today avolunlock your potential with our online learning platform</p>
         </div>
         <div class="Brochure_Links">
-          <a href="">Browse Courses</a>
+          <a [routerLink]="'/lms/courses'">Browse Courses</a>
         </div>
       </div>
 
@@ -17,44 +17,19 @@
     </div>
   </section>
 
-  <section class="featured-courses">
+  <section class="featured-courses" *ngIf="featuredCourses.length > 0">
     <div class="featured-courses__header">
       <h2 class="featured-courses__title">Featured Courses</h2>
       <p class="featured-courses__subtitle">Curated courses to help you grow faster.</p>
     </div>
 
-    <div class="featured-courses__body">
-      <article class="featured-courses__card">
-        <div class="featured-courses__image"></div>
-        <div class="featured-courses__body">
-          <h3 class="featured-courses__name">Web Development</h3>
-          <p class="featured-courses__meta">12h • Beginner • John Smith</p>
-        </div>
-      </article>
-
-      <article class="featured-courses__card">
-        <div class="featured-courses__image"></div>
-        <div class="featured-courses__body">
-          <h3 class="featured-courses__name">Data Science</h3>
-          <p class="featured-courses__meta">18h • Intermediate • Jane Doe</p>
-        </div>
-      </article>
-
-      <article class="featured-courses__card">
-        <div class="featured-courses__image"></div>
-        <div class="featured-courses__body">
-          <h3 class="featured-courses__name">Graphic Design</h3>
-          <p class="featured-courses__meta">9h • All levels • Alex Lee</p>
-        </div>
-      </article>
-
-      <article class="featured-courses__card">
-        <div class="featured-courses__image"></div>
-        <div class="featured-courses__body">
-          <h3 class="featured-courses__name">Graphic Design</h3>
-          <p class="featured-courses__meta">9h • All levels • Alex Lee</p>
-        </div>
-      </article>
+    <div class="featured-courses__grid">
+      <app-course-card
+        *ngFor="let course of featuredCourses; trackBy: trackByCourseId"
+        [course]="course"
+        [owned]="isCourseOwned(course)"
+        (purchased)="onCoursePurchased($event)"
+      ></app-course-card>
     </div>
   </section>
 
@@ -66,7 +41,7 @@
           <p>Access your universty's LMB alongside: our courses in one place.</p>
         </div>
         <div class="Brochure_Links">
-          <a href="">Open LMS</a>
+          <a [routerLink]="'/lms'">Open LMS</a>
         </div>
       </div>
     </div>
@@ -78,7 +53,7 @@
           <p>Offering expart solutions iejiured to your needs.</p>
         </div>
         <div class="Brochure_Links">
-          <a href="">View Services</a>
+          <a [routerLink]="'/services-section'">View Services</a>
         </div>
       </div>
     </div>

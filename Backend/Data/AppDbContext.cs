@@ -45,6 +45,11 @@ namespace Backend.Data
             // ==========================================
             // UserCourse (many-to-many: User ↔ Course)
             // ==========================================
+
+            modelBuilder.Entity<Course>()
+              .Property(c => c.CreatedAt)
+              .HasDefaultValueSql("GETUTCDATE()");
+
             modelBuilder.Entity<UserCourse>()
                 .HasKey(uc => new { uc.UserId, uc.CourseId });
 

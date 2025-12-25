@@ -91,7 +91,7 @@ export interface CoursePaymentResponse {
 export class PublicCoursesService {
   // Endpoint الـ LMS الأساسي
   private baseUrl = `${API_BASE_URL}/api/lms`;
-
+  private coursesBaseUrl = `${API_BASE_URL}/api/courses`;
   // Endpoint للدفع الافتراضي
   private paymentsBaseUrl = `${API_BASE_URL}/api/payments`;
 
@@ -100,6 +100,11 @@ export class PublicCoursesService {
   // جلب قائمة الكورسات العامة
   getCourses(): Observable<PublicCourse[]> {
     return this.http.get<PublicCourse[]>(`${this.baseUrl}/courses`);
+  }
+
+  // Latest featured courses (published only)
+  getFeaturedCourses(): Observable<PublicCourse[]> {
+    return this.http.get<PublicCourse[]>(`${this.coursesBaseUrl}/featured`);
   }
 
   // شراء كورس (الآن عبر نظام المدفوعات)

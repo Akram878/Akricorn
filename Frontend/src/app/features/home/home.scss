@@ -121,13 +121,6 @@ $gold-500: #b9822f;
 
   padding: 1.5rem;
   backdrop-filter: blur(2px);
-
-  // في الكروت الصغيرة نريد نسخة مصغرة أنيقة
-  &.featured-courses__image {
-    width: 10rem;
-    height: 7rem;
-    padding: 0;
-  }
 }
 
 .hero-velvet-plate__canvas {
@@ -160,36 +153,14 @@ $gold-500: #b9822f;
   &__subtitle {
   }
 
-  &__body {
+  &__grid {
     width: 100%;
-    @include flex(row, flex-start, center);
+    display: flex;
     flex-wrap: wrap;
     gap: 1.25rem;
-  }
 
-  &__card {
-    background-color: #041e16;
-    padding: 0.75rem;
-    flex-grow: 1;
-    border: 1px solid hsl(165, 93%, 11%);
-    border-radius: 0.5rem;
-
-    .featured-courses__image {
-      width: 10rem;
-      height: 10rem;
-    }
-
-    .featured-courses__body {
-      @include flex(column, flex-start, flex-start);
-
-      .featured-courses__name {
-        font-family: 'Cormorant Garamond Bold', serif;
-        width: 10rem;
-      }
-
-      .featured-courses__meta {
-        width: 10rem;
-      }
+    app-course-card {
+      flex: 1 1 260px;
     }
   }
 }

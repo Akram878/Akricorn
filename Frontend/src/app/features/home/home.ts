@@ -1,7 +1,11 @@
-import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterModule } from '@angular/router';
-import { ProfileComponent } from './profile/profile';
+import { RouterModule } from '@angular/router';
+import { PublicCourse, PublicCoursesService } from '../../core/services/public-courses.service';
+import { AuthService } from '../../core/services/auth.service';
+import { isTokenExpired } from '../../core/utils/auth-token';
+import { CourseCardComponent } from '../lms/course-card/course-card';
 
 interface Star3D {
   x: number;
@@ -12,11 +16,11 @@ interface Star3D {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ProfileComponent, RouterModule],
+  imports: [CommonModule, RouterModule, CourseCardComponent],
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })
-export class HOME implements AfterViewInit, OnDestroy {
+export class HOME implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('wormholeCanvas', { static: false })
   wormholeCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -27,6 +31,19 @@ export class HOME implements AfterViewInit, OnDestroy {
 
   private stars: Star3D[] = [];
   private universeReady = false;
+
+  featuredCourses: PublicCourse[] = [];
+  private ownedCourseIds: Set<number> = new Set<number>();
+
+  constructor(
+    private publicCoursesService: PublicCoursesService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadFeaturedCourses();
+    this.loadMyCourses();
+  }
 
   ngAfterViewInit(): void {
     const canvas = this.wormholeCanvas?.nativeElement;
@@ -62,6 +79,45 @@ export class HOME implements AfterViewInit, OnDestroy {
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
     }
+  }
+
+  trackByCourseId(index: number, course: PublicCourse): number {
+    return course.id;
+  }
+
+  isCourseOwned(course: PublicCourse): boolean {
+    return this.ownedCourseIds.has(course.id);
+  }
+
+  onCoursePurchased(courseId: number): void {
+    this.ownedCourseIds.add(courseId);
+  }
+
+  private loadFeaturedCourses(): void {
+    this.publicCoursesService.getFeaturedCourses().subscribe({
+      next: (courses) => {
+        this.featuredCourses = courses;
+      },
+      error: () => {
+        this.featuredCourses = [];
+      },
+    });
+  }
+
+  private loadMyCourses(): void {
+    const token = this.authService.getToken();
+    if (!token || isTokenExpired(token)) {
+      return;
+    }
+
+    this.publicCoursesService.getMyCourses().subscribe({
+      next: (courses) => {
+        this.ownedCourseIds = new Set(courses.map((course) => course.id));
+      },
+      error: () => {
+        this.ownedCourseIds.clear();
+      },
+    });
   }
 
   // توليد النجوم مرة واحدة

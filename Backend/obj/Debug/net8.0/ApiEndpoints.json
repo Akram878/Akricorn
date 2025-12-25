@@ -1027,6 +1027,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Backend.Controllers.CoursesController",
+    "Method": "GetFeaturedCourses",
+    "RelativePath": "api/courses/featured",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Backend.Controllers.LessonFilesController",
     "Method": "GetLessonFile",
     "RelativePath": "api/lessons/files/{fileId}",

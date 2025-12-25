@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Backend.Models
 {
@@ -11,7 +12,7 @@ namespace Backend.Models
         public string Description { get; set; } // وصف مختصر
         public decimal Price { get; set; }      // السعر
         public bool IsActive { get; set; } = true;
-
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         // خصائص العرض
         public int Hours { get; set; }          // عدد ساعات الكورس
         public string Category { get; set; }    // Beginner, Intermediate...
