@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   PublicCoursesService,
   MyCourseDetail,
@@ -9,6 +11,7 @@ import {
   CourseLearningPathProgress,
 } from '../../../../core/services/public-courses.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../../core/utils/media-url';
 type ViewerType = 'video' | 'pdf' | 'image' | 'audio' | 'embed' | 'download';
 
@@ -30,7 +33,7 @@ interface SelectedLessonFile {
   templateUrl: './course-viewer.html',
   styleUrl: './course-viewer.scss',
 })
-export class CourseViewer implements OnInit {
+export class CourseViewer implements OnInit, OnDestroy {
   courseId!: number;
   course: MyCourseDetail | null = null;
 
@@ -39,12 +42,17 @@ export class CourseViewer implements OnInit {
   isLoading = false;
   isCompleting = false;
   error: string | null = null;
+  isMediaLoading = false;
 
+  private activeObjectUrl: string | null = null;
+  private mediaSubscription?: Subscription;
   constructor(
     private route: ActivatedRoute,
     private coursesService: PublicCoursesService,
     private sanitizer: DomSanitizer,
-    private notifications: NotificationService
+    private notifications: NotificationService,
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -86,24 +94,62 @@ export class CourseViewer implements OnInit {
   selectFile(file: CourseLessonFile, lessonTitle: string, sectionTitle: string): void {
     const type = this.detectFileType(file);
     const resolvedUrl = resolveMediaUrl(file.url);
-    const displayUrl = this.withAuthToken(resolvedUrl);
-    const safeUrl =
-      type === 'pdf' || type === 'embed'
-        ? this.sanitizer.bypassSecurityTrustResourceUrl(displayUrl)
-        : undefined;
+
+    this.cleanupMediaUrl();
     this.selectedFile = {
       id: file.id,
       name: file.name,
       url: resolvedUrl,
-      displayUrl,
-      safeUrl,
+      displayUrl: '',
+      safeUrl: undefined,
       type,
       lessonTitle,
       sectionTitle,
     };
+
+    if (type === 'embed') {
+      const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(resolvedUrl);
+      this.selectedFile = { ...this.selectedFile, displayUrl: resolvedUrl, safeUrl };
+      return;
+    }
+
+    const token = this.authService.getToken();
+    if (!token) {
+      this.handleMediaError(type);
+      return;
+    }
+
+    this.isMediaLoading = true;
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    this.mediaSubscription = this.http
+      .get(resolvedUrl, { responseType: 'blob', headers })
+      .subscribe({
+        next: (blob) => {
+          if (this.selectedFile?.id !== file.id) {
+            this.isMediaLoading = false;
+            return;
+          }
+          this.activeObjectUrl = URL.createObjectURL(blob);
+          const safeUrl =
+            type === 'pdf'
+              ? this.sanitizer.bypassSecurityTrustResourceUrl(this.activeObjectUrl)
+              : undefined;
+          this.selectedFile = {
+            ...this.selectedFile,
+            displayUrl: this.activeObjectUrl,
+            safeUrl,
+          };
+          this.isMediaLoading = false;
+        },
+        error: () => {
+          this.isMediaLoading = false;
+          this.handleMediaError(type);
+        },
+      });
   }
 
   closeViewer(): void {
+    this.cleanupMediaUrl();
     this.selectedFile = null;
   }
   finishCourse(): void {
@@ -140,28 +186,6 @@ export class CourseViewer implements OnInit {
     return (this.course?.learningPaths?.length ?? 0) > 0;
   }
 
-  private getAuthToken(): string | undefined {
-    const userToken = localStorage.getItem('auth_token');
-    return userToken ?? undefined;
-  }
-
-  private withAuthToken(url: string): string {
-    if (typeof window === 'undefined') {
-      return url;
-    }
-
-    const token = this.getAuthToken();
-    if (!token || url.includes('token=')) {
-      return url;
-    }
-
-    if (url.startsWith('http') && !url.startsWith(window.location.origin)) {
-      return url;
-    }
-
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}token=${encodeURIComponent(token)}`;
-  }
   private detectFileType(file: Pick<CourseLessonFile, 'name' | 'url'>): ViewerType {
     const normalizedName = file.name.toLowerCase();
     const normalizedUrl = file.url.toLowerCase();
@@ -200,6 +224,10 @@ export class CourseViewer implements OnInit {
     this.notifications.showError(message);
   }
 
+  ngOnDestroy(): void {
+    this.cleanupMediaUrl();
+  }
+
   private isTokenExpired(token: string): boolean {
     try {
       const payloadSegment = token.split('.')[1];
@@ -223,5 +251,17 @@ export class CourseViewer implements OnInit {
     } catch {
       return true;
     }
+  }
+
+  private cleanupMediaUrl(): void {
+    if (this.mediaSubscription) {
+      this.mediaSubscription.unsubscribe();
+      this.mediaSubscription = undefined;
+    }
+    if (this.activeObjectUrl) {
+      URL.revokeObjectURL(this.activeObjectUrl);
+      this.activeObjectUrl = null;
+    }
+    this.isMediaLoading = false;
   }
 }

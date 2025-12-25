@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Router } from '@angular/router';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-lms-my-books',
   standalone: true,
@@ -11,15 +14,19 @@ import { resolveMediaUrl } from '../../../core/utils/media-url';
   templateUrl: './my-books.html',
   styleUrls: ['./my-books.scss'],
 })
-export class MyBooks implements OnInit {
+export class MyBooks implements OnInit, OnDestroy {
   myBooks: MyBook[] = [];
   isLoading = false;
   error: string | null = null;
+  private activeObjectUrl: string | null = null;
+  private downloadSubscription?: Subscription;
 
   constructor(
     private booksService: PublicBooksService,
     private notification: NotificationService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -90,17 +97,37 @@ export class MyBooks implements OnInit {
       return;
     }
 
-    const url = this.withAuthToken(resolveMediaUrl(book.fileUrl));
-    window.open(url, '_blank', 'noopener');
-  }
-
-  private withAuthToken(url: string): string {
-    const token = localStorage.getItem('auth_token');
-    if (!token || url.includes('token=')) {
-      return url;
+    const token = this.authService.getToken();
+    if (!token) {
+      this.notification.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
+      return;
     }
 
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}token=${encodeURIComponent(token)}`;
+    this.cleanupObjectUrl();
+    const url = resolveMediaUrl(book.fileUrl);
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    this.downloadSubscription = this.http.get(url, { responseType: 'blob', headers }).subscribe({
+      next: (blob) => {
+        this.activeObjectUrl = URL.createObjectURL(blob);
+        window.open(this.activeObjectUrl, '_blank', 'noopener');
+      },
+      error: () => {
+        this.notification.showError('Failed to load the file.');
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.cleanupObjectUrl();
+  }
+  private cleanupObjectUrl(): void {
+    if (this.downloadSubscription) {
+      this.downloadSubscription.unsubscribe();
+      this.downloadSubscription = undefined;
+    }
+    if (this.activeObjectUrl) {
+      URL.revokeObjectURL(this.activeObjectUrl);
+      this.activeObjectUrl = null;
+    }
   }
 }

@@ -187,6 +187,10 @@ export class AuthService {
     return this.userStore.getUser();
   }
 
+  getToken(): string | null {
+    return localStorage.getItem('auth_token');
+  }
+
   setUser(user: User | null, saveToStorage: boolean = true): void {
     this.userStore.setUser(user ?? null, saveToStorage);
   }

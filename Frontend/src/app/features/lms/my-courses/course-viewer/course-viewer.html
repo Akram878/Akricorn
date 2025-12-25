@@ -173,7 +173,7 @@
           ></iframe>
           <img
             *ngSwitchCase="'image'"
-            [src]="selectedFile?.displayUrl || selectedFile?.url"
+            [src]="selectedFile?.displayUrl"
             [alt]="selectedFile?.name"
             (error)="handleMediaError('image')"
           />
