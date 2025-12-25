@@ -98,12 +98,17 @@ export class CountrySelectComponent implements ControlValueAccessor {
     this.disabled = isDisabled;
   }
 
-  validate(_control: AbstractControl): ValidationErrors | null {
+  validate(control: AbstractControl): ValidationErrors | null {
     if (!this.required) return null;
-    if (!this.value || this.value.trim() === '+' || this.value.trim() === '') {
+    const rawValue = `${control.value ?? this.value ?? ''}`.trim();
+    if (!rawValue || rawValue === '+') {
       return { required: true };
     }
 
+    const hasMatch = this.options.some((option) => option.dialCode === rawValue);
+    if (!hasMatch) {
+      return { invalidCountryCode: true };
+    }
     return null;
   }
 

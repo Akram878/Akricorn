@@ -54,6 +54,8 @@ namespace Backend.Controllers
                 errors["name"] = "Name is required.";
             else if (name.Length < 3)
                 errors["name"] = "Name must be at least 3 letters.";
+            else if (name.Length > 30)
+                errors["name"] = "Name must be at most 30 letters.";
             else if (!Regex.IsMatch(name, "^[A-Za-z]+$"))
                 errors["name"] = "Name must use A–Z letters only.";
 
@@ -61,6 +63,8 @@ namespace Backend.Controllers
                 errors["family"] = "Family name is required.";
             else if (family.Length < 3)
                 errors["family"] = "Family name must be at least 3 letters.";
+            else if (family.Length > 30)
+                errors["family"] = "Family name must be at most 30 letters.";
             else if (!Regex.IsMatch(family, "^[A-Za-z]+$"))
                 errors["family"] = "Family name must use A–Z letters only.";
 
@@ -85,13 +89,18 @@ namespace Backend.Controllers
                 errors["password"] = "Password is required.";
             else
             {
-                var passwordPattern = new Regex(
-                    @"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~]{6,}$"
-                );
+                if (request.Password.Length > 50)
+                    errors["password"] = "Password must be at most 50 characters.";
+                else
+                {
+                    var passwordPattern = new Regex(
+                        @"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~]{6,}$"
+                    );
 
-                if (!passwordPattern.IsMatch(request.Password))
-                    errors["password"] =
-                        "Password must be at least 6 characters and include 1 uppercase letter, 1 number, and 1 symbol (A–Z only).";
+                    if (!passwordPattern.IsMatch(request.Password))
+                        errors["password"] =
+                            "Password must be at least 6 characters and include 1 uppercase letter, 1 number, and 1 symbol (A–Z only).";
+                }
             }
 
             if (string.IsNullOrWhiteSpace(request.ConfirmPassword))

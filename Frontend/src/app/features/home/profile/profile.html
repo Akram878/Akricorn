@@ -199,26 +199,29 @@
             />
           </div>
 
-          <div class="form-field">
-            <label for="countryCode">Country code</label>
-            <input
-              id="countryCode"
-              type="text"
-              name="countryCode"
-              [(ngModel)]="accountSettingsModel.countryCode"
-              placeholder="+20"
-            />
-          </div>
-
-          <div class="form-field">
+          <div class="form-field phone-field">
             <label for="phone">Phone number</label>
-            <input
-              id="phone"
-              type="text"
-              name="number"
-              [(ngModel)]="accountSettingsModel.number"
-              placeholder="Enter phone number"
-            />
+            <div class="phone-input-row">
+              <div class="phone-input-country">
+                <app-country-select
+                  name="countryCode"
+                  [(ngModel)]="accountSettingsModel.countryCode"
+                  #countryCodeCtrl="ngModel"
+                  [required]="true"
+                  [invalid]="accountSubmitted && !!countryCodeCtrl?.invalid"
+                />
+              </div>
+
+              <div class="phone-input-number">
+                <input
+                  id="phone"
+                  type="text"
+                  name="number"
+                  [(ngModel)]="accountSettingsModel.number"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
