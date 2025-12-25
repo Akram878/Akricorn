@@ -51,10 +51,16 @@ const ageRangeValidator = (minAge: number, maxAge: number): ValidatorFn => {
     if (Number.isNaN(birthDate.getTime())) {
       return { invalidDate: true };
     }
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    const todayUtc = new Date();
+    const todayYear = todayUtc.getUTCFullYear();
+    const todayMonth = todayUtc.getUTCMonth();
+    const todayDay = todayUtc.getUTCDate();
+    const birthYear = birthDate.getUTCFullYear();
+    const birthMonth = birthDate.getUTCMonth();
+    const birthDay = birthDate.getUTCDate();
+    let age = todayYear - birthYear;
+    const monthDiff = todayMonth - birthMonth;
+    if (monthDiff < 0 || (monthDiff === 0 && todayDay < birthDay)) {
       age -= 1;
     }
     return age >= minAge && age <= maxAge ? null : { ageOutOfRange: true };
