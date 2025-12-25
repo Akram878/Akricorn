@@ -18,6 +18,7 @@ const LATIN_NAME_PATTERN = /^[A-Za-z]+$/;
 const PASSWORD_REGEX =
   /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{6,}$/;
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const trimmedRequired: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const value = `${control.value ?? ''}`.trim();
   return value ? null : { required: true };
@@ -104,7 +105,7 @@ export class Sign {
         ],
         countryCode: ['+', [Validators.required]],
         number: ['', [trimmedRequired, Validators.pattern(/^[0-9]{7,15}$/)]],
-        email: ['', [trimmedRequired, Validators.email]],
+        email: ['', [trimmedRequired, Validators.pattern(EMAIL_REGEX)]],
         city: ['', [trimmedRequired, trimmedMinLength(2), Validators.maxLength(50)]],
         birthDate: ['', [Validators.required, ageRangeValidator(12, 100)]],
         password: [
@@ -170,6 +171,9 @@ export class Sign {
     this.showPrivacyPolicy = false;
   }
   signup() {
+    if (this.loading) {
+      return;
+    }
     this.submitted = true;
     if (this.signForm.invalid) {
       this.signForm.markAllAsTouched();
@@ -205,7 +209,11 @@ export class Sign {
           this.router.navigate(['/home']);
         },
         error: (err: any) => {
-          console.error(err);
+          if (err?.status >= 400 && err?.status < 500) {
+            console.warn(err);
+          } else {
+            console.error(err);
+          }
           alert('Sign up failed: ' + (err?.error?.message || err.message || 'Unknown error'));
         },
       });

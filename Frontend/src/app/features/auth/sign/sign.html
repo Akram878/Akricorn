@@ -59,11 +59,11 @@
       <!-- NUMBER -->
       <div
         class="field number number-field"
-        [class.field-invalid]="numberCtrl?.invalid && (numberCtrl?.touched || submitted)"
+        [class.field-invalid]="submitted && numberCtrl?.invalid"
       >
         <input type="text" placeholder="Number" formControlName="number" />
 
-        <div class="field-icon" *ngIf="numberCtrl?.invalid && (numberCtrl?.touched || submitted)">
+        <div class="field-icon" *ngIf="submitted && numberCtrl?.invalid">
           !
           <div class="field-tooltip">
             <span *ngIf="numberCtrl?.errors?.['required']"> Phone number is required. </span>
@@ -86,7 +86,7 @@
         !
         <div class="field-tooltip">
           <span *ngIf="emailCtrl?.errors?.['required']"> Email is required. </span>
-          <span *ngIf="emailCtrl?.errors?.['email']"> Please enter a valid email address. </span>
+          <span *ngIf="emailCtrl?.errors?.['pattern']"> Please enter a valid email address. </span>
         </div>
       </div>
     </div>

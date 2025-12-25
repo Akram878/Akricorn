@@ -14,7 +14,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Backend.Helpers;
-using System.ComponentModel.DataAnnotations;
+
 namespace Backend.Controllers
 {
     [Route("api/[controller]")]
@@ -24,7 +24,7 @@ namespace Backend.Controllers
         private readonly AppDbContext _context;
         private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
         private readonly IConfiguration _configuration;
-
+        private static readonly Regex EmailRegex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$", RegexOptions.Compiled);
         public AuthController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
@@ -70,7 +70,7 @@ namespace Backend.Controllers
 
             if (string.IsNullOrWhiteSpace(email))
                 errors["email"] = "Email is required.";
-            else if (!new EmailAddressAttribute().IsValid(email))
+            else if (!EmailRegex.IsMatch(email))
                 errors["email"] = "Please enter a valid email address.";
 
             if (string.IsNullOrWhiteSpace(number))
@@ -183,14 +183,22 @@ namespace Backend.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
         {
-            if (request == null ||
-                string.IsNullOrWhiteSpace(request.Email) ||
-                string.IsNullOrWhiteSpace(request.Password))
+            if (request == null)
+                return BadRequest(new { message = "Email and password are required." });
+
+            var email = request.Email?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(request.Password))
             {
                 return BadRequest(new { message = "Email and password are required." });
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            if (!EmailRegex.IsMatch(email))
+            {
+                return BadRequest(new { message = "Please enter a valid email address." });
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
             {
                 // بيانات دخول خاطئة

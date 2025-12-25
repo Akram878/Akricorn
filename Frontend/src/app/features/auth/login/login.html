@@ -9,7 +9,7 @@
       !
       <div class="field-tooltip">
         <span *ngIf="emailCtrl?.errors?.['required']"> Email is required. </span>
-        <span *ngIf="emailCtrl?.errors?.['email']"> Please enter a valid email address. </span>
+        <span *ngIf="emailCtrl?.errors?.['pattern']"> Please enter a valid email address. </span>
       </div>
     </div>
   </div>

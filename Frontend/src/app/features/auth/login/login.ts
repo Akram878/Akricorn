@@ -16,10 +16,11 @@ export class Login {
   loginForm: FormGroup;
   loading: boolean = false;
   submitted: boolean = false;
+  private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   constructor(private authService: AuthService, private router: Router, private fb: FormBuilder) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.pattern(this.emailRegex)]],
       password: ['', [Validators.required]],
     });
   }
@@ -37,6 +38,9 @@ export class Login {
   }
 
   login() {
+    if (this.loading) {
+      return;
+    }
     this.submitted = true;
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -60,7 +64,11 @@ export class Login {
           this.router.navigate(['/home']);
         },
         error: (err: any) => {
-          console.error(err);
+          if (err?.status >= 400 && err?.status < 500) {
+            console.warn(err);
+          } else {
+            console.error(err);
+          }
           alert('Login failed: ' + (err?.error?.message || err.message || 'Unknown error'));
         },
       });
