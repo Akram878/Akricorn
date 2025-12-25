@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-
+import { API_BASE_URL } from '../config/api.config';
 interface AdminLoginRequest {
   username: string;
   password: string;
@@ -20,7 +20,7 @@ interface AdminLoginResponse {
 })
 export class AdminAuthService {
   // عدّل الرابط إذا الباك إند عندك على بورت مختلف
-  private apiUrl = 'https://localhost:7150/api/admin';
+  private apiUrl = `${API_BASE_URL}/api/admin`;
 
   private _isLoggedIn$ = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$ = this._isLoggedIn$.asObservable();

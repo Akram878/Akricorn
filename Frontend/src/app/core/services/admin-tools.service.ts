@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminAuthService } from './admin-auth.service';
-
+import { API_BASE_URL } from '../config/api.config';
 export interface AdminToolDto {
   id: number;
   name: string;
@@ -40,7 +40,7 @@ export interface ToolFileDto {
   providedIn: 'root',
 })
 export class AdminToolsService {
-  private apiUrl = 'https://localhost:7150/api/admin/tools';
+  private apiUrl = `${API_BASE_URL}/api/admin/tools`;
 
   constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
 

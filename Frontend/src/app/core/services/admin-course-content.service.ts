@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminAuthService } from './admin-auth.service';
-
+import { API_BASE_URL } from '../config/api.config';
 export interface LessonFileDto {
   id: number;
   fileName: string;
@@ -39,7 +39,7 @@ export interface CourseContentResponse {
   providedIn: 'root',
 })
 export class AdminCourseContentService {
-  private baseUrl = 'https://localhost:7150/api/admin/course-content';
+  private baseUrl = `${API_BASE_URL}/api/admin/course-content`;
 
   constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
 

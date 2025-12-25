@@ -422,14 +422,13 @@ namespace Backend.Controllers
                     {
                         await file.CopyToAsync(stream);
                     }
-                    var relativePath = Path.Combine("books", $"book-{id}", "files", fileName).Replace("\\", "/");
-                    var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+                 
 
                     var newFile = new BookFile
                     {
                         BookId = id,
                         FileName = file.FileName,
-                        FileUrl = url,
+                        FileUrl = fileName,
                         SizeBytes = file.Length,
                         ContentType = file.ContentType ?? "application/octet-stream"
                     };
@@ -439,14 +438,15 @@ namespace Backend.Controllers
                         _context.BookFiles.Add(newFile);
 
                         if (string.IsNullOrEmpty(book.FileUrl))
-                            book.FileUrl = url;
+                            book.FileUrl = fileName;
 
                         await _context.SaveChangesAsync();
                     });
 
                     var dto = MapToDto(book, newFile);
 
-                    return Ok(new { message = "File uploaded.", fileId = newFile.Id, url, book = dto });
+                    var fileAccessUrl = BuildBookFileUrl(newFile.Id);
+                    return Ok(new { message = "File uploaded.", fileId = newFile.Id, url = fileAccessUrl, book = dto });
                 }
                 catch (Exception ex)
                 {
@@ -493,6 +493,13 @@ namespace Backend.Controllers
                     var physicalPath = Path.Combine(folder, fileName);
                     if (System.IO.File.Exists(physicalPath))
                         System.IO.File.Delete(physicalPath);
+                    else
+                    {
+                        var legacyFolder = BookStorageHelper.GetLegacyFilesFolder(bookId);
+                        var legacyPath = Path.Combine(legacyFolder, fileName);
+                        if (System.IO.File.Exists(legacyPath))
+                            System.IO.File.Delete(legacyPath);
+                    }
                 }
 
                 try
@@ -560,7 +567,7 @@ namespace Backend.Controllers
             var files = book.Files?.ToList() ?? new List<BookFile>();
             if (extraFile != null && files.All(f => f.Id != extraFile.Id))
                 files.Add(extraFile);
-
+            var primaryFile = files.OrderBy(f => f.Id).FirstOrDefault();
             return new BookDto
             {
                 Id = book.Id,
@@ -568,14 +575,14 @@ namespace Backend.Controllers
                 Description = book.Description,
                 Price = book.Price,
                 Category = book.Category,
-                FileUrl = book.FileUrl,
+                FileUrl = primaryFile != null ? BuildBookFileUrlStatic(primaryFile.Id) : string.Empty,
                 ThumbnailUrl = book.ThumbnailUrl,
                 IsActive = book.IsActive,
                 Files = files.Select(f => new BookFileDto
                 {
                     Id = f.Id,
                     FileName = f.FileName,
-                    FileUrl = f.FileUrl,
+                    FileUrl = BuildBookFileUrlStatic(f.Id),
                     SizeBytes = f.SizeBytes,
                     ContentType = f.ContentType
                 }).ToList()
@@ -636,6 +643,17 @@ namespace Backend.Controllers
 
             var parts = url.Split('/', StringSplitOptions.RemoveEmptyEntries);
             return parts.LastOrDefault();
+        }
+
+
+        private static string BuildBookFileUrlStatic(int fileId)
+        {
+            return $"/api/books/files/{fileId}";
+        }
+
+        private string BuildBookFileUrl(int fileId)
+        {
+            return Url.Content($"/api/books/files/{fileId}");
         }
     }
 

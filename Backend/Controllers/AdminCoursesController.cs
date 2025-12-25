@@ -238,6 +238,9 @@ namespace Backend.Controllers
                 var courseFolder = CourseStorageHelper.GetCourseFolder(id);
                 if (Directory.Exists(courseFolder))
                     Directory.Delete(courseFolder, true);
+                var publicFolder = Path.Combine(CourseStorageHelper.GetLegacyCourseRootFolder(), $"course-{id}");
+                if (Directory.Exists(publicFolder))
+                    Directory.Delete(publicFolder, true);
 
                 // Remove learning path links
                 var links = _context.LearningPathCourses

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { API_BASE_URL } from '../config/api.config';
 // الكورسات العامة لصفحة /lms/courses
 export interface PublicCourse {
   id: number;
@@ -90,10 +90,10 @@ export interface CoursePaymentResponse {
 })
 export class PublicCoursesService {
   // Endpoint الـ LMS الأساسي
-  private baseUrl = 'https://localhost:7150/api/lms';
+  private baseUrl = `${API_BASE_URL}/api/lms`;
 
   // Endpoint للدفع الافتراضي
-  private paymentsBaseUrl = 'https://localhost:7150/api/payments';
+  private paymentsBaseUrl = `${API_BASE_URL}/api/payments`;
 
   constructor(private http: HttpClient) {}
 

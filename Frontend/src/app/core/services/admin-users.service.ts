@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminAuthService } from './admin-auth.service';
-
+import { API_BASE_URL } from '../config/api.config';
 export interface AdminUserDto {
   id: number;
   name: string;
@@ -24,7 +24,7 @@ export interface UpdateUserRoleRequest {
   providedIn: 'root',
 })
 export class AdminUsersService {
-  private apiUrl = 'https://localhost:7150/api/admin/users';
+  private apiUrl = `${API_BASE_URL}/api/admin/users`;
 
   constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
 

@@ -156,18 +156,23 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.Migrate();
 
-    // لو ما في ولا حساب أدمن، ننشئ Owner افتراضي
-    if (!db.AdminAccounts.Any())
+    var adminSeedSection = builder.Configuration.GetSection("AdminSeed");
+    var seedEnabled = adminSeedSection.GetValue<bool>("Enabled");
+    var seedUsername = adminSeedSection["Username"];
+    var seedPassword = adminSeedSection["Password"];
+
+    // لو ما في ولا حساب أدمن، ننشئ Owner افتراضي (متحكم به بالبيئة)
+    if (seedEnabled && !string.IsNullOrWhiteSpace(seedUsername) && !string.IsNullOrWhiteSpace(seedPassword) && !db.AdminAccounts.Any())
     {
         var owner = new AdminAccount
         {
-            Username = "owner",
+            Username = seedUsername,
             Role = AdminRole.Owner,
             IsActive = true
         };
 
         var hasher = new PasswordHasher<AdminAccount>();
-        owner.PasswordHash = hasher.HashPassword(owner, "Owner123!");
+        owner.PasswordHash = hasher.HashPassword(owner, seedPassword);
 
         db.AdminAccounts.Add(owner);
         db.SaveChanges();
@@ -185,7 +190,22 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
 
+    var isCourseContent = path.StartsWith("/courses/") && path.Contains("/content/");
+    var isBookFile = path.StartsWith("/books/") && path.Contains("/files/");
+    var isToolFile = path.StartsWith("/tools/") && path.Contains("/files/");
+
+    if (isCourseContent || isBookFile || isToolFile)
+    {
+        context.Response.StatusCode = StatusCodes.Status404NotFound;
+        return;
+    }
+
+    await next();
+});
 // ملفات Angular الـ static (لو حاطط الـ build هنا)
 app.UseStaticFiles();
 

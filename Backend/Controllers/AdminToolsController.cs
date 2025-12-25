@@ -231,14 +231,12 @@ namespace Backend.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            var relativePath = Path.Combine("tools", $"tool-{id}", "files", fileName).Replace("\\", "/");
-            var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
-
+          
             var newFile = new ToolFile
             {
                 ToolId = id,
                 FileName = file.FileName,
-                FileUrl = url,
+                FileUrl = fileName,
                 SizeBytes = file.Length,
                 ContentType = file.ContentType ?? "application/octet-stream"
             };
@@ -246,7 +244,44 @@ namespace Backend.Controllers
             _context.ToolFiles.Add(newFile);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "File uploaded.", fileId = newFile.Id, url });
+            var fileAccessUrl = BuildToolFileUrl(newFile.Id);
+            return Ok(new { message = "File uploaded.", fileId = newFile.Id, url = fileAccessUrl });
+        }
+
+        // =========================
+        //  GET: /api/admin/tools/files/{fileId}
+        //  تحميل ملف أداة (أدمن فقط)
+        // =========================
+        [HttpGet("files/{fileId:int}")]
+        public async Task<IActionResult> DownloadFile(int fileId)
+        {
+            var entity = await _context.ToolFiles.FirstOrDefaultAsync(f => f.Id == fileId);
+
+            if (entity == null)
+                return NotFound(new { message = "File not found." });
+
+            var fileName = TryExtractFileName(entity.FileUrl);
+            if (string.IsNullOrEmpty(fileName))
+                return NotFound(new { message = "File content not found." });
+
+            var folder = ToolStorageHelper.GetFilesFolder(entity.ToolId);
+            var physicalPath = Path.Combine(folder, fileName);
+            if (!System.IO.File.Exists(physicalPath))
+            {
+                var legacyFolder = ToolStorageHelper.GetLegacyFilesFolder(entity.ToolId);
+                var legacyPath = Path.Combine(legacyFolder, fileName);
+                if (!System.IO.File.Exists(legacyPath))
+                    return NotFound(new { message = "File content not found." });
+
+                physicalPath = legacyPath;
+            }
+
+            var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var contentType = string.IsNullOrWhiteSpace(entity.ContentType)
+                ? "application/octet-stream"
+                : entity.ContentType;
+
+            return File(stream, contentType, enableRangeProcessing: true);
         }
 
         // =========================
@@ -269,6 +304,14 @@ namespace Backend.Controllers
                 var physicalPath = Path.Combine(folder, fileName);
                 if (System.IO.File.Exists(physicalPath))
                     System.IO.File.Delete(physicalPath);
+
+                else
+                {
+                    var legacyFolder = ToolStorageHelper.GetLegacyFilesFolder(entity.ToolId);
+                    var legacyPath = Path.Combine(legacyFolder, fileName);
+                    if (System.IO.File.Exists(legacyPath))
+                        System.IO.File.Delete(legacyPath);
+                }
             }
 
             _context.ToolFiles.Remove(entity);
@@ -284,8 +327,10 @@ namespace Backend.Controllers
 
             try
             {
-                var uri = new Uri(fileUrl);
-                return Path.GetFileName(uri.AbsolutePath);
+                if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
+                    return Path.GetFileName(uri.AbsolutePath);
+
+                return Path.GetFileName(fileUrl);
             }
             catch
             {
@@ -310,7 +355,7 @@ namespace Backend.Controllers
                 {
                     Id = f.Id,
                     FileName = f.FileName,
-                    FileUrl = f.FileUrl,
+                    FileUrl = BuildToolFileUrlStatic(f.Id),
                     SizeBytes = f.SizeBytes,
                     ContentType = f.ContentType
                 }).ToList() ?? new List<ToolFileDto>()
@@ -330,6 +375,16 @@ namespace Backend.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Tool status changed.", isActive = tool.IsActive });
+        }
+
+        private static string BuildToolFileUrlStatic(int fileId)
+        {
+            return $"/api/admin/tools/files/{fileId}";
+        }
+
+        private string BuildToolFileUrl(int fileId)
+        {
+            return Url.Content($"/api/admin/tools/files/{fileId}");
         }
     }
 

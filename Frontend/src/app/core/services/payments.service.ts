@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { API_BASE_URL } from '../config/api.config';
 export interface Payment {
   id: number;
   amount: number;
@@ -20,7 +20,7 @@ export interface Payment {
   providedIn: 'root',
 })
 export class PaymentsService {
-  private baseUrl = 'https://localhost:7150/api/payments';
+  private baseUrl = `${API_BASE_URL}/api/payments`;
 
   constructor(private http: HttpClient) {}
 

@@ -89,6 +89,29 @@ export class MyBooks implements OnInit {
       return;
     }
 
-    window.open(book.fileUrl, '_blank');
+    const token = localStorage.getItem('auth_token') ?? localStorage.getItem('adminToken');
+
+    fetch(book.fileUrl, {
+      credentials: 'include',
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : undefined,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Download failed with status ${response.status}`);
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      })
+      .catch(() => {
+        this.notification.showError('تعذر تحميل الكتاب.');
+      });
   }
 }

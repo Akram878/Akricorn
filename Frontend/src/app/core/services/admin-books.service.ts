@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminAuthService } from './admin-auth.service';
-
+import { API_BASE_URL } from '../config/api.config';
 export interface AdminBookDto {
   id: number;
   title: string;
@@ -40,7 +40,7 @@ export interface BookFileDto {
   providedIn: 'root',
 })
 export class AdminBooksService {
-  private apiUrl = 'https://localhost:7150/api/admin/books'; // غيّر البورت لو الباك إند عندك غير
+  private apiUrl = `${API_BASE_URL}/api/admin/books`;
 
   constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
 

@@ -458,22 +458,32 @@ namespace Backend.Controllers
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
 
-            var books = await _context.UserBooks
+            var userBooks = await _context.UserBooks
                 .Where(ub => ub.UserId == userId.Value)
                 .Include(ub => ub.Book)
-                .Select(ub => new
-                {
+                .ThenInclude(b => b.Files)
+                .ToListAsync();
+
+            var books = userBooks.Select(ub =>
+            {
+            var primaryFileId = ub.Book.Files
+                .OrderBy(f => f.Id)
+                .Select(f => f.Id)
+                .FirstOrDefault();
+
+            return new
+            {
                     ub.Book.Id,
                     ub.Book.Title,
                     ub.Book.Description,
                     ub.Book.Price,
                     ub.Book.Category,
                     ub.Book.ThumbnailUrl,
-                    ub.Book.FileUrl,
-                    ub.GrantedAt,
+                fileUrl = primaryFileId > 0 ? BuildBookFileUrl(primaryFileId) : string.Empty,
+                ub.GrantedAt,
                     ub.IsFromCourse
-                })
-                .ToListAsync();
+            };
+            }).ToList();
 
             return Ok(books);
         }
@@ -533,6 +543,12 @@ namespace Backend.Controllers
         private string BuildLessonFileUrl(int fileId)
         {
             return Url.Content($"/api/lessons/files/{fileId}");
+        }
+
+
+        private string BuildBookFileUrl(int fileId)
+        {
+            return Url.Content($"/api/books/files/{fileId}");
         }
         private double CalculateCompletionPercent(
             IDictionary<int, int> totalByPath,

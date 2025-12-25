@@ -777,6 +777,22 @@
   },
   {
     "ContainingType": "Backend.Controllers.AdminToolsController",
+    "Method": "DownloadFile",
+    "RelativePath": "api/admin/tools/files/{fileId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminToolsController",
     "Method": "DeleteFile",
     "RelativePath": "api/admin/tools/files/{fileId}",
     "HttpMethod": "DELETE",
@@ -993,6 +1009,22 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "Backend.Controllers.BookFilesController",
+    "Method": "GetBookFile",
+    "RelativePath": "api/books/files/{fileId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "Backend.Controllers.LessonFilesController",

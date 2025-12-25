@@ -7,25 +7,28 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.IO;
+using System;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace Backend.Controllers
 {
     [ApiController]
-    [Route("api/lessons/files")]
-    public class LessonFilesController : ControllerBase
+    [Route("api/books/files")]
+    public class BookFilesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<LessonFilesController> _logger;
+        private readonly ILogger<BookFilesController> _logger;
 
-        public LessonFilesController(AppDbContext context, ILogger<LessonFilesController> logger)
+        public BookFilesController(AppDbContext context, ILogger<BookFilesController> logger)
         {
             _context = context;
             _logger = logger;
         }
 
-        [HttpGet("{fileId}")]
+        [HttpGet("{fileId:int}")]
         [Authorize]
-        public async Task<IActionResult> GetLessonFile(int fileId)
+        public async Task<IActionResult> GetBookFile(int fileId)
         {
             var userContext = ResolveUserContext();
             if (!userContext.IsAuthenticated)
@@ -33,15 +36,12 @@ namespace Backend.Controllers
                 return Unauthorized(new { message = "Invalid token." });
             }
 
-            var file = await _context.CourseLessonFiles
-                .Include(f => f.Lesson)
-                    .ThenInclude(l => l.Section)
+            var file = await _context.BookFiles
+                .Include(f => f.Book)
                 .FirstOrDefaultAsync(f => f.Id == fileId);
 
             if (file == null)
                 return NotFound(new { message = "File not found." });
-
-            var courseId = file.Lesson.Section.CourseId;
 
             if (!userContext.IsAdmin)
             {
@@ -55,11 +55,11 @@ namespace Backend.Controllers
                 if (!user.IsActive)
                     return StatusCode(403, new { message = "Your account has been disabled." });
 
-                var enrolled = await _context.UserCourses
-                    .AnyAsync(uc => uc.UserId == userContext.UserId && uc.CourseId == courseId);
+                var ownsBook = await _context.UserBooks
+                    .AnyAsync(ub => ub.UserId == userContext.UserId && ub.BookId == file.BookId);
 
-                if (!enrolled)
-                    return StatusCode(403, new { message = "You are not enrolled in this course." });
+                if (!ownsBook)
+                    return StatusCode(403, new { message = "You do not own this book." });
             }
 
             var physicalPath = ResolvePhysicalPath(file);
@@ -73,30 +73,23 @@ namespace Backend.Controllers
                 ? "application/octet-stream"
                 : file.ContentType;
 
-            _logger.LogInformation("Lesson file request: userId={UserId}, fileId={FileId}, courseId={CourseId}", userContext.UserId, fileId, courseId);
+            _logger.LogInformation("Book file request: userId={UserId}, fileId={FileId}, bookId={BookId}", userContext.UserId, fileId, file.BookId);
 
             return File(stream, contentType, enableRangeProcessing: true);
         }
 
-        private string? ResolvePhysicalPath(CourseLessonFile file)
+        private string? ResolvePhysicalPath(BookFile file)
         {
-            var lesson = file.Lesson;
-            var section = lesson.Section;
-            var courseId = section.CourseId;
-            var lessonFolder = CourseStorageHelper.GetLessonFolder(courseId, section.Id, lesson.Id);
-
             var storedFileName = TryExtractFileName(file.FileUrl);
             if (string.IsNullOrEmpty(storedFileName))
                 return null;
 
-            var primaryPath = Path.Combine(lessonFolder, storedFileName);
+            var primaryFolder = BookStorageHelper.GetFilesFolder(file.BookId);
+            var primaryPath = Path.Combine(primaryFolder, storedFileName);
             if (System.IO.File.Exists(primaryPath))
                 return primaryPath;
 
-            var legacyFolder = Path.Combine(
-                CourseStorageHelper.GetLegacyContentFolder(courseId),
-                $"section-{section.Id}",
-                $"lesson-{lesson.Id}");
+            var legacyFolder = BookStorageHelper.GetLegacyFilesFolder(file.BookId);
             var legacyPath = Path.Combine(legacyFolder, storedFileName);
             if (System.IO.File.Exists(legacyPath))
                 return legacyPath;
@@ -134,7 +127,6 @@ namespace Backend.Controllers
                 return new UserRequestContext(userId, isAdmin);
             }
 
-            // Admin tokens may not contain a numeric user id
             if (isAdmin)
             {
                 return new UserRequestContext(null, true);

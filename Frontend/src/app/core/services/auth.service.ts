@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, map } from 'rxjs';
 import { UserStoreService } from './user-store.service';
-
+import { API_BASE_URL } from '../config/api.config';
 // ============================
 //       واجهات البيانات
 // ============================
@@ -57,7 +57,7 @@ export interface UpdateAccountSettingsRequest {
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'https://localhost:7150/api/auth';
+  private apiUrl = `${API_BASE_URL}/api/auth`;
 
   // ✅ هنا التعديل المهم
   currentUser$!: Observable<User | null>;

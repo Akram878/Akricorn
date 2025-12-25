@@ -327,15 +327,12 @@ public class AdminCourseContentController : ControllerBase
                 await file.CopyToAsync(stream);
             }
 
-            var relativePath = Path.Combine("courses", $"course-{lesson.Section.CourseId}", "content", $"section-{lesson.SectionId}", $"lesson-{lesson.Id}", fileName)
-                 .Replace("\\", "/");
-            var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
-
+           
             var newFile = new CourseLessonFile
             {
                 LessonId = lessonId,
                 FileName = file.FileName,
-                FileUrl = url,
+                FileUrl = fileName,
                 SizeBytes = file.Length,
                 ContentType = file.ContentType ?? "application/octet-stream"
             };
@@ -385,6 +382,17 @@ public class AdminCourseContentController : ControllerBase
             var physicalPath = Path.Combine(fileFolder, fileName);
             if (System.IO.File.Exists(physicalPath))
                 System.IO.File.Delete(physicalPath);
+
+            else
+            {
+                var legacyFolder = Path.Combine(
+                    CourseStorageHelper.GetLegacyContentFolder(courseId),
+                    $"section-{sectionId}",
+                    $"lesson-{lessonId}");
+                var legacyPath = Path.Combine(legacyFolder, fileName);
+                if (System.IO.File.Exists(legacyPath))
+                    System.IO.File.Delete(legacyPath);
+            }
         }
 
         _context.CourseLessonFiles.Remove(entity);
