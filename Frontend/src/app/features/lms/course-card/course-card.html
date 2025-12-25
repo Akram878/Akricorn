@@ -1,18 +1,51 @@
 <article class="lms-course-card card" [class.lms-course-card--owned]="owned" (click)="toggleFlip()">
   <div class="card-inner" [class.is-flipped]="isFlipped">
     <div class="card-front">
-      <div class="lms-course-card__thumb">
-        <ng-container *ngIf="getThumbnailUrl() as thumbnailUrl; else thumbNull">
-          <img [src]="thumbnailUrl" [alt]="course.title ?? 'Course thumbnail'" loading="lazy" />
-        </ng-container>
-        <ng-template #thumbNull>
-          <div class="lms-course-card__thumb-placeholder">null</div>
-        </ng-template>
+      <div class="head_card">
+        <h3 class="lms-course-card__title">
+          {{ course.title ?? 'null' }}
+        </h3>
+        <div class="lms-course-card__thumb">
+          <ng-container *ngIf="getThumbnailUrl() as thumbnailUrl; else thumbNull">
+            <img [src]="thumbnailUrl" [alt]="course.title ?? 'Course thumbnail'" loading="lazy" />
+          </ng-container>
+          <ng-template #thumbNull>
+            <div class="lms-course-card__thumb-placeholder">null</div>
+          </ng-template>
+        </div>
       </div>
-
-      <h3 class="lms-course-card__title">
-        {{ course.title ?? 'null' }}
-      </h3>
+      <div class="lms-course-card__meta">
+        <div class="lms-course-card__meta-item">
+          <span class="lms-course-card__meta-label">Rating</span>
+          <span class="lms-course-card__meta-value">
+            <ng-container
+              *ngIf="course.rating !== null && course.rating !== undefined; else ratingNull"
+            >
+              ⭐ {{ course.rating | number : '1.1-1' }} / 5
+            </ng-container>
+            <ng-template #ratingNull>null</ng-template>
+          </span>
+        </div>
+        <div class="lms-course-card__meta-item">
+          <span class="lms-course-card__meta-label">Category</span>
+          <span class="lms-course-card__meta-value">{{ course.category ?? 'null' }}</span>
+        </div>
+        <div class="lms-course-card__meta-item">
+          <span class="lms-course-card__meta-label">Path</span>
+          <span class="lms-course-card__meta-value">{{ course.pathTitle ?? 'null' }}</span>
+        </div>
+        <div class="lms-course-card__meta-item">
+          <span class="lms-course-card__meta-label">Duration</span>
+          <span class="lms-course-card__meta-value">
+            <ng-container
+              *ngIf="course.hours !== null && course.hours !== undefined; else hoursNull"
+            >
+              {{ course.hours }} hours
+            </ng-container>
+            <ng-template #hoursNull>null</ng-template>
+          </span>
+        </div>
+      </div>
 
       <footer class="lms-course-card__footer">
         <div class="lms-course-card__price">
@@ -33,7 +66,7 @@
           (click)="onPurchase(); $event.stopPropagation()"
           [disabled]="isProcessing"
         >
-          {{ owned ? 'View in My Courses' : isProcessing ? 'Processing...' : 'Buy / Enroll' }}
+          {{ owned ? 'View' : isProcessing ? 'Processing...' : 'Buy' }}
         </button>
       </footer>
     </div>

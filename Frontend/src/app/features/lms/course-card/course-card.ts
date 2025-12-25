@@ -32,7 +32,7 @@ export class CourseCardComponent {
 
   onPurchase(): void {
     if (this.owned) {
-      this.router.navigate(['/lms/my-courses']);
+      this.router.navigate(['/lms/my-courses', this.course.id]);
       return;
     }
 
