@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe, NgIf, NgForOf } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   PublicBooksService,
   PublicBook,
   MyBook,
 } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { resolveMediaUrl } from '../../../core/utils/media-url';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-lms-library',
@@ -15,7 +19,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './library.html',
   styleUrl: './library.scss',
 })
-export class Library implements OnInit {
+export class Library implements OnInit, OnDestroy {
   // كل الكتب المتاحة (حتى للزائر)
   books: PublicBook[] = [];
 
@@ -27,6 +31,9 @@ export class Library implements OnInit {
 
   // IDs للكتب المملوكة
   private ownedBookIds: Set<number> = new Set<number>();
+  bookThumbnails: Record<number, string> = {};
+  private thumbnailObjectUrls: Map<number, string> = new Map();
+  private thumbnailSubscriptions: Map<number, Subscription> = new Map();
 
   isLoading = false;
   error: string | null = null;
@@ -35,12 +42,18 @@ export class Library implements OnInit {
   constructor(
     private booksService: PublicBooksService,
     private notification: NotificationService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.loadBooks();
     this.loadMyBooks(); // لو المستخدم مسجّل، نملأ الـ ownedBookIds
+  }
+
+  ngOnDestroy(): void {
+    this.resetThumbnails();
   }
 
   // تحميل الكتب العامة
@@ -50,9 +63,11 @@ export class Library implements OnInit {
 
     this.booksService.getBooks().subscribe({
       next: (data) => {
+        this.resetThumbnails();
         this.books = data;
         this.buildCategories();
         this.applyFilters();
+        this.loadBookThumbnails(this.books);
         this.isLoading = false;
       },
       error: () => {
@@ -159,5 +174,47 @@ export class Library implements OnInit {
         this.processingBookId = null;
       },
     });
+  }
+
+  private loadBookThumbnails(books: PublicBook[]): void {
+    const token = this.authService.getToken();
+    if (!token) {
+      return;
+    }
+
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    for (const book of books) {
+      if (!book.thumbnailUrl || this.bookThumbnails[book.id]) {
+        continue;
+      }
+
+      const resolvedUrl = resolveMediaUrl(book.thumbnailUrl);
+      const subscription = this.http.get(resolvedUrl, { responseType: 'blob', headers }).subscribe({
+        next: (blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.bookThumbnails[book.id] = objectUrl;
+          this.thumbnailObjectUrls.set(book.id, objectUrl);
+        },
+        error: () => {
+          // ignore thumbnail errors to avoid console noise
+        },
+      });
+
+      this.thumbnailSubscriptions.set(book.id, subscription);
+    }
+  }
+
+  private resetThumbnails(): void {
+    for (const subscription of this.thumbnailSubscriptions.values()) {
+      subscription.unsubscribe();
+    }
+    this.thumbnailSubscriptions.clear();
+
+    for (const objectUrl of this.thumbnailObjectUrls.values()) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    this.thumbnailObjectUrls.clear();
+    this.bookThumbnails = {};
   }
 }

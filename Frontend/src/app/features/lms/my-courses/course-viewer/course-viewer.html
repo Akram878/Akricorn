@@ -9,10 +9,10 @@
     <div class="course-viewer__hero">
       <div
         class="course-viewer__cover"
-        [class.course-viewer__cover--placeholder]="!course?.thumbnailUrl"
+        [class.course-viewer__cover--placeholder]="!courseThumbnailUrl"
       >
-        <ng-container *ngIf="course?.thumbnailUrl; else coverPlaceholder">
-          <img [src]="course?.thumbnailUrl" [alt]="course?.title || 'صورة الكورس'" loading="lazy" />
+        <ng-container *ngIf="courseThumbnailUrl; else coverPlaceholder">
+          <img [src]="courseThumbnailUrl" [alt]="course?.title || 'صورة الكورس'" loading="lazy" />
         </ng-container>
         <ng-template #coverPlaceholder>
           <div class="course-viewer__cover-placeholder">لا توجد صورة</div>
@@ -146,11 +146,16 @@
       <div class="course-viewer__overlay-body">
         <div class="course-viewer__player" [ngSwitch]="selectedFile?.type">
           <div class="course-viewer__pdf" *ngSwitchCase="'pdf'">
-            <iframe
-              [src]="selectedFile?.safeUrl"
-              title="ملف PDF"
-              (error)="handleMediaError('pdf')"
-            ></iframe>
+            <ng-container *ngIf="selectedFile?.safeUrl; else pdfLoading">
+              <iframe
+                [src]="selectedFile?.safeUrl"
+                title="ملف PDF"
+                (error)="handleMediaError('pdf')"
+              ></iframe>
+            </ng-container>
+            <ng-template #pdfLoading>
+              <div class="course-viewer__state">جاري تحميل ملف PDF…</div>
+            </ng-template>
           </div>
           <video
             *ngSwitchCase="'video'"
@@ -165,12 +170,18 @@
             controls
             (error)="handleMediaError('audio')"
           ></audio>
-          <iframe
-            *ngSwitchCase="'embed'"
-            [src]="selectedFile?.safeUrl"
-            title="Lesson resource"
-            (error)="handleMediaError('embed')"
-          ></iframe>
+          <ng-container *ngSwitchCase="'embed'">
+            <ng-container *ngIf="selectedFile?.safeUrl; else embedLoading">
+              <iframe
+                [src]="selectedFile?.safeUrl"
+                title="Lesson resource"
+                (error)="handleMediaError('embed')"
+              ></iframe>
+            </ng-container>
+            <ng-template #embedLoading>
+              <div class="course-viewer__state">جاري تحميل المحتوى…</div>
+            </ng-template>
+          </ng-container>
           <img
             *ngSwitchCase="'image'"
             [src]="selectedFile?.displayUrl"

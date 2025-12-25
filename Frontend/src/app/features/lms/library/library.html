@@ -54,8 +54,8 @@
       <!-- Cover -->
       <div class="lms-book-row__cover">
         <div class="lms-book-row__cover-art">
-          <img *ngIf="b.thumbnailUrl" [src]="b.thumbnailUrl" alt="{{ b.title }}" />
-          <span *ngIf="!b.thumbnailUrl">📘</span>
+          <img *ngIf="bookThumbnails[b.id]" [src]="bookThumbnails[b.id]" alt="{{ b.title }}" />
+          <span *ngIf="!bookThumbnails[b.id]">📘</span>
         </div>
       </div>
 

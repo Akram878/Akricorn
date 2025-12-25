@@ -20,7 +20,7 @@ interface SelectedLessonFile {
   name: string;
   url: string;
   displayUrl: string;
-  safeUrl?: SafeResourceUrl;
+  safeUrl: SafeResourceUrl | null;
   type: ViewerType;
   lessonTitle: string;
   sectionTitle: string;
@@ -38,14 +38,16 @@ export class CourseViewer implements OnInit, OnDestroy {
   course: MyCourseDetail | null = null;
 
   selectedFile: SelectedLessonFile | null = null;
-
+  courseThumbnailUrl: string | null = null;
   isLoading = false;
   isCompleting = false;
   error: string | null = null;
   isMediaLoading = false;
 
   private activeObjectUrl: string | null = null;
+  private courseThumbnailObjectUrl: string | null = null;
   private mediaSubscription?: Subscription;
+  private courseThumbnailSubscription?: Subscription;
   constructor(
     private route: ActivatedRoute,
     private coursesService: PublicCoursesService,
@@ -78,6 +80,7 @@ export class CourseViewer implements OnInit, OnDestroy {
     this.coursesService.getMyCourse(this.courseId).subscribe({
       next: (course) => {
         this.course = course;
+        this.loadCourseThumbnail(course.thumbnailUrl);
         this.isLoading = false;
       },
       error: (err) => {
@@ -101,7 +104,7 @@ export class CourseViewer implements OnInit, OnDestroy {
       name: file.name,
       url: resolvedUrl,
       displayUrl: '',
-      safeUrl: undefined,
+      safeUrl: null,
       type,
       lessonTitle,
       sectionTitle,
@@ -133,7 +136,7 @@ export class CourseViewer implements OnInit, OnDestroy {
           const safeUrl =
             type === 'pdf'
               ? this.sanitizer.bypassSecurityTrustResourceUrl(this.activeObjectUrl)
-              : undefined;
+              : null;
           this.selectedFile = {
             ...this.selectedFile,
             displayUrl: this.activeObjectUrl,
@@ -226,6 +229,7 @@ export class CourseViewer implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cleanupMediaUrl();
+    this.cleanupCourseThumbnail();
   }
 
   private isTokenExpired(token: string): boolean {
@@ -263,5 +267,45 @@ export class CourseViewer implements OnInit, OnDestroy {
       this.activeObjectUrl = null;
     }
     this.isMediaLoading = false;
+  }
+
+  private loadCourseThumbnail(thumbnailUrl?: string | null): void {
+    this.cleanupCourseThumbnail();
+
+    if (!thumbnailUrl) {
+      this.courseThumbnailUrl = null;
+      return;
+    }
+
+    const token = this.authService.getToken();
+    if (!token) {
+      this.courseThumbnailUrl = null;
+      return;
+    }
+
+    const resolvedUrl = resolveMediaUrl(thumbnailUrl);
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    this.courseThumbnailSubscription = this.http
+      .get(resolvedUrl, { responseType: 'blob', headers })
+      .subscribe({
+        next: (blob) => {
+          this.courseThumbnailObjectUrl = URL.createObjectURL(blob);
+          this.courseThumbnailUrl = this.courseThumbnailObjectUrl;
+        },
+        error: () => {
+          this.courseThumbnailUrl = null;
+        },
+      });
+  }
+
+  private cleanupCourseThumbnail(): void {
+    if (this.courseThumbnailSubscription) {
+      this.courseThumbnailSubscription.unsubscribe();
+      this.courseThumbnailSubscription = undefined;
+    }
+    if (this.courseThumbnailObjectUrl) {
+      URL.revokeObjectURL(this.courseThumbnailObjectUrl);
+      this.courseThumbnailObjectUrl = null;
+    }
   }
 }

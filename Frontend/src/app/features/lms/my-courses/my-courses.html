@@ -55,8 +55,8 @@
     <article class="lms-course-card" *ngFor="let c of filteredMyCourses; trackBy: trackByCourseId">
       <div class="lms-course-card__thumb">
         <img
-          *ngIf="c.thumbnailUrl?.trim(); else thumbNull"
-          [src]="c.thumbnailUrl"
+          *ngIf="courseThumbnails[c.id]; else thumbNull"
+          [src]="courseThumbnails[c.id]"
           [alt]="c.title ?? 'Course thumbnail'"
           loading="lazy"
         />

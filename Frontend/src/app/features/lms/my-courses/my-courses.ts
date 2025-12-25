@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { PublicCoursesService, MyCourse } from '../../../core/services/public-courses.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { resolveMediaUrl } from '../../../core/utils/media-url';
 
 import { Router } from '@angular/router';
 @Component({
@@ -11,7 +15,7 @@ import { Router } from '@angular/router';
   templateUrl: './my-courses.html',
   styleUrl: './my-courses.scss',
 })
-export class MyCourses implements OnInit {
+export class MyCourses implements OnInit, OnDestroy {
   myCourses: MyCourse[] = [];
   filteredMyCourses: MyCourse[] = [];
 
@@ -20,12 +24,19 @@ export class MyCourses implements OnInit {
 
   // خيارات الفئات الموجودة فعلياً
   categories: string[] = [];
-
+  courseThumbnails: Record<number, string> = {};
+  private thumbnailObjectUrls: Map<number, string> = new Map();
+  private thumbnailSubscriptions: Map<number, Subscription> = new Map();
   // فلاتر
   minHours: number | null = null;
   selectedCategory: string = 'all';
 
-  constructor(private publicCoursesService: PublicCoursesService, private router: Router) {}
+  constructor(
+    private publicCoursesService: PublicCoursesService,
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     const token = localStorage.getItem('auth_token');
@@ -39,15 +50,21 @@ export class MyCourses implements OnInit {
     this.loadMyCourses();
   }
 
+  ngOnDestroy(): void {
+    this.resetThumbnails();
+  }
+
   loadMyCourses(): void {
     this.isLoading = true;
     this.error = null;
 
     this.publicCoursesService.getMyCourses().subscribe({
       next: (data: MyCourse[]) => {
+        this.resetThumbnails();
         this.myCourses = data;
         this.buildFilterOptions();
         this.applyFilters();
+        this.loadCourseThumbnails(this.myCourses);
         this.isLoading = false;
       },
       error: (err) => {
@@ -105,6 +122,47 @@ export class MyCourses implements OnInit {
     this.router.navigate(['/lms/my-courses', course.id]);
   }
 
+  private loadCourseThumbnails(courses: MyCourse[]): void {
+    const token = this.authService.getToken();
+    if (!token) {
+      return;
+    }
+
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    for (const course of courses) {
+      if (!course.thumbnailUrl || this.courseThumbnails[course.id]) {
+        continue;
+      }
+
+      const resolvedUrl = resolveMediaUrl(course.thumbnailUrl);
+      const subscription = this.http.get(resolvedUrl, { responseType: 'blob', headers }).subscribe({
+        next: (blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.courseThumbnails[course.id] = objectUrl;
+          this.thumbnailObjectUrls.set(course.id, objectUrl);
+        },
+        error: () => {
+          // ignore thumbnail errors to avoid console noise
+        },
+      });
+
+      this.thumbnailSubscriptions.set(course.id, subscription);
+    }
+  }
+
+  private resetThumbnails(): void {
+    for (const subscription of this.thumbnailSubscriptions.values()) {
+      subscription.unsubscribe();
+    }
+    this.thumbnailSubscriptions.clear();
+
+    for (const objectUrl of this.thumbnailObjectUrls.values()) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    this.thumbnailObjectUrls.clear();
+    this.courseThumbnails = {};
+  }
   private isTokenExpired(token: string): boolean {
     try {
       const payloadSegment = token.split('.')[1];

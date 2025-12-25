@@ -1,14 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // 👈 مهم جداً
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   PublicCoursesService,
   PublicCourse,
   MyCourse,
 } from '../../../core/services/public-courses.service';
 import { NotificationService } from '../../../core/services/notification.service';
-
+import { AuthService } from '../../../core/services/auth.service';
+import { resolveMediaUrl } from '../../../core/utils/media-url';
 @Component({
   selector: 'app-lms-courses',
   standalone: true,
@@ -22,7 +25,7 @@ import { NotificationService } from '../../../core/services/notification.service
   templateUrl: './courses.html',
   styleUrl: './courses.scss',
 })
-export class Courses implements OnInit {
+export class Courses implements OnInit, OnDestroy {
   // كل الكورسات من الباك إند
   courses: PublicCourse[] = [];
 
@@ -37,7 +40,9 @@ export class Courses implements OnInit {
 
   // IDs للكورسات المملوكة
   private ownedCourseIds: Set<number> = new Set<number>();
-
+  courseThumbnails: Record<number, string> = {};
+  private thumbnailObjectUrls: Map<number, string> = new Map();
+  private thumbnailSubscriptions: Map<number, Subscription> = new Map();
   // خيارات الفلترة (قائمة قيم موجودة فعلياً في الكورسات)
   categories: string[] = [];
   paths: string[] = [];
@@ -56,12 +61,18 @@ export class Courses implements OnInit {
   constructor(
     private publicCoursesService: PublicCoursesService,
     private notification: NotificationService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.loadCourses();
     this.loadMyCourses();
+  }
+
+  ngOnDestroy(): void {
+    this.resetThumbnails();
   }
 
   // ============================
@@ -73,9 +84,11 @@ export class Courses implements OnInit {
 
     this.publicCoursesService.getCourses().subscribe({
       next: (data) => {
+        this.resetThumbnails();
         this.courses = data;
         this.buildFilterOptions();
         this.applyFilters();
+        this.loadCourseThumbnails(this.courses);
         this.isLoading = false;
       },
       error: () => {
@@ -249,5 +262,46 @@ export class Courses implements OnInit {
         this.processingCourseId = null;
       },
     });
+  }
+  private loadCourseThumbnails(courses: PublicCourse[]): void {
+    const token = this.authService.getToken();
+    if (!token) {
+      return;
+    }
+
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    for (const course of courses) {
+      if (!course.thumbnailUrl || this.courseThumbnails[course.id]) {
+        continue;
+      }
+
+      const resolvedUrl = resolveMediaUrl(course.thumbnailUrl);
+      const subscription = this.http.get(resolvedUrl, { responseType: 'blob', headers }).subscribe({
+        next: (blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          this.courseThumbnails[course.id] = objectUrl;
+          this.thumbnailObjectUrls.set(course.id, objectUrl);
+        },
+        error: () => {
+          // ignore thumbnail errors to avoid console noise
+        },
+      });
+
+      this.thumbnailSubscriptions.set(course.id, subscription);
+    }
+  }
+
+  private resetThumbnails(): void {
+    for (const subscription of this.thumbnailSubscriptions.values()) {
+      subscription.unsubscribe();
+    }
+    this.thumbnailSubscriptions.clear();
+
+    for (const objectUrl of this.thumbnailObjectUrls.values()) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    this.thumbnailObjectUrls.clear();
+    this.courseThumbnails = {};
   }
 }
