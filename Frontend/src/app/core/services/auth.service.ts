@@ -22,6 +22,7 @@ export interface User {
 
   password?: string; // لاستعماله في التسجيل فقط (لن نستقبله من الباك إند)
   confirmPassword?: string;
+  acceptedPolicy?: boolean;
   isGuest?: boolean;
 
   canEditBirthDate?: boolean;

@@ -89,11 +89,18 @@ $gold-400: #d9a74a;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
   }
 
   &__option {
     width: 100%;
-    padding: 0.45rem 0.6rem;
+    padding: 0.45rem 0.3rem;
     border-radius: 0.45rem;
     border: 1px solid transparent;
     background: rgba(3, 22, 18, 0.9);

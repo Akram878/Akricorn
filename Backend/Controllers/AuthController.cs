@@ -14,6 +14,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Backend.Helpers;
+using System.ComponentModel.DataAnnotations;
 namespace Backend.Controllers
 {
     [Route("api/[controller]")]
@@ -47,6 +48,7 @@ namespace Backend.Controllers
             var email = request.Email?.Trim() ?? string.Empty;
             var city = request.City?.Trim() ?? string.Empty;
             var countryCode = request.CountryCode?.Trim() ?? string.Empty;
+            var number = request.Number?.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(name))
                 errors["name"] = "Name is required.";
@@ -64,6 +66,20 @@ namespace Backend.Controllers
 
             if (string.IsNullOrWhiteSpace(email))
                 errors["email"] = "Email is required.";
+            else if (!new EmailAddressAttribute().IsValid(email))
+                errors["email"] = "Please enter a valid email address.";
+
+            if (string.IsNullOrWhiteSpace(number))
+                errors["number"] = "Phone number is required.";
+            else if (!Regex.IsMatch(number, "^[0-9]{7,15}$"))
+                errors["number"] = "Only digits allowed (7–15 characters).";
+
+            if (string.IsNullOrWhiteSpace(city))
+                errors["city"] = "City is required.";
+            else if (city.Length < 2)
+                errors["city"] = "City name is too short.";
+            else if (city.Length > 50)
+                errors["city"] = "City name is too long.";
 
             if (string.IsNullOrWhiteSpace(request.Password))
                 errors["password"] = "Password is required.";
@@ -107,7 +123,10 @@ namespace Backend.Controllers
             {
                 errors["countryCode"] = "Country code is invalid.";
             }
-
+            if (!request.AcceptedPolicy)
+            {
+                errors["acceptedPolicy"] = "Privacy policy acceptance is required.";
+            }
             if (errors.Any())
                 return BadRequest(new { message = "Validation failed.", errors });
 
@@ -124,8 +143,8 @@ namespace Backend.Controllers
                 Name = name,
                 Family = family,
                 CountryCode = countryCode,
-                Number = request.Number,
-               
+                Number = number,
+
                 Email = email,
                 City = city,
                 BirthDate = request.BirthDate,
@@ -414,7 +433,9 @@ namespace Backend.Controllers
         public string ConfirmPassword { get; set; }
         public string City { get; set; }
         public DateTime? BirthDate { get; set; }
-       
+
+        public bool AcceptedPolicy { get; set; }
+
     }
 
     public class LoginRequest

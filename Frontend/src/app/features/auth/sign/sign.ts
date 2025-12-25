@@ -102,7 +102,7 @@ export class Sign {
           '',
           [trimmedRequired, trimmedMinLength(3), latinLettersOnly, Validators.maxLength(30)],
         ],
-        countryCode: ['+20', [Validators.required]],
+        countryCode: ['+', [Validators.required]],
         number: ['', [trimmedRequired, Validators.pattern(/^[0-9]{7,15}$/)]],
         email: ['', [trimmedRequired, Validators.email]],
         city: ['', [trimmedRequired, trimmedMinLength(2), Validators.maxLength(50)]],
@@ -190,6 +190,7 @@ export class Sign {
       city: formValue.city.trim(),
       birthDate: formValue.birthDate,
       confirmPassword: formValue.confirmPassword,
+      acceptedPolicy: formValue.acceptedPolicy,
     };
 
     this.authService
