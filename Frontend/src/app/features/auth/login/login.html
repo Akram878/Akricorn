@@ -1,9 +1,32 @@
-<form class="login" #loginForm="ngForm" (ngSubmit)="login(loginForm)" novalidate>
+<form class="login" [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
   <!-- Email -->
-  <input type="email" placeholder="Email" [(ngModel)]="email" name="email" />
+  <div
+    class="field"
+    [class.field-invalid]="emailCtrl?.invalid && (emailCtrl?.touched || submitted)"
+  >
+    <input type="email" placeholder="Email" formControlName="email" />
+    <div class="field-icon" *ngIf="emailCtrl?.invalid && (emailCtrl?.touched || submitted)">
+      !
+      <div class="field-tooltip">
+        <span *ngIf="emailCtrl?.errors?.['required']"> Email is required. </span>
+        <span *ngIf="emailCtrl?.errors?.['email']"> Please enter a valid email address. </span>
+      </div>
+    </div>
+  </div>
 
   <!-- Password -->
-  <input type="password" placeholder="Password" [(ngModel)]="password" name="password" />
+  <div
+    class="field"
+    [class.field-invalid]="passwordCtrl?.invalid && (passwordCtrl?.touched || submitted)"
+  >
+    <input type="password" placeholder="Password" formControlName="password" />
+    <div class="field-icon" *ngIf="passwordCtrl?.invalid && (passwordCtrl?.touched || submitted)">
+      !
+      <div class="field-tooltip">
+        <span *ngIf="passwordCtrl?.errors?.['required']"> Password is required. </span>
+      </div>
+    </div>
+  </div>
 
   <!-- Buttons -->
   <div class="buttonContainer">

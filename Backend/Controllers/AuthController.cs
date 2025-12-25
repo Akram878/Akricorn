@@ -11,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Backend.Controllers
@@ -39,21 +40,84 @@ namespace Backend.Controllers
             if (request == null)
                 return BadRequest(new { message = "Invalid request payload." });
 
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-                return BadRequest(new { message = "Email and password are required." });
+            var errors = new System.Collections.Generic.Dictionary<string, string>();
 
-            var emailExists = await _context.Users.AnyAsync(u => u.Email == request.Email);
+            var name = request.Name?.Trim() ?? string.Empty;
+            var family = request.Family?.Trim() ?? string.Empty;
+            var email = request.Email?.Trim() ?? string.Empty;
+            var city = request.City?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(name))
+                errors["name"] = "Name is required.";
+            else if (name.Length < 3)
+                errors["name"] = "Name must be at least 3 letters.";
+            else if (!Regex.IsMatch(name, "^[A-Za-z]+$"))
+                errors["name"] = "Name must use A–Z letters only.";
+
+            if (string.IsNullOrWhiteSpace(family))
+                errors["family"] = "Family name is required.";
+            else if (family.Length < 3)
+                errors["family"] = "Family name must be at least 3 letters.";
+            else if (!Regex.IsMatch(family, "^[A-Za-z]+$"))
+                errors["family"] = "Family name must use A–Z letters only.";
+
+            if (string.IsNullOrWhiteSpace(email))
+                errors["email"] = "Email is required.";
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+                errors["password"] = "Password is required.";
+            else
+            {
+                var passwordPattern = new Regex(
+                    @"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~]{6,}$"
+                );
+
+                if (!passwordPattern.IsMatch(request.Password))
+                    errors["password"] =
+                        "Password must be at least 6 characters and include 1 uppercase letter, 1 number, and 1 symbol (A–Z only).";
+            }
+
+            if (string.IsNullOrWhiteSpace(request.ConfirmPassword))
+                errors["confirmPassword"] = "Confirm password is required.";
+            else if (!string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal))
+                errors["confirmPassword"] = "Passwords do not match.";
+
+            if (!request.BirthDate.HasValue)
+            {
+                errors["birthDate"] = "Date of birth is required.";
+            }
+            else
+            {
+                var today = DateTime.UtcNow.Date;
+                var birthDate = request.BirthDate.Value.Date;
+                var age = today.Year - birthDate.Year;
+                if (birthDate > today.AddYears(-age))
+                    age--;
+
+                if (age < 12 || age > 100)
+                    errors["birthDate"] = "Age must be between 12 and 100.";
+            }
+
+            if (errors.Any())
+                return BadRequest(new { message = "Validation failed.", errors });
+
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest(new { message = "Email is required." });
+
+            var emailExists = await _context.Users.AnyAsync(u => u.Email == email);
             if (emailExists)
                 return BadRequest(new { message = "Email is already in use." });
 
             var user = new User
             {
-                Name = request.Name,
-                Family = request.Family,
+               
+                Name = name,
+                Family = family,
                 CountryCode = request.CountryCode,
                 Number = request.Number,
-                Email = request.Email,
-                City = request.City,
+               
+                Email = email,
+                City = city,
                 BirthDate = request.BirthDate,
                 CanEditBirthDate = true,
                 IsActive = true
@@ -330,9 +394,10 @@ namespace Backend.Controllers
         public string Number { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-
+        public string ConfirmPassword { get; set; }
         public string City { get; set; }
         public DateTime? BirthDate { get; set; }
+       
     }
 
     public class LoginRequest

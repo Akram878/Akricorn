@@ -186,6 +186,10 @@ $gold-500: #b9822f;
     accent-color: $gold-400;
     cursor: pointer;
   }
+  .checkbox.checkbox-invalid {
+    box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.9);
+    border: 1px solid #ff6b6b;
+  }
 
   &.field-invalid .policy-container {
     color: #ff6b6b;
@@ -211,6 +215,84 @@ $gold-500: #b9822f;
     margin-bottom: 0.2rem;
     font-size: small;
     height: 1rem;
+  }
+}
+
+.policy-error {
+  margin-top: 0.2rem;
+  color: #ff6b6b;
+  font-size: 0.78rem;
+}
+
+.privacy-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.privacy-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 15, 12, 0.75);
+  backdrop-filter: blur(2px);
+}
+
+.privacy-modal {
+  position: relative;
+  max-width: 540px;
+  margin: 6vh auto;
+  background: rgba($emerald-900, 0.98);
+  border: 1px solid rgba($gold-500, 0.4);
+  border-radius: 0.8rem;
+  padding: 1.2rem 1.4rem 1.4rem;
+  color: $gold-100;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+}
+
+.privacy-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+
+  h2 {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $gold-200;
+  }
+}
+
+.privacy-close {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: $gold-300;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  &:hover {
+    color: $gold-100;
+    text-decoration: underline;
+  }
+}
+
+.privacy-content {
+  line-height: 1.6;
+  font-size: 0.9rem;
+  color: rgba($gold-100, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+@media (max-width: 640px) {
+  .privacy-modal {
+    margin: 5vh 1rem;
+    padding: 1rem;
   }
 }
 
