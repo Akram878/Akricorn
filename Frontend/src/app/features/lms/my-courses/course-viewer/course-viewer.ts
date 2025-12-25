@@ -9,7 +9,7 @@ import {
   CourseLearningPathProgress,
 } from '../../../../core/services/public-courses.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-
+import { resolveMediaUrl } from '../../../../core/utils/media-url';
 type ViewerType = 'video' | 'pdf' | 'image' | 'audio' | 'embed' | 'download';
 
 interface SelectedLessonFile {
@@ -85,7 +85,8 @@ export class CourseViewer implements OnInit {
 
   selectFile(file: CourseLessonFile, lessonTitle: string, sectionTitle: string): void {
     const type = this.detectFileType(file);
-    const displayUrl = this.withAuthToken(file.url);
+    const resolvedUrl = resolveMediaUrl(file.url);
+    const displayUrl = this.withAuthToken(resolvedUrl);
     const safeUrl =
       type === 'pdf' || type === 'embed'
         ? this.sanitizer.bypassSecurityTrustResourceUrl(displayUrl)
@@ -93,7 +94,7 @@ export class CourseViewer implements OnInit {
     this.selectedFile = {
       id: file.id,
       name: file.name,
-      url: file.url,
+      url: resolvedUrl,
       displayUrl,
       safeUrl,
       type,

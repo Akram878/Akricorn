@@ -3,6 +3,7 @@ import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Router } from '@angular/router';
+import { resolveMediaUrl } from '../../../core/utils/media-url';
 @Component({
   selector: 'app-lms-my-books',
   standalone: true,
@@ -89,7 +90,7 @@ export class MyBooks implements OnInit {
       return;
     }
 
-    const url = this.withAuthToken(book.fileUrl);
+    const url = this.withAuthToken(resolveMediaUrl(book.fileUrl));
     window.open(url, '_blank', 'noopener');
   }
 
