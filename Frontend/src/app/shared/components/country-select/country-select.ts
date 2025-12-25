@@ -33,7 +33,7 @@ export class CountrySelectComponent implements ControlValueAccessor {
   @Input() options: CountryOption[] = COUNTRY_OPTIONS;
   @Input() required = false;
   @Input() invalid = false;
-  @Input() placeholder = '+';
+  @Input() placeholder = '+1';
   @Input() searchPlaceholder = 'Search by country or dial code';
   @Input() disabled = false;
 
@@ -41,7 +41,7 @@ export class CountrySelectComponent implements ControlValueAccessor {
 
   open = false;
   searchTerm = '';
-  value = '+';
+  value = '+1';
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
@@ -83,7 +83,7 @@ export class CountrySelectComponent implements ControlValueAccessor {
   }
 
   writeValue(value: string | null): void {
-    this.value = value && value.trim() ? value : '+';
+    this.value = value && value.trim() ? value : '+1';
   }
 
   registerOnChange(fn: (value: string) => void): void {
@@ -121,5 +121,9 @@ export class CountrySelectComponent implements ControlValueAccessor {
       this.searchTerm = '';
       this.onTouched();
     }
+  }
+  @HostListener('focusout')
+  handleFocusOut(): void {
+    this.onTouched();
   }
 }

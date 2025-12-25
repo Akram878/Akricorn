@@ -48,22 +48,27 @@
       <!-- COUNTRY CODE -->
       <div
         class="field compact key country-field"
-        [class.field-invalid]="submitted && countryCodeCtrl?.invalid"
+        [class.field-invalid]="countryCodeCtrl?.invalid && (countryCodeCtrl?.touched || submitted)"
       >
         <app-country-select
           formControlName="countryCode"
           [required]="true"
-          [invalid]="submitted && !!countryCodeCtrl?.invalid"
+          [invalid]="!!countryCodeCtrl?.invalid && (countryCodeCtrl?.touched || submitted)"
         />
       </div>
       <!-- NUMBER -->
       <div
         class="field number number-field"
-        [class.field-invalid]="submitted && numberCtrl?.invalid"
+        [class.field-invalid]="numberCtrl?.invalid && (numberCtrl?.touched || submitted)"
       >
-        <input type="text" placeholder="Number" formControlName="number" />
+        <input
+          type="text"
+          placeholder="Number"
+          formControlName="number"
+          (blur)="numberCtrl?.markAsTouched()"
+        />
 
-        <div class="field-icon" *ngIf="submitted && numberCtrl?.invalid">
+        <div class="field-icon" *ngIf="numberCtrl?.invalid && (numberCtrl?.touched || submitted)">
           !
           <div class="field-tooltip">
             <span *ngIf="numberCtrl?.errors?.['required']"> Phone number is required. </span>

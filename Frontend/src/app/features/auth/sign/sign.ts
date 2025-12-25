@@ -103,7 +103,7 @@ export class Sign {
           '',
           [trimmedRequired, trimmedMinLength(3), latinLettersOnly, Validators.maxLength(30)],
         ],
-        countryCode: ['+', [Validators.required]],
+        countryCode: ['+1', [Validators.required]],
         number: ['', [trimmedRequired, Validators.pattern(/^[0-9]{7,15}$/)]],
         email: ['', [trimmedRequired, Validators.pattern(EMAIL_REGEX)]],
         city: ['', [trimmedRequired, trimmedMinLength(2), Validators.maxLength(50)]],

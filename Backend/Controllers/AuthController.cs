@@ -47,7 +47,7 @@ namespace Backend.Controllers
             var family = request.Family?.Trim() ?? string.Empty;
             var email = request.Email?.Trim() ?? string.Empty;
             var city = request.City?.Trim() ?? string.Empty;
-            var countryCode = request.CountryCode?.Trim() ?? string.Empty;
+            var countryCode = request.CountryCode?.Trim() ?? "+1";
             var number = request.Number?.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(name))
