@@ -8,10 +8,11 @@ import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 
 import { Router } from '@angular/router';
+import { CourseCardComponent } from '../course-card/course-card';
 @Component({
   selector: 'app-my-courses',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, FormsModule, DatePipe],
+  imports: [CommonModule, NgIf, NgForOf, FormsModule, DatePipe, CourseCardComponent],
   templateUrl: './my-courses.html',
   styleUrl: './my-courses.scss',
 })
@@ -115,11 +116,6 @@ export class MyCourses implements OnInit, OnDestroy {
 
   trackByCourseId(index: number, course: MyCourse): number {
     return course.id;
-  }
-
-  // مجرد placeholder لو حبّينا نضيف زر "Open course"
-  openCourse(course: MyCourse): void {
-    this.router.navigate(['/lms/my-courses', course.id]);
   }
 
   private loadCourseThumbnails(courses: MyCourse[]): void {

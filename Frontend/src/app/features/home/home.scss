@@ -158,10 +158,7 @@ $gold-500: #b9822f;
     display: flex;
     flex-wrap: wrap;
     gap: 1.25rem;
-
-    app-course-card {
-      flex: 1 1 260px;
-    }
+    justify-content: flex-start;
   }
 }
 
@@ -173,10 +170,18 @@ $gold-500: #b9822f;
   .Home {
     padding: 1rem;
   }
+
+  .featured-courses__grid {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 600px) {
   .home {
     padding: 1rem;
+  }
+
+  .featured-courses__grid {
+    justify-content: center;
   }
 }

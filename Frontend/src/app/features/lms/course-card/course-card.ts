@@ -17,9 +17,11 @@ import { resolveMediaUrl } from '../../../core/utils/media-url';
 export class CourseCardComponent {
   @Input({ required: true }) course!: PublicCourse;
   @Input() owned = false;
+  @Input() thumbnailUrl?: string | null;
   @Output() purchased = new EventEmitter<number>();
 
   isProcessing = false;
+  isFlipped = false;
 
   constructor(
     private publicCoursesService: PublicCoursesService,
@@ -66,7 +68,14 @@ export class CourseCardComponent {
     });
   }
 
+  toggleFlip(): void {
+    this.isFlipped = !this.isFlipped;
+  }
+
   getThumbnailUrl(): string | null {
+    if (this.thumbnailUrl) {
+      return this.thumbnailUrl;
+    }
     if (!this.course.thumbnailUrl?.trim()) {
       return null;
     }
@@ -80,11 +89,6 @@ export class CourseCardComponent {
       return 'No description available.';
     }
 
-    const maxLength = 120;
-    if (description.length <= maxLength) {
-      return description;
-    }
-
-    return `${description.slice(0, maxLength).trim()}…`;
+    return description;
   }
 }

@@ -154,15 +154,11 @@ $gold-500: #b9822f;
 .lms-courses-grid {
   margin-top: 0.5rem;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: row;
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 1rem 1.3rem;
-}
-
-app-course-card {
-  flex: 1 1 280px;
 }
 
 /* =================== STATES (Loading / Empty / Error) =================== */
@@ -199,6 +195,9 @@ app-course-card {
   .lms-courses-page__topbar {
     align-items: flex-start;
   }
+  .lms-courses-grid {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 700px) {
@@ -224,10 +223,4 @@ app-course-card {
   .lms-courses-page {
     padding-inline: 1rem;
   }
-}
-
-.lms-course-card__thumb-placeholder {
-  color: rgba($gold-200, 0.7);
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
 }

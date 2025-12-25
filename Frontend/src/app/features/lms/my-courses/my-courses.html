@@ -52,67 +52,12 @@
     class="lms-courses-grid"
     *ngIf="!isLoading && !error && filteredMyCourses.length > 0; else loadingOrEmpty"
   >
-    <article class="lms-course-card" *ngFor="let c of filteredMyCourses; trackBy: trackByCourseId">
-      <div class="lms-course-card__thumb">
-        <img
-          *ngIf="courseThumbnails[c.id]; else thumbNull"
-          [src]="courseThumbnails[c.id]"
-          [alt]="c.title ?? 'Course thumbnail'"
-          loading="lazy"
-        />
-        <ng-template #thumbNull>
-          <div class="lms-course-card__thumb-placeholder">null</div>
-        </ng-template>
-      </div>
-
-      <header class="lms-course-card__header">
-        <div class="lms-course-card__title-block">
-          <h3 class="lms-course-card__title">
-            {{ c.title ?? 'null' }}
-          </h3>
-          <!-- <p class="lms-course-card__subtitle">
-            {{ c.description }}
-          </p> -->
-        </div>
-
-        <!-- level حسب الـ category (نفس نظام الكورسات العامة) -->
-        <span
-          class="lms-course-card__level"
-          [ngClass]="{
-            'lms-course-card__level--beginner': c.category === 'Beginner',
-            'lms-course-card__level--intermediate': c.category === 'Intermediate',
-            'lms-course-card__level--advanced': c.category === 'Advanced'
-          }"
-        >
-          {{ c.category ?? 'null' }}
-        </span>
-      </header>
-
-      <div class="lms-course-card__body">
-        <div class="lms-course-card__meta">
-          <span>
-            <span>⏱</span>
-            <span>{{ c.hours || 0 }} h</span>
-          </span>
-
-          <span>
-            <span>📚</span>
-            <span>{{ c.pathTitle?.trim() ? c.pathTitle : 'null' }}</span>
-          </span>
-
-          <span>
-            <span>🏷</span>
-            <span>{{ c.category ?? 'null' }}</span>
-          </span>
-        </div>
-      </div>
-
-      <footer class="lms-course-card__footer">
-        <button type="button" class="lms-primary-btn" (click)="openCourse(c)">
-          Open course (soon)
-        </button>
-      </footer>
-    </article>
+    <app-course-card
+      *ngFor="let c of filteredMyCourses; trackBy: trackByCourseId"
+      [course]="c"
+      [owned]="true"
+      [thumbnailUrl]="courseThumbnails[c.id]"
+    ></app-course-card>
   </div>
 
   <ng-template #loadingOrEmpty>

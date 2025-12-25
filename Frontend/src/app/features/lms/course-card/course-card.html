@@ -1,72 +1,45 @@
-<article class="lms-course-card" [class.lms-course-card--owned]="owned">
-  <div class="lms-course-card__thumb">
-    <ng-container *ngIf="getThumbnailUrl() as thumbnailUrl; else thumbNull">
-      <img [src]="thumbnailUrl" [alt]="course.title ?? 'Course thumbnail'" loading="lazy" />
-    </ng-container>
-    <ng-template #thumbNull>
-      <div class="lms-course-card__thumb-placeholder">null</div>
-    </ng-template>
-  </div>
+<article class="lms-course-card card" [class.lms-course-card--owned]="owned" (click)="toggleFlip()">
+  <div class="card-inner" [class.is-flipped]="isFlipped">
+    <div class="card-front">
+      <div class="lms-course-card__thumb">
+        <ng-container *ngIf="getThumbnailUrl() as thumbnailUrl; else thumbNull">
+          <img [src]="thumbnailUrl" [alt]="course.title ?? 'Course thumbnail'" loading="lazy" />
+        </ng-container>
+        <ng-template #thumbNull>
+          <div class="lms-course-card__thumb-placeholder">null</div>
+        </ng-template>
+      </div>
 
-  <header class="lms-course-card__header">
-    <div class="lms-course-card__title-block">
       <h3 class="lms-course-card__title">
         {{ course.title ?? 'null' }}
       </h3>
-      <p class="lms-course-card__subtitle">
-        {{ getDescription() }}
-      </p>
+
+      <footer class="lms-course-card__footer">
+        <div class="lms-course-card__price">
+          <span class="lms-course-card__price-label">Price</span>
+          <span class="lms-course-card__price-value">
+            <ng-container
+              *ngIf="course.price !== null && course.price !== undefined; else priceNull"
+            >
+              {{ course.price | number : '1.2-2' }} $
+            </ng-container>
+            <ng-template #priceNull>null</ng-template>
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="lms-primary-btn"
+          (click)="onPurchase(); $event.stopPropagation()"
+          [disabled]="isProcessing"
+        >
+          {{ owned ? 'View in My Courses' : isProcessing ? 'Processing...' : 'Buy / Enroll' }}
+        </button>
+      </footer>
     </div>
 
-    <span
-      class="lms-course-card__level"
-      [ngClass]="{
-        'lms-course-card__level--beginner': course.category === 'Beginner',
-        'lms-course-card__level--intermediate': course.category === 'Intermediate',
-        'lms-course-card__level--advanced': course.category === 'Advanced'
-      }"
-    >
-      {{ course.category ?? 'null' }}
-    </span>
-  </header>
-
-  <div class="lms-course-card__body">
-    <div class="lms-course-card__meta">
-      <span>
-        <span>⏱</span>
-        <span>{{ course.hours || 0 }} h</span>
-      </span>
-
-      <span>
-        <span>📚</span>
-        <span>{{ course.pathTitle?.trim() ? course.pathTitle : 'null' }}</span>
-      </span>
-
-      <span>
-        <span>⭐</span>
-        <span>
-          <ng-container *ngIf="course.rating && course.rating > 0; else noRating">
-            {{ course.rating | number : '1.1-1' }} / 5
-          </ng-container>
-          <ng-template #noRating>no rating</ng-template>
-        </span>
-      </span>
+    <div class="card-back">
+      <p class="lms-course-card__description">{{ getDescription() }}</p>
     </div>
   </div>
-
-  <footer class="lms-course-card__footer">
-    <div class="lms-course-card__price">
-      <span class="lms-course-card__price-label">Price</span>
-      <span class="lms-course-card__price-value">
-        <ng-container *ngIf="course.price !== null && course.price !== undefined; else priceNull">
-          {{ course.price | number : '1.2-2' }} $
-        </ng-container>
-        <ng-template #priceNull>null</ng-template>
-      </span>
-    </div>
-
-    <button type="button" class="lms-primary-btn" (click)="onPurchase()" [disabled]="isProcessing">
-      {{ owned ? 'View in My Courses' : isProcessing ? 'Processing...' : 'Buy / Enroll' }}
-    </button>
-  </footer>
 </article>
