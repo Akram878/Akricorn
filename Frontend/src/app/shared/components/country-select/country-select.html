@@ -1,0 +1,45 @@
+<div
+  class="country-select"
+  [class.country-select--open]="open"
+  [class.country-select--invalid]="invalid"
+>
+  <button
+    type="button"
+    class="country-select__trigger"
+    (click)="toggleDropdown()"
+    [attr.aria-expanded]="open"
+    [disabled]="disabled"
+  >
+    <span class="country-select__value">{{ selectedOption?.dialCode || placeholder }}</span>
+    <span class="country-select__chevron">▾</span>
+  </button>
+
+  <div class="country-select__panel" *ngIf="open">
+    <input
+      #searchInput
+      type="search"
+      class="country-select__search"
+      [placeholder]="searchPlaceholder"
+      [(ngModel)]="searchTerm"
+    />
+
+    <div class="country-select__options">
+      <button
+        type="button"
+        class="country-select__option"
+        *ngFor="let option of filteredOptions"
+        (click)="selectOption(option)"
+      >
+        <span class="country-select__option-name">{{ option.name }}</span>
+        <span class="country-select__option-meta">
+          <span class="country-select__option-code">{{ option.dialCode }}</span>
+          <span class="country-select__option-iso">{{ option.isoCode }}</span>
+        </span>
+      </button>
+
+      <p class="country-select__empty" *ngIf="filteredOptions.length === 0">
+        No matching countries.
+      </p>
+    </div>
+  </div>
+</div>

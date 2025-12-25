@@ -433,13 +433,43 @@ $gold-500: #b9822f;
     min-height: 90px;
   }
 }
+.phone-field {
+  .phone-input-row {
+    display: flex;
+    gap: 0.5rem;
+  }
 
+  .phone-input-country {
+    flex: 0 0 20%;
+    min-width: 6.5rem;
+  }
+
+  .phone-input-number {
+    flex: 1 1 80%;
+  }
+}
 .field-hint {
   margin: 0.1rem 0 0;
   font-size: 0.75rem;
   color: rgba($gold-200, 0.75);
 }
 
+@media (max-width: 640px) {
+  .phone-field {
+    .phone-input-row {
+      gap: 0.6rem;
+    }
+
+    .phone-input-country {
+      flex: 0 0 30%;
+      min-width: 5.5rem;
+    }
+
+    .phone-input-number {
+      flex: 1 1 70%;
+    }
+  }
+}
 /* أزرار أسفل الفورم */
 
 .form-actions {

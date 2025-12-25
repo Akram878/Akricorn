@@ -44,34 +44,21 @@
     </div>
 
     <!-- Phone -->
-    <div class="field-row">
+    <div class="field-row phone-row">
       <!-- COUNTRY CODE -->
       <div
-        class="field compact key"
-        [class.field-invalid]="countryCodeCtrl?.invalid && (countryCodeCtrl?.touched || submitted)"
+        class="field compact key country-field"
+        [class.field-invalid]="submitted && countryCodeCtrl?.invalid"
       >
-        <select id="countryCode" formControlName="countryCode">
-          <option value="+1">🇺🇸 +1</option>
-          <option value="+44">🇬🇧 +44</option>
-          <option value="+20">🇪🇬 +20</option>
-          <option value="+966">🇸🇦 +966</option>
-          <option value="+971">🇦🇪 +971</option>
-        </select>
-
-        <div
-          class="field-icon"
-          *ngIf="countryCodeCtrl?.invalid && (countryCodeCtrl?.touched || submitted)"
-        >
-          !
-          <div class="field-tooltip">
-            <span>Country code is required.</span>
-          </div>
-        </div>
+        <app-country-select
+          formControlName="countryCode"
+          [required]="true"
+          [invalid]="submitted && !!countryCodeCtrl?.invalid"
+        />
       </div>
-
       <!-- NUMBER -->
       <div
-        class="field number"
+        class="field number number-field"
         [class.field-invalid]="numberCtrl?.invalid && (numberCtrl?.touched || submitted)"
       >
         <input type="text" placeholder="Number" formControlName="number" />

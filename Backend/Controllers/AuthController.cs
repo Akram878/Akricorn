@@ -13,7 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using Backend.Helpers;
 namespace Backend.Controllers
 {
     [Route("api/[controller]")]
@@ -46,6 +46,7 @@ namespace Backend.Controllers
             var family = request.Family?.Trim() ?? string.Empty;
             var email = request.Email?.Trim() ?? string.Empty;
             var city = request.City?.Trim() ?? string.Empty;
+            var countryCode = request.CountryCode?.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(name))
                 errors["name"] = "Name is required.";
@@ -98,6 +99,15 @@ namespace Backend.Controllers
                     errors["birthDate"] = "Age must be between 12 and 100.";
             }
 
+            if (string.IsNullOrWhiteSpace(countryCode) || countryCode == "+")
+            {
+                errors["countryCode"] = "Country code is required.";
+            }
+            else if (!CountryCatalog.IsValidDialCode(countryCode))
+            {
+                errors["countryCode"] = "Country code is invalid.";
+            }
+
             if (errors.Any())
                 return BadRequest(new { message = "Validation failed.", errors });
 
@@ -113,7 +123,7 @@ namespace Backend.Controllers
                
                 Name = name,
                 Family = family,
-                CountryCode = request.CountryCode,
+                CountryCode = countryCode,
                 Number = request.Number,
                
                 Email = email,
@@ -272,7 +282,14 @@ namespace Backend.Controllers
                 user.Email = request.Email;
             }
 
-            user.CountryCode = request.CountryCode;
+            var requestedCountryCode = request.CountryCode?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(requestedCountryCode) || requestedCountryCode == "+")
+                return BadRequest(new { message = "Country code is required." });
+
+            if (!CountryCatalog.IsValidDialCode(requestedCountryCode))
+                return BadRequest(new { message = "Country code is invalid." });
+
+            user.CountryCode = requestedCountryCode;
             user.Number = request.Number;
 
             if (!string.IsNullOrWhiteSpace(request.NewPassword))

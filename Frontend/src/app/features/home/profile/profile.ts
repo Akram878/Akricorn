@@ -10,10 +10,11 @@ import {
 } from '../../../core/services/auth.service';
 import { Subscription } from 'rxjs';
 import { RouterModule } from '@angular/router';
+import { CountrySelectComponent } from '../../../shared/components/country-select/country-select';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, RouterModule],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterModule, CountrySelectComponent],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss'],
 })
@@ -24,7 +25,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   editMode = false;
   accountSettingsMode = false;
   settingsOpen = false;
-
+  accountSubmitted = false;
   avatarUrl: string = '/assets/icons/user.png';
   about = '';
 
@@ -40,7 +41,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   accountSettingsModel = {
     email: '',
-    countryCode: '+20',
+    countryCode: '+',
     number: '',
     currentPassword: '',
     newPassword: '',
@@ -69,7 +70,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
         this.accountSettingsModel = {
           email: user.email || '',
-          countryCode: user.countryCode || '+20',
+          countryCode: user.countryCode || '+',
           number: user.number || '',
           currentPassword: '',
           newPassword: '',
@@ -172,7 +173,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     this.accountSettingsModel = {
       email: this.user.email || '',
-      countryCode: this.user.countryCode || '+20',
+      countryCode: this.user.countryCode || '+',
       number: this.user.number || '',
       currentPassword: '',
       newPassword: '',
@@ -182,11 +183,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.accountSettingsMode = true;
     this.editMode = false;
     this.settingsOpen = false;
+    this.accountSubmitted = false;
   }
 
   cancelEdit() {
     this.editMode = false;
     this.accountSettingsMode = false;
+    this.accountSubmitted = false;
   }
 
   // ============================
@@ -241,6 +244,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   // ============================
 
   saveAccountSettings() {
+    this.accountSubmitted = true;
     if (!this.user || this.user.isGuest || !this.user.id) {
       alert('Guests cannot save account settings.');
       return;
@@ -279,6 +283,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
         console.log('Account settings updated:', updated);
         this.accountSettingsMode = false;
+        this.accountSubmitted = false;
       },
       error: (err: any) => {
         console.error(err);

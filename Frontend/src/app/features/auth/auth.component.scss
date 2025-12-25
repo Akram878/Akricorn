@@ -86,6 +86,7 @@ $gold-500: #b9822f;
   grid-area: logo;
   @include flex(row, center, center);
   gap: 1rem;
+  margin: 1rem 0;
 
   .fill {
     width: 3rem;

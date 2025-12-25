@@ -35,9 +35,11 @@ $gold-500: #b9822f;
   @include flex(row, space-between, flex-start);
   gap: 0.3rem;
   flex-wrap: nowrap;
-
-  .key {
-    width: 20%;
+}
+.field-row.phone-row {
+  .country-field {
+    flex: 0 0 20%;
+    min-width: 6.5rem;
   }
 
   .Number {
@@ -151,7 +153,20 @@ $gold-500: #b9822f;
     }
   }
 }
+@media (max-width: 640px) {
+  .field-row.phone-row {
+    gap: 0.4rem;
 
+    .country-field {
+      flex: 0 0 30%;
+      min-width: 5.5rem;
+    }
+
+    .number-field {
+      flex: 1 1 70%;
+    }
+  }
+}
 /* سياسة الخصوصية */
 .policy-field {
   .policy-container {

@@ -12,6 +12,8 @@ import {
 } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { AuthService, User } from '../../../core/services/auth.service';
+import { CountrySelectComponent } from '../../../shared/components/country-select/country-select';
+
 const LATIN_NAME_PATTERN = /^[A-Za-z]+$/;
 const PASSWORD_REGEX =
   /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{6,}$/;
@@ -79,7 +81,7 @@ const passwordMatchValidator: ValidatorFn = (group: AbstractControl): Validation
 @Component({
   selector: 'app-sign',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, CountrySelectComponent],
   templateUrl: './sign.html',
   styleUrls: ['./sign.scss'],
 })
