@@ -56,6 +56,7 @@ $gold-500: #b9822f;
   height: 100%;
   transform-style: preserve-3d;
   transition: transform 0.6s ease;
+  will-change: transform;
 }
 
 .card-inner.is-flipped {
@@ -76,9 +77,10 @@ $gold-500: #b9822f;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  transform: translateZ(0);
 }
 .card-back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(0);
   overflow: hidden;
 }
 
