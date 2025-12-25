@@ -62,7 +62,8 @@ builder.Services.AddSwaggerGen(options =>
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddScoped<AdminSeeder>();
+builder.Services.AddScoped<PasswordHasher<AdminAccount>>();
 // CORS للسماح لـ Angular على http://localhost:4200
 builder.Services.AddCors(options =>
 {
@@ -178,31 +179,9 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    db.Database.Migrate();
-
-    var adminSeedSection = builder.Configuration.GetSection("AdminSeed");
-    var seedEnabled = adminSeedSection.GetValue<bool>("Enabled");
-    var seedUsername = adminSeedSection["Username"];
-    var seedPassword = adminSeedSection["Password"];
-
-    // لو ما في ولا حساب أدمن، ننشئ Owner افتراضي (متحكم به بالبيئة)
-    if (seedEnabled && !string.IsNullOrWhiteSpace(seedUsername) && !string.IsNullOrWhiteSpace(seedPassword) && !db.AdminAccounts.Any())
-    {
-        var owner = new AdminAccount
-        {
-            Username = seedUsername,
-            Role = AdminRole.Owner,
-            IsActive = true
-        };
-
-        var hasher = new PasswordHasher<AdminAccount>();
-        owner.PasswordHash = hasher.HashPassword(owner, seedPassword);
-
-        db.AdminAccounts.Add(owner);
-        db.SaveChanges();
-    }
+    var adminSeeder = scope.ServiceProvider.GetRequiredService<AdminSeeder>();
+    await adminSeeder.SeedAsync();
 }
 
 // ============================
