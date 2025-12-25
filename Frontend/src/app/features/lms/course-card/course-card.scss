@@ -163,23 +163,16 @@ $gold-500: #b9822f;
 
 .lms-course-card .lms-primary-btn {
   border-radius: 0.3rem;
-  color: hsl(168, 78.95%, 3.73%);
+  color: hsl(42.67deg 88.24% 80%);
   padding: 0.75rem;
-  background: linear-gradient(
-    180deg,
-    hsl(45, 48.78%, 67.84%) 0%,
-    hsl(43.33, 46.96%, 54.9%) 40%,
-    #c89445 100%
-  );
-  justify-content: center;
-
+  background: #041e16;
   cursor: pointer;
   white-space: nowrap;
-
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   border: none;
+  border: 1px solid #023629;
 }
 
 .lms-course-card__description {
