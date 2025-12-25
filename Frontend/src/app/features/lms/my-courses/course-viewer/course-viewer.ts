@@ -89,7 +89,11 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
       this.error = 'لم يتم العثور على الكورس المطلوب.';
       return;
     }
-
+    const token = localStorage.getItem('auth_token');
+    if (!token || this.isTokenExpired(token)) {
+      this.error = 'يرجى تسجيل الدخول للوصول إلى الكورس.';
+      return;
+    }
     this.loadCourse();
   }
 
@@ -143,6 +147,11 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
         safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl);
         this.mediaObjectUrl = objectUrl;
       } catch (err) {
+        if (this.isAuthError(err)) {
+          this.notifications.showError('لا يمكنك الوصول إلى هذا الملف.');
+          return;
+        }
+
         console.error('Failed to prepare media URL', err);
         // حافظ على الرابط الأصلي في حال فشل إنشاء Blob URL حتى يتمكن المتصفح من محاولة تحميله مباشرة
         displayUrl = file.url;
@@ -268,6 +277,9 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
       await this.renderTask.promise;
     } catch (err) {
       console.error(err);
+      if (this.isAuthError(err)) {
+        this.notifications.showError('لا يمكنك الوصول إلى ملف PDF.');
+      }
       this.pdfRenderError = 'تعذر تحميل ملف PDF حالياً. حاول مرة أخرى لاحقاً.';
       container.innerHTML = '';
     } finally {
@@ -411,8 +423,7 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
 
   private getAuthToken(): string | undefined {
     const userToken = localStorage.getItem('auth_token');
-    const adminToken = localStorage.getItem('adminToken');
-    return userToken ?? adminToken ?? undefined;
+    return userToken ?? undefined;
   }
   private detectFileType(file: Pick<CourseLessonFile, 'name' | 'url'>): ViewerType {
     const normalizedName = file.name.toLowerCase();
@@ -450,5 +461,40 @@ export class CourseViewer implements OnInit, AfterViewInit, OnDestroy {
 
     const message = messageMap[type] || 'تعذر تحميل الملف.';
     this.notifications.showError(message);
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payloadSegment = token.split('.')[1];
+      if (!payloadSegment) {
+        return true;
+      }
+
+      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(
+        normalized.length + ((4 - (normalized.length % 4)) % 4),
+        '='
+      );
+      const payload = JSON.parse(atob(padded));
+
+      if (!payload?.exp) {
+        return true;
+      }
+
+      const expiryMs = payload.exp * 1000;
+      return Date.now() >= expiryMs;
+    } catch {
+      return true;
+    }
+  }
+
+  private isAuthError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      message.includes('status 401') ||
+      message.includes('status 403') ||
+      message.toLowerCase().includes('unauthorized') ||
+      message.toLowerCase().includes('forbidden')
+    );
   }
 }

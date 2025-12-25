@@ -26,12 +26,14 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
       req.url.includes('/api/lms/paths'));
   let tokenToUse: string | null = null;
 
-  // لو الطلب رايح إلى /api/admin → حاول تستخدم adminToken أولاً
-  if (req.url.includes('/api/admin')) {
-    tokenToUse = adminToken || userToken;
+  const isAdminRequest = req.url.includes('/api/admin');
+
+  // لو الطلب رايح إلى /api/admin → استخدم adminToken فقط
+  if (isAdminRequest) {
+    tokenToUse = adminToken;
   } else if (!isPublicLmsRequest) {
-    // لباقي الطلبات → استخدم توكن المستخدم، ولو مش موجود استخدم الأدمن
-    tokenToUse = userToken || adminToken;
+    // LMS محمي + باقي الطلبات → توكن المستخدم فقط
+    tokenToUse = userToken;
   }
 
   // ================================

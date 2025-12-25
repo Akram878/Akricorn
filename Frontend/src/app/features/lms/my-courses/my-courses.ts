@@ -28,6 +28,14 @@ export class MyCourses implements OnInit {
   constructor(private publicCoursesService: PublicCoursesService, private router: Router) {}
 
   ngOnInit(): void {
+    const token = localStorage.getItem('auth_token');
+
+    if (!token || this.isTokenExpired(token)) {
+      this.router.navigate(['/auth/sign'], {
+        queryParams: { returnUrl: '/lms/my-courses' },
+      });
+      return;
+    }
     this.loadMyCourses();
   }
 
@@ -95,5 +103,30 @@ export class MyCourses implements OnInit {
   // مجرد placeholder لو حبّينا نضيف زر "Open course"
   openCourse(course: MyCourse): void {
     this.router.navigate(['/lms/my-courses', course.id]);
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payloadSegment = token.split('.')[1];
+      if (!payloadSegment) {
+        return true;
+      }
+
+      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(
+        normalized.length + ((4 - (normalized.length % 4)) % 4),
+        '='
+      );
+      const payload = JSON.parse(atob(padded));
+
+      if (!payload?.exp) {
+        return true;
+      }
+
+      const expiryMs = payload.exp * 1000;
+      return Date.now() >= expiryMs;
+    } catch {
+      return true;
+    }
   }
 }

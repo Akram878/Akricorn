@@ -89,7 +89,7 @@ export class MyBooks implements OnInit {
       return;
     }
 
-    const token = localStorage.getItem('auth_token') ?? localStorage.getItem('adminToken');
+    const token = localStorage.getItem('auth_token');
 
     fetch(book.fileUrl, {
       credentials: 'include',
@@ -101,6 +101,9 @@ export class MyBooks implements OnInit {
     })
       .then((response) => {
         if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            this.notification.showError('لا يمكنك الوصول إلى هذا الكتاب.');
+          }
           throw new Error(`Download failed with status ${response.status}`);
         }
         return response.blob();
