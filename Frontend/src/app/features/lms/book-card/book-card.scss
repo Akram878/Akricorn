@@ -11,7 +11,8 @@ $gold-400: #d9a74a;
 
 .lms-book-card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 0.9rem;
   padding: 1rem;
   border-radius: 1rem;
@@ -22,8 +23,8 @@ $gold-400: #d9a74a;
 }
 
 .lms-book-card__cover {
-  width: 100%;
-  aspect-ratio: 3 / 4;
+  width: 50px;
+  height: 50px;
   border-radius: 0.8rem;
   overflow: hidden;
   background: $emerald-800;
@@ -121,7 +122,8 @@ $gold-400: #d9a74a;
 }
 
 .lms-book-card__footer {
-  margin-top: auto;
+  margin-left: auto;
+
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -78,7 +78,7 @@ $gold-400: #d9a74a;
 
 .lms-filters__fields {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.85rem;
 }
 
@@ -86,6 +86,7 @@ $gold-400: #d9a74a;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  flex-grow: 1;
 }
 
 .lms-filters__label {
@@ -125,6 +126,11 @@ $gold-400: #d9a74a;
   display: flex;
   align-items: center;
   gap: 0.4rem;
+
+  .lms-filters__input {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
 .lms-filters__dash {
@@ -134,7 +140,7 @@ $gold-400: #d9a74a;
 
 .lms-filters__actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   gap: 0.8rem;
 }
 
@@ -147,17 +153,54 @@ $gold-400: #d9a74a;
     display: inline-flex;
   }
 
+  .lms-filters__fields {
+    flex-direction: column;
+  }
+
+  @media (min-width: 993px) {
+    .lms-filters__panel {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .lms-filters__panel-header {
+      flex: 0 0 auto;
+    }
+
+    .lms-filters__fields {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-end;
+
+      min-width: 0;
+    }
+
+    .lms-filters__field {
+      flex-grow: 1;
+    }
+
+    .lms-filters__actions {
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+  }
   .lms-filters__panel {
     position: fixed;
     top: 0;
     right: 0;
-    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     max-width: 320px;
     width: 100%;
     border-radius: 0;
     transform: translateX(100%);
     transition: transform 0.25s ease;
     z-index: 50;
+    height: 100dvh;
+    max-height: 100dvh;
   }
 
   .lms-filters__panel.is-open {
