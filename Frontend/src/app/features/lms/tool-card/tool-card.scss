@@ -1,0 +1,82 @@
+@use '../../../../scss/base/variables' as *;
+
+$emerald-900: #020f0c;
+$emerald-800: #021813;
+$emerald-700: #08342a;
+
+$gold-100: #fff4cf;
+$gold-200: #f9e0a2;
+$gold-300: #f0cb7a;
+
+.lms-tool-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(2, 15, 12, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: $gold-100;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 100%;
+}
+
+.lms-tool-card__header {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.lms-tool-card__avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.8rem;
+  background: $emerald-800;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: $gold-200;
+}
+
+.lms-tool-card__title {
+  h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    color: $gold-100;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: rgba($gold-200, 0.8);
+  }
+}
+
+.lms-tool-card__meta {
+  font-size: 0.75rem;
+  color: rgba($gold-200, 0.7);
+
+  span {
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: rgba($emerald-700, 0.8);
+  }
+}
+
+.lms-tool-card__footer {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.lms-tool-card .lms-secondary-btn.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .lms-tool-card {
+    padding: 0.85rem;
+  }
+}

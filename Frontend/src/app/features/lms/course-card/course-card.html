@@ -6,60 +6,52 @@
   <div class="card-inner" [class.is-revealed]="isRevealed">
     <div class="card-front">
       <div class="head_card">
-        <h3 class="lms-course-card__title">{{ course.title || '—' }}</h3>
+        <h3 class="lms-course-card__title">{{ course.title }}</h3>
         <div class="lms-course-card__thumb">
           <ng-container *ngIf="getThumbnailUrl() as thumbnailUrl; else thumbFallback">
             <img [src]="thumbnailUrl" [alt]="course.title ?? 'Course thumbnail'" loading="lazy" />
           </ng-container>
           <ng-template #thumbFallback>
-            <div class="lms-course-card__thumb-placeholder">—</div>
+            <div class="lms-course-card__thumb-placeholder" aria-hidden="true">🎓</div>
           </ng-template>
         </div>
       </div>
       <div class="lms-course-card__meta">
         <div class="lms-course-card__meta-item">
           <span class="lms-course-card__meta-label">Rating</span>
-          <span class="lms-course-card__meta-value">
-            <ng-container
-              *ngIf="course.rating !== null && course.rating !== undefined; else ratingNull"
-            >
-              ⭐ {{ course.rating | number : '1.1-1' }} / 5
-            </ng-container>
-            <ng-template #ratingNull>—</ng-template>
-          </span>
+
+          <span class="lms-course-card__meta-value"
+            >⭐ {{ getRating() | number : '1.1-1' }} / 5</span
+          >
         </div>
-        <div class="lms-course-card__meta-item">
+
+        <div class="lms-course-card__meta-item" *ngIf="course.category">
           <span class="lms-course-card__meta-label">Category</span>
-          <span class="lms-course-card__meta-value">{{ course.category || '—' }}</span>
+
+          <span class="lms-course-card__meta-value">{{ course.category }}</span>
         </div>
-        <div class="lms-course-card__meta-item">
+
+        <div class="lms-course-card__meta-item" *ngIf="course.pathTitle">
           <span class="lms-course-card__meta-label">Path</span>
-          <span class="lms-course-card__meta-value">{{ course.pathTitle || '—' }}</span>
+
+          <span class="lms-course-card__meta-value">{{ course.pathTitle }}</span>
         </div>
-        <div class="lms-course-card__meta-item">
+
+        <div
+          class="lms-course-card__meta-item"
+          *ngIf="course.hours !== null && course.hours !== undefined"
+        >
           <span class="lms-course-card__meta-label">Duration</span>
-          <span class="lms-course-card__meta-value">
-            <ng-container
-              *ngIf="course.hours !== null && course.hours !== undefined; else hoursNull"
-            >
-              {{ course.hours }} hours
-            </ng-container>
-            <ng-template #hoursNull>—</ng-template>
-          </span>
+
+          <span class="lms-course-card__meta-value">{{ course.hours }} hours</span>
         </div>
       </div>
 
       <footer class="lms-course-card__footer">
         <div class="lms-course-card__price">
           <span class="lms-course-card__price-label">Price</span>
-          <span class="lms-course-card__price-value">
-            <ng-container
-              *ngIf="course.price !== null && course.price !== undefined; else priceNull"
-            >
-              {{ course.price | number : '1.2-2' }} $
-            </ng-container>
-            <ng-template #priceNull>—</ng-template>
-          </span>
+
+          <span class="lms-course-card__price-value">{{ course.price | number : '1.2-2' }} $</span>
         </div>
 
         <button
@@ -73,8 +65,8 @@
       </footer>
     </div>
 
-    <div class="card-back">
-      <p class="lms-course-card__description">{{ getDescription() }}</p>
+    <div class="card-back" *ngIf="getDescription() as description">
+      <p class="lms-course-card__description">{{ description }}</p>
     </div>
   </div>
 </article>

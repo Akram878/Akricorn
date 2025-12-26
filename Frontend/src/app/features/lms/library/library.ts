@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe, NgIf, NgForOf } from '@angular/common';
+import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -11,11 +11,21 @@ import {
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
-import { FormsModule } from '@angular/forms';
+import { BookCardComponent } from '../book-card/book-card';
+import { LmsFiltersComponent } from '../../../shared/components/lms-filters/lms-filters';
+import {
+  applyFilters as applyFilterSet,
+  buildFilterState,
+} from '../../../shared/components/lms-filters/lms-filters.utils';
+import {
+  FilterDefinition,
+  FilterState,
+} from '../../../shared/components/lms-filters/lms-filters.types';
+import { buildBookFilters } from '../filters/lms-filter-config';
 @Component({
   selector: 'app-lms-library',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, NgIf, NgForOf, FormsModule],
+  imports: [CommonModule, NgIf, NgForOf, BookCardComponent, LmsFiltersComponent],
   templateUrl: './library.html',
   styleUrl: './library.scss',
 })
@@ -25,9 +35,8 @@ export class Library implements OnInit, OnDestroy {
 
   filteredBooks: PublicBook[] = [];
 
-  categories: string[] = [];
-  selectedCategory: string = 'all';
-  searchTerm = '';
+  filters: FilterDefinition<PublicBook>[] = [];
+  filterState: FilterState = {};
 
   // IDs للكتب المملوكة
   private ownedBookIds: Set<number> = new Set<number>();
@@ -52,8 +61,10 @@ export class Library implements OnInit, OnDestroy {
     this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
       if (isAuthenticated) {
         this.loadMyBooks();
+        this.loadBookThumbnails(this.books);
       } else {
         this.ownedBookIds.clear();
+        this.resetThumbnails();
       }
     });
   }
@@ -72,8 +83,9 @@ export class Library implements OnInit, OnDestroy {
       next: (data) => {
         this.resetThumbnails();
         this.books = data;
-        this.buildCategories();
-        this.applyFilters();
+        this.filters = buildBookFilters(data);
+        this.filterState = buildFilterState(this.filters);
+        this.applyFilters(this.filterState);
         this.loadBookThumbnails(this.books);
         this.isLoading = false;
       },
@@ -105,58 +117,28 @@ export class Library implements OnInit, OnDestroy {
     return book.id;
   }
 
-  onCategoryChange(): void {
-    this.applyFilters();
-  }
-
-  onSearchChange(): void {
-    this.applyFilters();
-  }
-
-  private buildCategories(): void {
-    const categorySet = new Set<string>();
-
-    for (const b of this.books) {
-      if (b.category && b.category.trim() !== '') {
-        categorySet.add(b.category);
-      }
-    }
-
-    this.categories = Array.from(categorySet).sort();
-  }
-
-  private applyFilters(): void {
-    const search = this.searchTerm.trim().toLowerCase();
-
-    this.filteredBooks = this.books.filter((b) => {
-      if (this.selectedCategory !== 'all') {
-        const category = b.category || '';
-        if (category !== this.selectedCategory) {
-          return false;
-        }
-      }
-
-      if (search) {
-        const title = b.title?.toLowerCase() || '';
-        const desc = b.description?.toLowerCase() || '';
-
-        if (!title.includes(search) && !desc.includes(search)) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+  applyFilters(state: FilterState): void {
+    this.filterState = state;
+    this.filteredBooks = applyFilterSet(this.books, this.filters, state);
   }
 
   // المنطق: شراء / عرض في My Books
-  onAction(book: PublicBook): void {
-    // لو مملوك → ننتقل إلى My Books
+  onView(book: PublicBook): void {
     if (this.isBookOwned(book)) {
       this.router.navigate(['/lms/my-books']);
       return;
     }
 
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/sign'], {
+        queryParams: { returnUrl: this.router.url },
+      });
+      return;
+    }
+    this.notification.showError('Purchase the book to access it.');
+  }
+
+  onBuy(book: PublicBook): void {
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/auth/sign'], {
         queryParams: { returnUrl: this.router.url },
@@ -188,6 +170,11 @@ export class Library implements OnInit, OnDestroy {
         this.processingBookId = null;
       },
     });
+  }
+
+  resetFilters(): void {
+    this.filterState = buildFilterState(this.filters);
+    this.filteredBooks = applyFilterSet(this.books, this.filters, this.filterState);
   }
 
   private loadBookThumbnails(books: PublicBook[]): void {

@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule, NgIf, NgForOf } from '@angular/common';
 
 import { Subscription } from 'rxjs';
 import { PublicCoursesService, MyCourse } from '../../../core/services/public-courses.service';
@@ -8,10 +7,20 @@ import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 
 import { CourseCardComponent } from '../course-card/course-card';
+import { LmsFiltersComponent } from '../../../shared/components/lms-filters/lms-filters';
+import {
+  applyFilters as applyFilterSet,
+  buildFilterState,
+} from '../../../shared/components/lms-filters/lms-filters.utils';
+import {
+  FilterDefinition,
+  FilterState,
+} from '../../../shared/components/lms-filters/lms-filters.types';
+import { buildCourseFilters } from '../filters/lms-filter-config';
 @Component({
   selector: 'app-my-courses',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, FormsModule, DatePipe, CourseCardComponent],
+  imports: [CommonModule, NgIf, NgForOf, CourseCardComponent, LmsFiltersComponent],
   templateUrl: './my-courses.html',
   styleUrl: './my-courses.scss',
 })
@@ -22,15 +31,11 @@ export class MyCourses implements OnInit, OnDestroy {
   isLoading = false;
   error: string | null = null;
 
-  // خيارات الفئات الموجودة فعلياً
-  categories: string[] = [];
-
   courseThumbnails: Record<number, string> = {};
 
   private authSubscription?: Subscription;
-  // فلاتر
-  minHours: number | null = null;
-  selectedCategory: string = 'all';
+  filters: FilterDefinition<MyCourse>[] = [];
+  filterState: FilterState = {};
 
   constructor(
     private publicCoursesService: PublicCoursesService,
@@ -64,8 +69,9 @@ export class MyCourses implements OnInit, OnDestroy {
       next: (data: MyCourse[]) => {
         this.resetThumbnails();
         this.myCourses = data;
-        this.buildFilterOptions();
-        this.applyFilters();
+        this.filters = buildCourseFilters(data);
+        this.filterState = buildFilterState(this.filters);
+        this.applyFilters(this.filterState);
         this.loadCourseThumbnails(this.myCourses);
         this.isLoading = false;
       },
@@ -76,42 +82,14 @@ export class MyCourses implements OnInit, OnDestroy {
     });
   }
 
-  private buildFilterOptions(): void {
-    const catSet = new Set<string>();
-
-    for (const c of this.myCourses) {
-      if (c.category && c.category.trim() !== '') {
-        catSet.add(c.category);
-      }
-    }
-
-    this.categories = Array.from(catSet).sort();
-  }
-
-  applyFilters(): void {
-    this.filteredMyCourses = this.myCourses.filter((c) => {
-      // الساعات (لو null نخليه 0)
-      const hours = c.hours != null ? c.hours : 0;
-      if (this.minHours != null && hours < this.minHours) {
-        return false;
-      }
-
-      // الفئة
-      if (this.selectedCategory !== 'all') {
-        const cat = c.category || '';
-        if (cat !== this.selectedCategory) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+  applyFilters(state: FilterState): void {
+    this.filterState = state;
+    this.filteredMyCourses = applyFilterSet(this.myCourses, this.filters, state);
   }
 
   resetFilters(): void {
-    this.minHours = null;
-    this.selectedCategory = 'all';
-    this.applyFilters();
+    this.filterState = buildFilterState(this.filters);
+    this.filteredMyCourses = applyFilterSet(this.myCourses, this.filters, this.filterState);
   }
 
   trackByCourseId(index: number, course: MyCourse): number {
@@ -140,6 +118,7 @@ export class MyCourses implements OnInit, OnDestroy {
     this.error = null;
     this.myCourses = [];
     this.filteredMyCourses = [];
-    this.categories = [];
+    this.filters = [];
+    this.filterState = {};
   }
 }

@@ -1,6 +1,6 @@
-<div class="lms-library-page">
-  <div class="lms-library-page__header">
-    <div class="lms-library-page__breadcrumb">
+<div class="lms-section">
+  <div class="lms-section__header">
+    <div class="lms-section__breadcrumb">
       <span>LMS</span>
       <span>/</span>
       <span class="active">Library</span>
@@ -9,99 +9,37 @@
     <h2>Digital Library</h2>
     <p>Explore a selection of digital books available in the library.</p>
   </div>
+  <div class="lms-section__body">
+    <app-lms-filters
+      [filters]="filters"
+      [state]="filterState"
+      [resultCount]="filteredBooks.length"
+      (stateChange)="applyFilters($event)"
+      (reset)="resetFilters()"
+    ></app-lms-filters>
 
-  <!-- Top bar: search + filter -->
-  <div class="lms-library-page__topbar">
-    <div class="lms-library-page__search">
-      <input
-        type="text"
-        placeholder="Search by title or description"
-        [(ngModel)]="searchTerm"
-        (input)="onSearchChange()"
-      />
-    </div>
-
-    <div class="lms-library-page__filter">
-      <label>Category:</label>
-      <select [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
-        <option value="all">All</option>
-        <option *ngFor="let category of categories" [value]="category">
-          {{ category }}
-        </option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Empty / error states -->
-  <div class="lms-library-page__state" *ngIf="!isLoading && error">
-    {{ error }}
-  </div>
-
-  <div class="lms-library-page__state" *ngIf="!isLoading && !error && filteredBooks.length === 0">
-    لا توجد كتب مطابقة للبحث/الفئة المختارة حتى الآن.
-  </div>
-
-  <!-- Books List -->
-  <div class="lms-library-list" *ngIf="!isLoading && !error && filteredBooks.length > 0">
-    <article
-      class="lms-book-row hovershadow"
-      *ngFor="let b of filteredBooks; trackBy: trackByBookId"
-      [class.lms-book-row--owned]="isBookOwned(b)"
-    >
-      <!-- Cover -->
-      <div class="lms-book-row__cover">
-        <div class="lms-book-row__cover-art">
-          <img *ngIf="bookThumbnails[b.id]" [src]="bookThumbnails[b.id]" alt="{{ b.title }}" />
-          <span *ngIf="!bookThumbnails[b.id]">📘</span>
-        </div>
+    <div class="lms-section__content">
+      <div class="lms-library-grid" *ngIf="!isLoading && !error && filteredBooks.length > 0">
+        <app-book-card
+          *ngFor="let b of filteredBooks; trackBy: trackByBookId"
+          [book]="b"
+          [coverUrl]="bookThumbnails[b.id]"
+          [owned]="isBookOwned(b)"
+          [isProcessing]="processingBookId === b.id"
+          (view)="onView(b)"
+          (buy)="onBuy(b)"
+        ></app-book-card>
       </div>
 
-      <!-- MAIN CONTENT -->
-      <div class="lms-book-row__content">
-        <header class="lms-book-row__header">
-          <div>
-            <h3 class="lms-book-row__title">{{ b.title }}</h3>
-
-            <!-- بدل author من الديمو نضع description -->
-            <p class="lms-book-row__author">{{ b.description || '—' }}</p>
-          </div>
-
-          <!-- level (كلمة ثابتة حتى لا يتأثر الديزاين) -->
-          <span class="lms-book-row__level">Digital Book</span>
-        </header>
-
-        <!-- Meta (الديزاين الأصلي محفوظ) -->
-        <div class="lms-book-row__meta">
-          <span *ngIf="b.category">{{ b.category }}</span>
-          <span class="lms-book-row__tag">E-Book</span>
-          <span class="lms-book-row__owned" *ngIf="isBookOwned(b)">Owned</span>
-        </div>
+      <div class="lms-section__state" *ngIf="!isLoading && error">
+        {{ error }}
       </div>
 
-      <!-- FOOTER -->
-      <footer class="lms-book-row__footer">
-        <div class="lms-book-row__price">
-          <span class="label">Price</span>
-          <span class="value">{{ b.price | number : '1.2-2' }} $</span>
-        </div>
+      <div class="lms-section__state" *ngIf="!isLoading && !error && filteredBooks.length === 0">
+        No books match the selected filters yet.
+      </div>
 
-        <!-- If a file exists -->
-
-        <button
-          type="button"
-          class="lms-secondary-btn"
-          (click)="onAction(b)"
-          [disabled]="processingBookId === b.id"
-        >
-          {{
-            isBookOwned(b)
-              ? 'View in My Books'
-              : processingBookId === b.id
-              ? 'Processing...'
-              : 'Purchase'
-          }}
-        </button>
-      </footer>
-    </article>
+      <div class="lms-section__state" *ngIf="isLoading">Loading books...</div>
+    </div>
   </div>
 </div>

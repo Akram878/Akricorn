@@ -1,44 +1,78 @@
-<div class="lms-path-page">
-  <div class="lms-path-page__header">
-    <div class="lms-path-page__breadcrumb">
+<div class="lms-section">
+  <div class="lms-section__header">
+    <div class="lms-section__breadcrumb">
       <span>LMS</span>
       <span>/</span>
       <span class="active">Learning Paths</span>
     </div>
 
     <h2>Learning Paths</h2>
-    <p>
-      Structured roadmaps that connect multiple courses into a coherent progression for each skill
-      area.
-    </p>
+    <p>Structured roadmaps that connect multiple courses into a coherent progression.</p>
   </div>
 
-  <div class="lms-path-list">
-    <article class="lms-path-card hovershadow" *ngFor="let p of paths; trackBy: trackByPathId">
-      <header class="lms-path-card__header">
-        <div>
-          <h3 class="lms-path-card__title">{{ p.title }}</h3>
-          <p class="lms-path-card__subtitle">{{ p.subtitle }}</p>
-        </div>
-        <span class="lms-path-card__level">{{ p.level }}</span>
-      </header>
+  <div class="lms-section__body">
+    <app-lms-filters
+      [filters]="filters"
+      [state]="filterState"
+      [resultCount]="filteredPaths.length"
+      (stateChange)="applyFilters($event)"
+      (reset)="resetFilters()"
+    ></app-lms-filters>
 
-      <div class="lms-path-card__meta">
-        <span>🧭 Focus: {{ p.focusArea }}</span>
-        <span>📚 {{ p.coursesCount }} courses</span>
-        <span>⏱ ~{{ p.estimatedWeeks }} weeks</span>
+    <div class="lms-section__content">
+      <div class="lms-path-grid" *ngIf="!isLoading && !error && filteredPaths.length > 0">
+        <article class="lms-path-card" *ngFor="let p of filteredPaths; trackBy: trackByPathId">
+          <header class="lms-path-card__header">
+            <h3>{{ p.title }}</h3>
+            <button type="button" class="lms-path-card__toggle" (click)="togglePath(p)">
+              {{ p.isExpanded ? 'Hide courses' : 'View courses' }}
+            </button>
+          </header>
+
+          <p class="lms-path-card__subtitle">{{ p.description }}</p>
+
+          <div class="lms-path-card__meta">
+            <span>{{ p.coursesCount }} courses</span>
+            <span>{{ p.completedCourses }} completed</span>
+          </div>
+
+          <div class="lms-path-card__progress">
+            <div class="lms-path-card__progress-bar">
+              <div class="lms-path-card__progress-fill" [style.width.%]="p.completionPercent"></div>
+            </div>
+            <span>{{ p.completionPercent | number : '1.0-0' }}%</span>
+          </div>
+
+          <div class="lms-path-card__courses" *ngIf="p.isExpanded">
+            <div
+              class="lms-path-card__course"
+              *ngFor="let course of p.courses; trackBy: trackByCourseId"
+              [class.is-completed]="course.isCompleted"
+            >
+              <span class="order">{{ course.order }}</span>
+              <span class="title">{{ course.title }}</span>
+              <span class="status" *ngIf="course.isCompleted">Completed</span>
+            </div>
+          </div>
+
+          <footer class="lms-path-card__footer">
+            <button type="button" class="lms-primary-btn is-disabled" disabled>Buy Path</button>
+          </footer>
+        </article>
       </div>
 
-      <div class="lms-path-card__progress">
-        <div class="lms-path-card__progress-bar">
-          <div class="lms-path-card__progress-fill"></div>
-        </div>
-        <span class="hint">Progress indicator</span>
+      <div class="lms-section__state" *ngIf="isLoading">Loading learning paths...</div>
+
+      <div
+        class="lms-section__state lms-section__state--empty"
+        *ngIf="!isLoading && !error && filteredPaths.length === 0"
+      >
+        No learning paths match the selected filters.
       </div>
 
-      <footer class="lms-path-card__footer">
-        <button type="button" class="lms-primary-btn">View path details</button>
-      </footer>
-    </article>
+      <div class="lms-section__state lms-section__state--error" *ngIf="!isLoading && error">
+        {{ error }}
+      </div>
+    </div>
   </div>
 </div>

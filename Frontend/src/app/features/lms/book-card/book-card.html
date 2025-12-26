@@ -1,0 +1,63 @@
+<article class="lms-book-card" [class.lms-book-card--owned]="owned">
+  <div class="lms-book-card__cover">
+    <ng-container *ngIf="getCoverUrl() as coverUrl; else coverFallback">
+      <img [src]="coverUrl" [alt]="book.title" loading="lazy" />
+    </ng-container>
+    <ng-template #coverFallback>
+      <div class="lms-book-card__cover-fallback" aria-hidden="true">📘</div>
+    </ng-template>
+  </div>
+
+  <div class="lms-book-card__body">
+    <header class="lms-book-card__header">
+      <h3 class="lms-book-card__title">{{ book.title }}</h3>
+      <div class="lms-book-card__rating">
+        <span aria-hidden="true">⭐</span>
+        <span>{{ getRating() | number : '1.1-1' }}</span>
+      </div>
+    </header>
+
+    <p
+      class="lms-book-card__description"
+      [class.lms-book-card__description--expanded]="isExpanded"
+      *ngIf="hasDescription()"
+    >
+      {{ book.description }}
+    </p>
+
+    <button
+      type="button"
+      class="lms-book-card__toggle"
+      *ngIf="hasDescription() && isLongDescription()"
+      (click)="toggleDescription()"
+    >
+      {{ isExpanded ? 'Show less' : '…' }}
+    </button>
+
+    <div class="lms-book-card__meta">
+      <span *ngIf="book.category">{{ book.category }}</span>
+      <span class="lms-book-card__meta-tag">Digital</span>
+      <span class="lms-book-card__meta-owned" *ngIf="owned">Owned</span>
+    </div>
+  </div>
+
+  <footer class="lms-book-card__footer">
+    <div class="lms-book-card__price">
+      <span class="label">Price</span>
+      <span class="value">{{ book.price | number : '1.2-2' }} $</span>
+    </div>
+
+    <div class="lms-book-card__actions">
+      <button type="button" class="lms-secondary-btn" (click)="onView()">View</button>
+      <button
+        type="button"
+        class="lms-primary-btn"
+        *ngIf="showBuy"
+        (click)="onBuy()"
+        [disabled]="isProcessing || owned"
+      >
+        {{ owned ? 'Owned' : isProcessing ? 'Processing...' : 'Buy' }}
+      </button>
+    </div>
+  </footer>
+</article>

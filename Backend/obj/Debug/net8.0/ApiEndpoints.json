@@ -1090,16 +1090,6 @@
   },
   {
     "ContainingType": "Backend.Controllers.LmsController",
-    "Method": "GetCourses",
-    "RelativePath": "api/lms/courses",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "Backend.Controllers.LmsController",
     "Method": "GetCourseContent",
     "RelativePath": "api/lms/courses/{courseId}/content",
     "HttpMethod": "GET",

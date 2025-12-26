@@ -1,7 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, NgIf, NgForOf, DecimalPipe } from '@angular/common';
-
-import { FormsModule } from '@angular/forms'; // 👈 مهم جداً
+import { CommonModule, NgIf, NgForOf } from '@angular/common';
 
 import { Subscription } from 'rxjs';
 import {
@@ -13,18 +11,21 @@ import {
 import { AuthService } from '../../../core/services/auth.service';
 
 import { CourseCardComponent } from '../course-card/course-card';
+import { LmsFiltersComponent } from '../../../shared/components/lms-filters/lms-filters';
+import {
+  applyFilters as applyFilterSet,
+  buildFilterState,
+} from '../../../shared/components/lms-filters/lms-filters.utils';
+import {
+  FilterDefinition,
+  FilterState,
+} from '../../../shared/components/lms-filters/lms-filters.types';
+import { buildCourseFilters } from '../filters/lms-filter-config';
 
 @Component({
   selector: 'app-lms-courses',
   standalone: true,
-  imports: [
-    CommonModule,
-    NgIf,
-    NgForOf,
-    DecimalPipe,
-    FormsModule, // 👈 هنا نضيف الـ FormsModule
-    CourseCardComponent,
-  ],
+  imports: [CommonModule, NgIf, NgForOf, CourseCardComponent, LmsFiltersComponent],
   templateUrl: './courses.html',
   styleUrl: './courses.scss',
 })
@@ -42,20 +43,9 @@ export class Courses implements OnInit, OnDestroy {
   private ownedCourseIds: Set<number> = new Set<number>();
 
   private authSubscription?: Subscription;
-  // خيارات الفلترة (قائمة قيم موجودة فعلياً في الكورسات)
-  categories: string[] = [];
-  paths: string[] = [];
 
-  // قيم الفلاتر
-  priceMin: number | null = null;
-  priceMax: number | null = null;
-
-  minHours: number | null = null;
-
-  selectedCategory: string = 'all';
-  selectedPath: string = 'all';
-
-  minRating: number | null = null;
+  filters: FilterDefinition<PublicCourse>[] = [];
+  filterState: FilterState = {};
 
   constructor(
     private publicCoursesService: PublicCoursesService,
@@ -88,8 +78,9 @@ export class Courses implements OnInit, OnDestroy {
     this.publicCoursesService.getCourses().subscribe({
       next: (data) => {
         this.courses = data;
-        this.buildFilterOptions();
-        this.applyFilters();
+        this.filters = buildCourseFilters(data);
+        this.filterState = buildFilterState(this.filters);
+        this.applyFilters(this.filterState);
 
         this.isLoading = false;
       },
@@ -115,79 +106,18 @@ export class Courses implements OnInit, OnDestroy {
     });
   }
 
-  // بناء خيارات الفلترة (categories + paths) من الداتا الموجودة
-  private buildFilterOptions(): void {
-    const categorySet = new Set<string>();
-    const pathSet = new Set<string>();
-
-    for (const c of this.courses) {
-      if (c.category && c.category.trim() !== '') {
-        categorySet.add(c.category);
-      }
-      if (c.pathTitle && c.pathTitle.trim() !== '') {
-        pathSet.add(c.pathTitle);
-      }
-    }
-
-    this.categories = Array.from(categorySet).sort();
-    this.paths = Array.from(pathSet).sort();
-  }
-
   // ============================
   //       Filtering logic
   // ============================
-  applyFilters(): void {
-    this.filteredCourses = this.courses.filter((c) => {
-      // price
-      if (this.priceMin != null && c.price < this.priceMin) {
-        return false;
-      }
-      if (this.priceMax != null && c.price > this.priceMax) {
-        return false;
-      }
-
-      // hours (لو مش راجع من الباك إند نعتبره 0)
-      const hours = c.hours != null ? c.hours : 0;
-      if (this.minHours != null && hours < this.minHours) {
-        return false;
-      }
-
-      // category
-      if (this.selectedCategory !== 'all') {
-        const cat = c.category || '';
-        if (cat !== this.selectedCategory) {
-          return false;
-        }
-      }
-
-      // path
-      if (this.selectedPath !== 'all') {
-        const path = c.pathTitle || '';
-        if (path !== this.selectedPath) {
-          return false;
-        }
-      }
-
-      // rating (لو مش راجع من الباك إند نعتبره 0)
-      const rating = c.rating != null ? c.rating : 0;
-      if (this.minRating != null && rating < this.minRating) {
-        return false;
-      }
-
-      return true;
-    });
+  applyFilters(state: FilterState): void {
+    this.filterState = state;
+    this.filteredCourses = applyFilterSet(this.courses, this.filters, state);
   }
 
   // Reset all filters at once
   resetFilters(): void {
-    this.priceMin = null;
-    this.priceMax = null;
-    this.minHours = null;
-    this.selectedCategory = 'all';
-    this.selectedPath = 'all';
-    this.minRating = null;
-
-    this.applyFilters();
+    this.filterState = buildFilterState(this.filters);
+    this.filteredCourses = applyFilterSet(this.courses, this.filters, this.filterState);
   }
 
   // ============================

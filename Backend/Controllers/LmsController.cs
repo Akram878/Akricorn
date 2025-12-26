@@ -538,20 +538,90 @@ namespace Backend.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetLearningPaths()
         {
+
+            var userContext = ResolveUserContext();
+            int? userId = null;
+
+            if (userContext.IsAuthenticated && !userContext.IsAdmin && userContext.UserId.HasValue)
+            {
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == userContext.UserId.Value);
+
+                if (user == null)
+                    return Unauthorized(new { message = "Unauthorized." });
+
+                if (!user.IsActive)
+                    return StatusCode(403, new { message = "Your account has been disabled." });
+
+                userId = user.Id;
+            }
+
             var paths = await _context.LearningPaths
                 .Where(p => p.IsActive)
                 .Include(p => p.LearningPathCourses)
-              .OrderBy(p => p.Title)
-                .Select(p => new
+              .ThenInclude(lpc => lpc.Course)
+                .OrderBy(p => p.Title)
+                .ToListAsync();
+
+            var completedByPath = new Dictionary<int, HashSet<int>>();
+
+            if (userId.HasValue)
+            {
+                completedByPath = await _context.UserLearningPathCourseProgresses
+                    .Where(p => p.UserId == userId.Value)
+                    .GroupBy(p => p.LearningPathId)
+                    .Select(g => new
+                    {
+                        PathId = g.Key,
+                        CourseIds = g.Select(x => x.CourseId).Distinct()
+                    })
+                    .ToDictionaryAsync(x => x.PathId, x => x.CourseIds.ToHashSet());
+            }
+
+            var result = paths.Select(p =>
+            {
+            var completedCourses = completedByPath.TryGetValue(p.Id, out var completed)
+                ? completed
+                : new HashSet<int>();
+
+            var courses = p.LearningPathCourses
+                .Where(lpc => lpc.Course != null && lpc.Course.IsActive)
+                .OrderBy(lpc => lpc.StepOrder)
+                .Select(lpc => new
                 {
+                    lpc.CourseId,
+                    lpc.StepOrder,
+                    title = lpc.Course.Title,
+                    description = lpc.Course.Description,
+                    price = lpc.Course.Price,
+                    category = lpc.Course.Category,
+                    hours = lpc.Course.Hours,
+                    rating = lpc.Course.Rating,
+                    thumbnailUrl = lpc.Course.ThumbnailUrl,
+                    isCompleted = completedCourses.Contains(lpc.CourseId)
+                })
+                .ToList();
+
+            var completedCount = courses.Count(c => c.isCompleted);
+            var totalCourses = courses.Count;
+            var completionPercent = totalCourses == 0
+                ? 0
+                : Math.Min(100, Math.Round((double)completedCount / totalCourses * 100, 2));
+
+            return new
+            {
                     p.Id,
                     p.Title,
                     p.Description,
-                    CoursesCount = p.LearningPathCourses.Count
-                })
-                .ToListAsync();
+                coursesCount = totalCourses,
+                completedCourses = completedCount,
+                completionPercent,
+                courses
+            };
+            });
 
-            return Ok(paths);
+            return Ok(result);
         }
 
         // ============================

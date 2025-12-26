@@ -70,6 +70,9 @@ export class CourseCardComponent {
   }
 
   toggleReveal(): void {
+    if (!this.getDescription()) {
+      return;
+    }
     this.isRevealed = !this.isRevealed;
   }
 
@@ -85,11 +88,10 @@ export class CourseCardComponent {
   }
 
   getDescription(): string {
-    const description = this.course.description?.trim();
-    if (!description) {
-      return 'No description available.';
-    }
+    return this.course.description?.trim() ?? '';
+  }
 
-    return description;
+  getRating(): number {
+    return this.course.rating ?? 0;
   }
 }

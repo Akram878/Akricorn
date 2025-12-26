@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
+import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -7,10 +7,11 @@ import { resolveMediaUrl } from '../../../core/utils/media-url';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { BookCardComponent } from '../book-card/book-card';
 @Component({
   selector: 'app-lms-my-books',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, DatePipe],
+  imports: [CommonModule, NgIf, NgForOf, BookCardComponent],
   templateUrl: './my-books.html',
   styleUrls: ['./my-books.scss'],
 })

@@ -1,0 +1,79 @@
+<div class="lms-filters">
+  <button type="button" class="lms-filters__toggle" (click)="togglePanel()">
+    <span>Filters</span>
+    <span class="lms-filters__count" *ngIf="getActiveCount() > 0">{{ getActiveCount() }}</span>
+  </button>
+
+  <div class="lms-filters__backdrop" *ngIf="isOpen" (click)="closePanel()"></div>
+
+  <aside class="lms-filters__panel" [class.is-open]="isOpen">
+    <div class="lms-filters__panel-header">
+      <div>
+        <h3>Filters</h3>
+        <p *ngIf="resultCount !== null">{{ resultCount }} results</p>
+      </div>
+      <button type="button" class="lms-filters__close" (click)="closePanel()">✕</button>
+    </div>
+
+    <div class="lms-filters__fields">
+      <div class="lms-filters__field" *ngFor="let filter of filters">
+        <label class="lms-filters__label">{{ filter.label }}</label>
+
+        <ng-container [ngSwitch]="filter.type">
+          <input
+            *ngSwitchCase="'search'"
+            type="text"
+            class="lms-filters__input"
+            [placeholder]="filter.placeholder || 'Search'"
+            [ngModel]="state[filter.id] || ''"
+            (ngModelChange)="updateValue(filter.id, $event)"
+          />
+
+          <select
+            *ngSwitchCase="'select'"
+            class="lms-filters__select"
+            [ngModel]="state[filter.id] || 'all'"
+            (ngModelChange)="updateValue(filter.id, $event)"
+          >
+            <option value="all">All</option>
+            <option *ngFor="let option of filter.options || []" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+
+          <div *ngSwitchCase="'range'" class="lms-filters__range">
+            <input
+              type="number"
+              class="lms-filters__input"
+              [placeholder]="filter.minLabel || 'Min'"
+              [ngModel]="getRangeValue(filter.id, 'min')"
+              (ngModelChange)="updateRange(filter.id, 'min', $event)"
+            />
+            <span class="lms-filters__dash">–</span>
+            <input
+              type="number"
+              class="lms-filters__input"
+              [placeholder]="filter.maxLabel || 'Max'"
+              [ngModel]="getRangeValue(filter.id, 'max')"
+              (ngModelChange)="updateRange(filter.id, 'max', $event)"
+            />
+          </div>
+
+          <input
+            *ngSwitchCase="'min'"
+            type="number"
+            class="lms-filters__input"
+            [placeholder]="filter.placeholder || 'Min'"
+            [ngModel]="state[filter.id] || null"
+            (ngModelChange)="updateValue(filter.id, $event)"
+          />
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="lms-filters__actions">
+      <button type="button" class="lms-secondary-btn" (click)="clearFilters()">Reset</button>
+      <button type="button" class="lms-primary-btn" (click)="closePanel()">Apply</button>
+    </div>
+  </aside>
+</div>

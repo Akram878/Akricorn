@@ -9,6 +9,7 @@ export interface PublicBook {
   price: number;
   category?: string | null;
   thumbnailUrl?: string | null;
+  rating?: number | null;
 }
 
 export interface MyBook {
@@ -19,6 +20,7 @@ export interface MyBook {
   category?: string | null;
   thumbnailUrl?: string | null;
   fileUrl: string;
+  rating?: number | null;
   grantedAt: string | null;
   isFromCourse: boolean | null;
 }

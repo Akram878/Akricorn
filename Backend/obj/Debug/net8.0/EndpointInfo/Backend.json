@@ -1829,18 +1829,6 @@
         }
       }
     },
-    "/api/lms/courses": {
-      "get": {
-        "tags": [
-          "Lms"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/lms/courses/{courseId}/content": {
       "get": {
         "tags": [

@@ -1,7 +1,6 @@
-<div class="lms-courses-page">
-  <!-- Header -->
-  <div class="lms-courses-page__header">
-    <div class="lms-courses-page__breadcrumb">
+<div class="lms-section">
+  <div class="lms-section__header">
+    <div class="lms-section__breadcrumb">
       <span>LMS</span>
       <span>/</span>
       <span class="active">Courses</span>
@@ -11,110 +10,43 @@
     <p>Browse a curated set of courses available through the LMS.</p>
   </div>
 
-  <!-- Topbar: filters (متناسقة مع الديزاين) -->
-  <div class="lms-courses-page__topbar">
-    <!-- Left: filters -->
-    <div class="lms-courses-page__filters">
-      <!-- Price -->
-      <div class="lms-filter-field">
-        <label class="lms-filter-field__label">Price</label>
-        <div class="lms-filter-field__controls">
-          <input
-            type="number"
-            class="lms-filter-input"
-            placeholder="Min"
-            [(ngModel)]="priceMin"
-            (ngModelChange)="applyFilters()"
-          />
-          <span class="lms-filter-dash">–</span>
-          <input
-            type="number"
-            class="lms-filter-input"
-            placeholder="Max"
-            [(ngModel)]="priceMax"
-            (ngModelChange)="applyFilters()"
-          />
-        </div>
+  <div class="lms-section__body">
+    <app-lms-filters
+      [filters]="filters"
+      [state]="filterState"
+      [resultCount]="filteredCourses.length"
+      (stateChange)="applyFilters($event)"
+      (reset)="resetFilters()"
+    ></app-lms-filters>
+
+    <div class="lms-section__content">
+      <div
+        class="lms-courses-grid"
+        *ngIf="!isLoading && !error && filteredCourses.length > 0; else loadingOrEmpty"
+      >
+        <app-course-card
+          *ngFor="let c of filteredCourses; trackBy: trackByCourseId"
+          [course]="c"
+          [owned]="isCourseOwned(c)"
+          (purchased)="onCoursePurchased($event)"
+        ></app-course-card>
       </div>
 
       <!-- Hours -->
-      <div class="lms-filter-field">
-        <label class="lms-filter-field__label">Min hours</label>
-        <input
-          type="number"
-          class="lms-filter-input"
-          placeholder="e.g. 5"
-          [(ngModel)]="minHours"
-          (ngModelChange)="applyFilters()"
-        />
-      </div>
+      <ng-template #loadingOrEmpty>
+        <div class="lms-section__state" *ngIf="isLoading">Loading courses...</div>
 
-      <!-- Category -->
-      <div class="lms-filter-field">
-        <label class="lms-filter-field__label">Category</label>
-        <select class="lms-filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
-          <option value="all">All</option>
-          <option *ngFor="let cat of categories" [value]="cat">
-            {{ cat }}
-          </option>
-        </select>
-      </div>
+        <div
+          class="lms-section__state lms-section__state--empty"
+          *ngIf="!isLoading && !error && filteredCourses.length === 0"
+        >
+          No courses match your filters.
+        </div>
 
-      <!-- Path -->
-      <div class="lms-filter-field">
-        <label class="lms-filter-field__label">Path</label>
-        <select class="lms-filter-select" [(ngModel)]="selectedPath" (change)="applyFilters()">
-          <option value="all">All</option>
-          <option *ngFor="let p of paths" [value]="p">
-            {{ p }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Rating -->
-      <div class="lms-filter-field">
-        <label class="lms-filter-field__label">Min rating</label>
-        <select class="lms-filter-select" [(ngModel)]="minRating" (change)="applyFilters()">
-          <option [ngValue]="null">Any</option>
-          <option [ngValue]="1">1+</option>
-          <option [ngValue]="2">2+</option>
-          <option [ngValue]="3">3+</option>
-          <option [ngValue]="4">4+</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Right: reset button (نفس روح الصفحة) -->
-    <div class="lms-courses-page__sort">
-      <button type="button" class="lms-primary-btn" (click)="resetFilters()">Reset filters</button>
+        <div class="lms-section__state lms-section__state--error" *ngIf="!isLoading && error">
+          {{ error }}
+        </div>
+      </ng-template>
     </div>
   </div>
-
-  <!-- Courses grid -->
-  <div
-    class="lms-courses-grid"
-    *ngIf="!isLoading && !error && filteredCourses.length > 0; else loadingOrEmpty"
-  >
-    <app-course-card
-      *ngFor="let c of filteredCourses; trackBy: trackByCourseId"
-      [course]="c"
-      [owned]="isCourseOwned(c)"
-      (purchased)="onCoursePurchased($event)"
-    ></app-course-card>
-  </div>
-
-  <ng-template #loadingOrEmpty>
-    <div class="lms-courses-page__state" *ngIf="isLoading">Loading courses...</div>
-
-    <div
-      class="lms-courses-page__state lms-courses-page__state--empty"
-      *ngIf="!isLoading && !error && filteredCourses.length === 0"
-    >
-      No courses match your filters.
-    </div>
-
-    <div class="lms-courses-page__state lms-courses-page__state--error" *ngIf="!isLoading && error">
-      {{ error }}
-    </div>
-  </ng-template>
 </div>

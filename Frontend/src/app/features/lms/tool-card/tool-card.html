@@ -1,0 +1,34 @@
+<article class="lms-tool-card">
+  <header class="lms-tool-card__header">
+    <div class="lms-tool-card__avatar" aria-hidden="true">{{ getToolAvatar() }}</div>
+    <div class="lms-tool-card__title">
+      <h3>{{ tool.name }}</h3>
+      <p>{{ tool.description }}</p>
+    </div>
+  </header>
+
+  <div class="lms-tool-card__meta">
+    <span *ngIf="tool.category">{{ tool.category }}</span>
+  </div>
+
+  <footer class="lms-tool-card__footer">
+    <button
+      type="button"
+      class="lms-secondary-btn"
+      [class.is-disabled]="!tool.url"
+      [disabled]="!tool.url"
+      (click)="onOpen()"
+    >
+      External link
+    </button>
+    <button
+      type="button"
+      class="lms-primary-btn"
+      [class.is-disabled]="!isDownloadAvailable"
+      [disabled]="!isDownloadAvailable"
+      (click)="onDownload()"
+    >
+      Download
+    </button>
+  </footer>
+</article>

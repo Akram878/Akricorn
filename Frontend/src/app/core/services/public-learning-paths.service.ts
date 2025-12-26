@@ -7,6 +7,22 @@ export interface PublicLearningPath {
   title: string;
   description: string;
   coursesCount: number;
+  completedCourses: number;
+  completionPercent: number;
+  courses: LearningPathCourseSummary[];
+}
+
+export interface LearningPathCourseSummary {
+  courseId: number;
+  stepOrder: number;
+  title: string;
+  description: string;
+  price: number;
+  category?: string | null;
+  hours?: number | null;
+  rating?: number | null;
+  thumbnailUrl?: string | null;
+  isCompleted: boolean;
 }
 
 @Injectable({

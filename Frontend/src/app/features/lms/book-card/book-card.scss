@@ -1,0 +1,159 @@
+@use '../../../../scss/base/variables' as *;
+
+$emerald-900: #020f0c;
+$emerald-800: #021813;
+$emerald-700: #08342a;
+
+$gold-100: #fff4cf;
+$gold-200: #f9e0a2;
+$gold-300: #f0cb7a;
+$gold-400: #d9a74a;
+
+.lms-book-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(2, 15, 12, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: $gold-100;
+  min-height: 100%;
+}
+
+.lms-book-card__cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 0.8rem;
+  overflow: hidden;
+  background: $emerald-800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.lms-book-card__cover-fallback {
+  font-size: 2.2rem;
+}
+
+.lms-book-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.lms-book-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.lms-book-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: $gold-100;
+}
+
+.lms-book-card__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: rgba($gold-200, 0.85);
+}
+
+.lms-book-card__description {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba($gold-200, 0.85);
+  max-height: 3.4rem;
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.25s ease;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.lms-book-card__description--expanded {
+  max-height: 10rem;
+  -webkit-line-clamp: unset;
+}
+
+.lms-book-card__toggle {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: $gold-300;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.lms-book-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: rgba($gold-200, 0.7);
+}
+
+.lms-book-card__meta-tag,
+.lms-book-card__meta-owned {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba($emerald-700, 0.8);
+  color: $gold-200;
+}
+
+.lms-book-card__meta-owned {
+  background: rgba($gold-400, 0.2);
+  color: $gold-100;
+}
+
+.lms-book-card__footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.lms-book-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.8rem;
+  color: rgba($gold-200, 0.7);
+
+  .value {
+    font-size: 0.95rem;
+    color: $gold-100;
+  }
+}
+
+.lms-book-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .lms-book-card {
+    padding: 0.85rem;
+  }
+
+  .lms-book-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

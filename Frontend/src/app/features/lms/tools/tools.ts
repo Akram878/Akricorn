@@ -1,24 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PublicToolsService, PublicTool } from '../../../core/services/public-tools.service';
-
-interface UiTool extends PublicTool {
-  status: 'Beta' | 'Stable';
-  tag: string;
-}
+import { ToolCardComponent } from '../tool-card/tool-card';
+import { LmsFiltersComponent } from '../../../shared/components/lms-filters/lms-filters';
+import {
+  applyFilters as applyFilterSet,
+  buildFilterState,
+} from '../../../shared/components/lms-filters/lms-filters.utils';
+import {
+  FilterDefinition,
+  FilterState,
+} from '../../../shared/components/lms-filters/lms-filters.types';
+import { buildToolFilters } from '../filters/lms-filter-config';
 
 @Component({
   selector: 'app-lms-tools',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ToolCardComponent, LmsFiltersComponent],
   templateUrl: './tools.html',
   styleUrls: ['./tools.scss'],
 })
 export class LmsTools implements OnInit {
-  tools: UiTool[] = [];
+  tools: PublicTool[] = [];
+  filteredTools: PublicTool[] = [];
   isLoading = false;
   error: string | null = null;
-
+  filters: FilterDefinition<PublicTool>[] = [];
+  filterState: FilterState = {};
   constructor(private toolsService: PublicToolsService) {}
 
   ngOnInit(): void {
@@ -31,12 +39,10 @@ export class LmsTools implements OnInit {
 
     this.toolsService.getTools().subscribe({
       next: (data) => {
-        // نضيف status/tag فقط للواجهة حتى نحافظ على نفس الديزاين
-        this.tools = data.map((t) => ({
-          ...t,
-          status: 'Stable',
-          tag: t.category,
-        }));
+        this.tools = data;
+        this.filters = buildToolFilters(data);
+        this.filterState = buildFilterState(this.filters);
+        this.applyFilters(this.filterState);
         this.isLoading = false;
       },
       error: () => {
@@ -46,25 +52,25 @@ export class LmsTools implements OnInit {
     });
   }
 
-  trackByToolId(index: number, tool: UiTool): number {
+  trackByToolId(index: number, tool: PublicTool): number {
     return tool.id;
   }
 
-  getToolAvatar(tool: UiTool): string {
-    const name = tool.name?.trim() || '';
-    if (!name) {
-      return '—';
-    }
-
-    const parts = name.split(/\s+/).slice(0, 2);
-    return parts.map((part) => part[0]?.toUpperCase()).join('');
-  }
-
-  openTool(tool: UiTool): void {
+  openTool(tool: PublicTool): void {
     if (!tool.url) {
       return;
     }
 
     window.open(tool.url, '_blank');
+  }
+
+  applyFilters(state: FilterState): void {
+    this.filterState = state;
+    this.filteredTools = applyFilterSet(this.tools, this.filters, state);
+  }
+
+  resetFilters(): void {
+    this.filterState = buildFilterState(this.filters);
+    this.filteredTools = applyFilterSet(this.tools, this.filters, this.filterState);
   }
 }
