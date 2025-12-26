@@ -10,6 +10,7 @@ export interface PublicCourse {
 
   price: number;
   thumbnailUrl?: string | null;
+  createdAt?: string;
   // الحقول الإضافية (اختيارية حالياً)
   hours?: number; // عدد الساعات
   category?: string; // Beginner / Intermediate / ...

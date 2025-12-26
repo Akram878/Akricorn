@@ -103,12 +103,22 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
   private loadFeaturedCourses(): void {
     this.publicCoursesService.getFeaturedCourses().subscribe({
       next: (courses) => {
-        this.featuredCourses = courses;
+        this.featuredCourses = [...courses]
+          .sort((a, b) => this.getCourseTimestamp(b) - this.getCourseTimestamp(a))
+          .slice(0, 5);
       },
       error: () => {
         this.featuredCourses = [];
       },
     });
+  }
+
+  private getCourseTimestamp(course: PublicCourse): number {
+    if (!course.createdAt) {
+      return 0;
+    }
+    const timestamp = new Date(course.createdAt).getTime();
+    return Number.isNaN(timestamp) ? 0 : timestamp;
   }
 
   private loadMyCourses(): void {
