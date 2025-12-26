@@ -23,7 +23,8 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
     (req.url.includes('/api/lms/courses') ||
       req.url.includes('/api/lms/books') ||
       req.url.includes('/api/lms/tools') ||
-      req.url.includes('/api/lms/paths'));
+      req.url.includes('/api/lms/paths') ||
+      req.url.includes('/api/lms/stats'));
   let tokenToUse: string | null = null;
 
   const isAdminRequest = req.url.includes('/api/admin');

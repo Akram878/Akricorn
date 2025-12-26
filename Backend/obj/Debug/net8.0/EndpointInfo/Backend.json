@@ -1817,6 +1817,18 @@
         }
       }
     },
+    "/api/lms/stats": {
+      "get": {
+        "tags": [
+          "Lms"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/lms/courses": {
       "get": {
         "tags": [

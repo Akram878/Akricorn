@@ -1178,6 +1178,16 @@
   },
   {
     "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "GetLmsStats",
+    "RelativePath": "api/lms/stats",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
     "Method": "GetTools",
     "RelativePath": "api/lms/tools",
     "HttpMethod": "GET",

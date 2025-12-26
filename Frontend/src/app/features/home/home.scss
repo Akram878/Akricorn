@@ -160,7 +160,8 @@ $gold-500: #b9822f;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    justify-content: space-between;
+    // justify-content: space-between;
+    justify-content: center;
   }
 }
 

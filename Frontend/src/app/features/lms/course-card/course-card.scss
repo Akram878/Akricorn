@@ -15,7 +15,7 @@ $gold-500: #b9822f;
   display: block;
   //   flex-grow: 1;
   //   min-width: 260px;
-  //   max-width: 25%;
+  max-width: 25rem;
   min-width: 200px;
   width: calc((100% - 4rem) / 4);
   height: 320px;
@@ -33,11 +33,25 @@ $gold-500: #b9822f;
   :host {
     width: calc((100% - 2rem) / 2);
   }
+  .lms-course-card {
+    perspective: none;
+  }
+
+  .card-inner {
+    transform-style: flat;
+  }
 }
 
 @media (max-width: 480px) {
   :host {
     width: 100%;
+  }
+  .lms-course-card {
+    perspective: none;
+  }
+
+  .card-inner {
+    transform-style: flat;
   }
 }
 
@@ -56,7 +70,6 @@ $gold-500: #b9822f;
   height: 100%;
   transform-style: preserve-3d;
   transition: transform 0.6s ease;
-  will-change: transform;
 }
 
 .card-inner.is-flipped {
@@ -77,10 +90,11 @@ $gold-500: #b9822f;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .card-back {
-  transform: rotateY(180deg) translateZ(0);
+  transform: rotateY(180deg);
   overflow: hidden;
 }
 

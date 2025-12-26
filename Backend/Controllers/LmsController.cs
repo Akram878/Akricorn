@@ -23,6 +23,24 @@ namespace Backend.Controllers
         }
 
         // ============================
+        //             Stats
+        // ============================
+        [HttpGet("stats")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetLmsStats()
+        {
+            var activeCourses = await _context.Courses.CountAsync(c => c.IsActive);
+            var activeLearningPaths = await _context.LearningPaths.CountAsync(p => p.IsActive);
+            var activeBooks = await _context.Books.CountAsync(b => b.IsActive);
+
+            return Ok(new
+            {
+                activeCourses,
+                activeLearningPaths,
+                activeBooks
+            });
+        }
+        // ============================
         //         Public Courses
         // ============================
         [HttpGet("courses")]
@@ -487,6 +505,8 @@ namespace Backend.Controllers
 
             return Ok(books);
         }
+
+
 
         // ============================
         //          Public Tools
