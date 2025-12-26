@@ -6,7 +6,7 @@
 
   nav {
     background-color: #041e16;
-    padding: 1rem 3rem;
+    padding: 1rem 1.8rem;
     border-bottom: 1px solid hsl(165.6deg 96.82% 8.08%);
     @include flex(row, space-between, center);
     position: relative; // عشان المنيو المنسدلة تتموضع تحته

@@ -21,7 +21,7 @@ export class CourseCardComponent {
   @Output() purchased = new EventEmitter<number>();
 
   isProcessing = false;
-  isFlipped = false;
+  isRevealed = false;
 
   constructor(
     private publicCoursesService: PublicCoursesService,
@@ -68,8 +68,8 @@ export class CourseCardComponent {
     });
   }
 
-  toggleFlip(): void {
-    this.isFlipped = !this.isFlipped;
+  toggleReveal(): void {
+    this.isRevealed = !this.isRevealed;
   }
 
   getThumbnailUrl(): string | null {

@@ -1,5 +1,9 @@
-<article class="lms-course-card card" [class.lms-course-card--owned]="owned" (click)="toggleFlip()">
-  <div class="card-inner" [class.is-flipped]="isFlipped">
+<article
+  class="lms-course-card card"
+  [class.lms-course-card--owned]="owned"
+  (click)="toggleReveal()"
+>
+  <div class="card-inner" [class.is-revealed]="isRevealed">
     <div class="card-front">
       <div class="head_card">
         <h3 class="lms-course-card__title">
