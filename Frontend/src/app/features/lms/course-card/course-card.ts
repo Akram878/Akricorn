@@ -37,6 +37,9 @@ export class CourseCardComponent {
     }
 
     if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/sign'], {
+        queryParams: { returnUrl: this.router.url },
+      });
       return;
     }
 
