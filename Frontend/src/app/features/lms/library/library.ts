@@ -65,10 +65,6 @@ export class Library implements OnInit, OnDestroy {
 
   // تحميل الكتب العامة
   loadBooks(): void {
-    if (!this.authService.isAuthenticated()) {
-      this.ownedBookIds.clear();
-      return;
-    }
     this.isLoading = true;
     this.error = null;
 
@@ -158,6 +154,13 @@ export class Library implements OnInit, OnDestroy {
     // لو مملوك → ننتقل إلى My Books
     if (this.isBookOwned(book)) {
       this.router.navigate(['/lms/my-books']);
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/sign'], {
+        queryParams: { returnUrl: this.router.url },
+      });
       return;
     }
 

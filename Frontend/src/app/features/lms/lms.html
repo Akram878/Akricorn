@@ -116,7 +116,7 @@
     </a>
 
     <!-- My LMS -->
-    <a [routerLink]="'/lms/my-lms'" class="lms-item">
+    <div class="lms-item lms-item--disabled" aria-disabled="true">
       <div class="lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="8" r="3" />
@@ -127,10 +127,10 @@
         <h3 class="lms-item__title">My LMS</h3>
         <p class="lms-item__text">Personal LMS view and preferences.</p>
       </div>
-    </a>
+    </div>
 
     <!-- LMSes -->
-    <a [routerLink]="'/lms/lmses'" class="lms-item">
+    <div class="lms-item lms-item--disabled" aria-disabled="true">
       <div class="lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="12" r="7" />
@@ -142,6 +142,6 @@
         <h3 class="lms-item__title">LMSes</h3>
         <p class="lms-item__text">Multiple LMS spaces (clients / schools).</p>
       </div>
-    </a>
+    </div>
   </section>
 </div>

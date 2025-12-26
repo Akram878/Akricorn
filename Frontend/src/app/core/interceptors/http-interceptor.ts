@@ -12,15 +12,6 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const adminAuthService = inject(AdminAuthService);
 
-  // الطلبات العامة في الـ LMS المفروض تشتغل بدون مصادقة حتى لو كان في توكن منتهي الصلاحية مخزن في المتصفح
-  const isPublicLmsRequest =
-    req.method === 'GET' &&
-    (req.url.includes('/api/lms/courses') ||
-      req.url.includes('/api/lms/books') ||
-      req.url.includes('/api/lms/tools') ||
-      req.url.includes('/api/lms/paths') ||
-      req.url.includes('/api/lms/stats') ||
-      req.url.includes('/api/courses'));
   const isAuthRequest =
     req.url.includes('/api/auth/login') ||
     req.url.includes('/api/auth/signup') ||
@@ -35,6 +26,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
       isAuthRequest || !adminAuthService.isAuthenticated()
         ? null
         : adminAuthService.getAccessToken();
+  } else {
     // LMS محمي + باقي الطلبات → توكن المستخدم فقط
     tokenToUse =
       isAuthRequest || !authService.isAuthenticated() ? null : authService.getAccessToken();

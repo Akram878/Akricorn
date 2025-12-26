@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DecimalPipe } from '@angular/common';
 
 import { FormsModule } from '@angular/forms'; // 👈 مهم جداً
-import { HttpClient } from '@angular/common/http';
+
 import { Subscription } from 'rxjs';
 import {
   PublicCoursesService,
@@ -11,7 +11,7 @@ import {
 } from '../../../core/services/public-courses.service';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { resolveMediaUrl } from '../../../core/utils/media-url';
+
 import { CourseCardComponent } from '../course-card/course-card';
 
 @Component({
@@ -40,9 +40,7 @@ export class Courses implements OnInit, OnDestroy {
 
   // IDs للكورسات المملوكة
   private ownedCourseIds: Set<number> = new Set<number>();
-  courseThumbnails: Record<number, string> = {};
-  private thumbnailObjectUrls: Map<number, string> = new Map();
-  private thumbnailSubscriptions: Map<number, Subscription> = new Map();
+
   private authSubscription?: Subscription;
   // خيارات الفلترة (قائمة قيم موجودة فعلياً في الكورسات)
   categories: string[] = [];
@@ -62,7 +60,6 @@ export class Courses implements OnInit, OnDestroy {
   constructor(
     private publicCoursesService: PublicCoursesService,
 
-    private http: HttpClient,
     private authService: AuthService
   ) {}
 
@@ -78,7 +75,6 @@ export class Courses implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.resetThumbnails();
     this.authSubscription?.unsubscribe();
   }
 
@@ -91,11 +87,10 @@ export class Courses implements OnInit, OnDestroy {
 
     this.publicCoursesService.getCourses().subscribe({
       next: (data) => {
-        this.resetThumbnails();
         this.courses = data;
         this.buildFilterOptions();
         this.applyFilters();
-        this.loadCourseThumbnails(this.courses);
+
         this.isLoading = false;
       },
       error: () => {
@@ -208,43 +203,5 @@ export class Courses implements OnInit, OnDestroy {
 
   onCoursePurchased(courseId: number): void {
     this.ownedCourseIds.add(courseId);
-  }
-  private loadCourseThumbnails(courses: PublicCourse[]): void {
-    if (!this.authService.isAuthenticated()) {
-      return;
-    }
-
-    for (const course of courses) {
-      if (!course.thumbnailUrl || this.courseThumbnails[course.id]) {
-        continue;
-      }
-
-      const resolvedUrl = resolveMediaUrl(course.thumbnailUrl);
-      const subscription = this.http.get(resolvedUrl, { responseType: 'blob' }).subscribe({
-        next: (blob) => {
-          const objectUrl = URL.createObjectURL(blob);
-          this.courseThumbnails[course.id] = objectUrl;
-          this.thumbnailObjectUrls.set(course.id, objectUrl);
-        },
-        error: () => {
-          // ignore thumbnail errors to avoid console noise
-        },
-      });
-
-      this.thumbnailSubscriptions.set(course.id, subscription);
-    }
-  }
-
-  private resetThumbnails(): void {
-    for (const subscription of this.thumbnailSubscriptions.values()) {
-      subscription.unsubscribe();
-    }
-    this.thumbnailSubscriptions.clear();
-
-    for (const objectUrl of this.thumbnailObjectUrls.values()) {
-      URL.revokeObjectURL(objectUrl);
-    }
-    this.thumbnailObjectUrls.clear();
-    this.courseThumbnails = {};
   }
 }

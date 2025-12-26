@@ -153,6 +153,12 @@ $gold-500: #b9822f;
   }
 }
 
+.lms-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* الأيقونة المنقوشة */
 
 .lms-item__icon {

@@ -1,13 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+
 import { Subscription } from 'rxjs';
-import {
-  PublicCoursesService,
-  MyCourse,
-  PublicCourse,
-} from '../../../core/services/public-courses.service';
+import { PublicCoursesService, MyCourse } from '../../../core/services/public-courses.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 
@@ -20,18 +16,17 @@ import { CourseCardComponent } from '../course-card/course-card';
   styleUrl: './my-courses.scss',
 })
 export class MyCourses implements OnInit, OnDestroy {
-  myCourses: PublicCourse[] = [];
-  filteredMyCourses: PublicCourse[] = [];
+  myCourses: MyCourse[] = [];
+  filteredMyCourses: MyCourse[] = [];
 
   isLoading = false;
   error: string | null = null;
 
   // خيارات الفئات الموجودة فعلياً
   categories: string[] = [];
-  private ownedCourseIds: Set<number> = new Set<number>();
+
   courseThumbnails: Record<number, string> = {};
-  private thumbnailObjectUrls: Map<number, string> = new Map();
-  private thumbnailSubscriptions: Map<number, Subscription> = new Map();
+
   private authSubscription?: Subscription;
   // فلاتر
   minHours: number | null = null;
@@ -40,7 +35,6 @@ export class MyCourses implements OnInit, OnDestroy {
   constructor(
     private publicCoursesService: PublicCoursesService,
 
-    private http: HttpClient,
     private authService: AuthService
   ) {}
 
@@ -66,8 +60,8 @@ export class MyCourses implements OnInit, OnDestroy {
     }
     this.isLoading = true;
     this.error = null;
-    this.publicCoursesService.getCourses().subscribe({
-      next: (data: PublicCourse[]) => {
+    this.publicCoursesService.getMyCourses().subscribe({
+      next: (data: MyCourse[]) => {
         this.resetThumbnails();
         this.myCourses = data;
         this.buildFilterOptions();
@@ -78,19 +72,6 @@ export class MyCourses implements OnInit, OnDestroy {
       error: () => {
         this.error = 'حدث خطأ أثناء تحميل كورساتك. حاول مرة أخرى لاحقاً.';
         this.isLoading = false;
-      },
-    });
-
-    this.loadOwnedCourses();
-  }
-
-  private loadOwnedCourses(): void {
-    this.publicCoursesService.getMyCourses().subscribe({
-      next: (data: MyCourse[]) => {
-        this.ownedCourseIds = new Set(data.map((course) => course.id));
-      },
-      error: () => {
-        this.ownedCourseIds.clear();
       },
     });
   }
@@ -133,54 +114,25 @@ export class MyCourses implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  trackByCourseId(index: number, course: PublicCourse): number {
+  trackByCourseId(index: number, course: MyCourse): number {
     return course.id;
   }
 
-  isCourseOwned(course: PublicCourse): boolean {
-    return this.ownedCourseIds.has(course.id);
-  }
-
-  onCoursePurchased(courseId: number): void {
-    this.ownedCourseIds.add(courseId);
-  }
-
-  private loadCourseThumbnails(courses: PublicCourse[]): void {
+  private loadCourseThumbnails(courses: MyCourse[]): void {
     if (!this.authService.isAuthenticated()) {
       return;
     }
 
     for (const course of courses) {
-      if (!course.thumbnailUrl || this.courseThumbnails[course.id]) {
+      if (!course.thumbnailUrl?.trim() || this.courseThumbnails[course.id]) {
         continue;
       }
 
-      const resolvedUrl = resolveMediaUrl(course.thumbnailUrl);
-      const subscription = this.http.get(resolvedUrl, { responseType: 'blob' }).subscribe({
-        next: (blob) => {
-          const objectUrl = URL.createObjectURL(blob);
-          this.courseThumbnails[course.id] = objectUrl;
-          this.thumbnailObjectUrls.set(course.id, objectUrl);
-        },
-        error: () => {
-          // ignore thumbnail errors to avoid console noise
-        },
-      });
-
-      this.thumbnailSubscriptions.set(course.id, subscription);
+      this.courseThumbnails[course.id] = resolveMediaUrl(course.thumbnailUrl);
     }
   }
 
   private resetThumbnails(): void {
-    for (const subscription of this.thumbnailSubscriptions.values()) {
-      subscription.unsubscribe();
-    }
-    this.thumbnailSubscriptions.clear();
-
-    for (const objectUrl of this.thumbnailObjectUrls.values()) {
-      URL.revokeObjectURL(objectUrl);
-    }
-    this.thumbnailObjectUrls.clear();
     this.courseThumbnails = {};
   }
   private resetState(): void {
@@ -189,6 +141,5 @@ export class MyCourses implements OnInit, OnDestroy {
     this.myCourses = [];
     this.filteredMyCourses = [];
     this.categories = [];
-    this.ownedCourseIds.clear();
   }
 }
