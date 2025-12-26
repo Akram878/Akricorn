@@ -34,7 +34,7 @@ export class Library implements OnInit, OnDestroy {
   bookThumbnails: Record<number, string> = {};
   private thumbnailObjectUrls: Map<number, string> = new Map();
   private thumbnailSubscriptions: Map<number, Subscription> = new Map();
-
+  private authSubscription?: Subscription;
   isLoading = false;
   error: string | null = null;
   processingBookId: number | null = null;
@@ -49,15 +49,26 @@ export class Library implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadBooks();
-    this.loadMyBooks(); // لو المستخدم مسجّل، نملأ الـ ownedBookIds
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.loadMyBooks();
+      } else {
+        this.ownedBookIds.clear();
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.resetThumbnails();
+    this.authSubscription?.unsubscribe();
   }
 
   // تحميل الكتب العامة
   loadBooks(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.ownedBookIds.clear();
+      return;
+    }
     this.isLoading = true;
     this.error = null;
 
@@ -177,7 +188,7 @@ export class Library implements OnInit, OnDestroy {
   }
 
   private loadBookThumbnails(books: PublicBook[]): void {
-    const token = this.authService.getToken();
+    const token = this.authService.getAccessToken();
     if (!token) {
       return;
     }

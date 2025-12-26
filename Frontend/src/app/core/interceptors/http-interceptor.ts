@@ -1,6 +1,6 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+
 import { catchError, throwError } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
 import { AuthService } from '../services/auth.service';
@@ -8,14 +8,9 @@ import { AdminAuthService } from '../services/admin-auth.service';
 
 export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   const notification = inject(NotificationService);
-  const router = inject(Router);
+
   const authService = inject(AuthService);
   const adminAuthService = inject(AdminAuthService);
-
-  // توكن المستخدم العادي
-  const userToken = localStorage.getItem('auth_token');
-  // توكن الأدمن
-  const adminToken = localStorage.getItem('adminToken');
 
   // الطلبات العامة في الـ LMS المفروض تشتغل بدون مصادقة حتى لو كان في توكن منتهي الصلاحية مخزن في المتصفح
   const isPublicLmsRequest =
@@ -24,17 +19,22 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
       req.url.includes('/api/lms/books') ||
       req.url.includes('/api/lms/tools') ||
       req.url.includes('/api/lms/paths') ||
-      req.url.includes('/api/lms/stats'));
+      req.url.includes('/api/lms/stats') ||
+      req.url.includes('/api/courses'));
+  const isAuthRequest =
+    req.url.includes('/api/auth/login') ||
+    req.url.includes('/api/auth/signup') ||
+    req.url.includes('/api/admin/login');
   let tokenToUse: string | null = null;
 
   const isAdminRequest = req.url.includes('/api/admin');
 
   // لو الطلب رايح إلى /api/admin → استخدم adminToken فقط
   if (isAdminRequest) {
-    tokenToUse = adminToken;
+    tokenToUse = isAuthRequest ? null : adminAuthService.getAccessToken();
   } else if (!isPublicLmsRequest) {
     // LMS محمي + باقي الطلبات → توكن المستخدم فقط
-    tokenToUse = userToken;
+    tokenToUse = isAuthRequest ? null : authService.getAccessToken();
   }
 
   // ================================
@@ -63,8 +63,6 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      console.error('HTTP Interceptor Error:', error);
-
       // ⛔ "Failed to fetch" (مثلاً السيرفر طافي)
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         notification.showError(
@@ -90,10 +88,6 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         //          403
         // ======================
         if (error.status === 403) {
-          if (!tokenToUse) {
-            return throwError(() => error);
-          }
-
           if (isAdminRequest) {
             message = error.error?.message || 'You do not have permission to perform this action.';
 
@@ -110,8 +104,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
               notification.showError(message);
             }
 
-            authService.logout();
-            router.navigate(['/auth/login']);
+            authService.handleAuthFailure();
 
             return throwError(() => error);
           }
@@ -120,19 +113,14 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         // ======================
         //          401
         // ======================
-        if (error.status === 401) {
-          if (!tokenToUse) {
-            message = null;
-            return throwError(() => error);
-          }
+       
 
           if (isAdminRequest) {
             message = 'Admin session has expired. Please log in again.';
             adminAuthService.logout();
           } else {
             message = 'Your session has expired. Please log in again.';
-            authService.logout();
-            router.navigate(['/auth/login']);
+            authService.handleAuthFailure();
           }
 
           if (message) {

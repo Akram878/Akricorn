@@ -13,7 +13,7 @@ import {
 import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 import { CourseCardComponent } from '../course-card/course-card';
-import { isTokenExpired } from '../../../core/utils/auth-token';
+
 @Component({
   selector: 'app-lms-courses',
   standalone: true,
@@ -43,6 +43,7 @@ export class Courses implements OnInit, OnDestroy {
   courseThumbnails: Record<number, string> = {};
   private thumbnailObjectUrls: Map<number, string> = new Map();
   private thumbnailSubscriptions: Map<number, Subscription> = new Map();
+  private authSubscription?: Subscription;
   // خيارات الفلترة (قائمة قيم موجودة فعلياً في الكورسات)
   categories: string[] = [];
   paths: string[] = [];
@@ -67,11 +68,18 @@ export class Courses implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCourses();
-    this.loadMyCourses();
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.loadMyCourses();
+      } else {
+        this.ownedCourseIds.clear();
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.resetThumbnails();
+    this.authSubscription?.unsubscribe();
   }
 
   // ============================
@@ -98,10 +106,8 @@ export class Courses implements OnInit, OnDestroy {
   }
 
   loadMyCourses(): void {
-    const token = localStorage.getItem('auth_token');
-
-    // لو ما في توكن أو التوكن منتهي الصلاحية → لا تطلب /my-courses حتى لا يظهر تنبيه انتهاء الجلسة للضيوف
-    if (!token || isTokenExpired(token)) {
+    if (!this.authService.isAuthenticated()) {
+      this.ownedCourseIds.clear();
       return;
     }
     this.publicCoursesService.getMyCourses().subscribe({
@@ -204,7 +210,7 @@ export class Courses implements OnInit, OnDestroy {
     this.ownedCourseIds.add(courseId);
   }
   private loadCourseThumbnails(courses: PublicCourse[]): void {
-    const token = this.authService.getToken();
+    const token = this.authService.getAccessToken();
     if (!token) {
       return;
     }

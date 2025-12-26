@@ -31,12 +31,12 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             // تأكد أن المستخدم موجود ومفعّل
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId.Value);
             if (user == null)
-                return Unauthorized(new { message = "User not found." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
@@ -105,7 +105,7 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             try
             {

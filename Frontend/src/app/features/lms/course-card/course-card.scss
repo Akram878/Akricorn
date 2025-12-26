@@ -15,9 +15,9 @@ $gold-500: #b9822f;
   display: block;
   //   flex-grow: 1;
   //   min-width: 260px;
-  max-width: 25rem;
-  min-width: 200px;
-  width: calc((100% - 4rem) / 4);
+  // max-width: 17rem;
+  // min-width: 15rem;
+  width: 15rem;
   height: 320px;
 
   max-height: 320px;
@@ -25,13 +25,13 @@ $gold-500: #b9822f;
 
 @media (max-width: 1000px) {
   :host {
-    width: calc((100% - 3rem) / 3);
+    // width: calc((100% - 3rem) / 3);
   }
 }
 
 @media (max-width: 700px) {
   :host {
-    width: calc((100% - 2rem) / 2);
+    width: 100%;
   }
 }
 

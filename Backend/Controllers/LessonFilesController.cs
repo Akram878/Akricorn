@@ -30,7 +30,7 @@ namespace Backend.Controllers
             var userContext = ResolveUserContext();
             if (!userContext.IsAuthenticated)
             {
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
             }
 
             var file = await _context.CourseLessonFiles
@@ -50,7 +50,7 @@ namespace Backend.Controllers
                     .FirstOrDefaultAsync(u => u.Id == userContext.UserId);
 
                 if (user == null)
-                    return Unauthorized(new { message = "User not found." });
+                    return Unauthorized(new { message = "Unauthorized." });
 
                 if (!user.IsActive)
                     return StatusCode(403, new { message = "Your account has been disabled." });

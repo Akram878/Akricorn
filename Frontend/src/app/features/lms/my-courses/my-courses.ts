@@ -11,7 +11,6 @@ import {
 import { AuthService } from '../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 
-import { Router } from '@angular/router';
 import { CourseCardComponent } from '../course-card/course-card';
 @Component({
   selector: 'app-my-courses',
@@ -33,34 +32,38 @@ export class MyCourses implements OnInit, OnDestroy {
   courseThumbnails: Record<number, string> = {};
   private thumbnailObjectUrls: Map<number, string> = new Map();
   private thumbnailSubscriptions: Map<number, Subscription> = new Map();
+  private authSubscription?: Subscription;
   // فلاتر
   minHours: number | null = null;
   selectedCategory: string = 'all';
 
   constructor(
     private publicCoursesService: PublicCoursesService,
-    private router: Router,
+
     private http: HttpClient,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('auth_token');
-
-    if (!token || this.isTokenExpired(token)) {
-      this.router.navigate(['/auth/sign'], {
-        queryParams: { returnUrl: '/lms/my-courses' },
-      });
-      return;
-    }
-    this.loadMyCourses();
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.loadMyCourses();
+      } else {
+        this.resetState();
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.resetThumbnails();
+    this.authSubscription?.unsubscribe();
   }
 
   loadMyCourses(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.resetState();
+      return;
+    }
     this.isLoading = true;
     this.error = null;
     this.publicCoursesService.getCourses().subscribe({
@@ -72,8 +75,7 @@ export class MyCourses implements OnInit, OnDestroy {
         this.loadCourseThumbnails(this.myCourses);
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Error loading my courses', err);
+      error: () => {
         this.error = 'حدث خطأ أثناء تحميل كورساتك. حاول مرة أخرى لاحقاً.';
         this.isLoading = false;
       },
@@ -144,7 +146,7 @@ export class MyCourses implements OnInit, OnDestroy {
   }
 
   private loadCourseThumbnails(courses: PublicCourse[]): void {
-    const token = this.authService.getToken();
+    const token = this.authService.getAccessToken();
     if (!token) {
       return;
     }
@@ -184,28 +186,12 @@ export class MyCourses implements OnInit, OnDestroy {
     this.thumbnailObjectUrls.clear();
     this.courseThumbnails = {};
   }
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payloadSegment = token.split('.')[1];
-      if (!payloadSegment) {
-        return true;
-      }
-
-      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
-      const padded = normalized.padEnd(
-        normalized.length + ((4 - (normalized.length % 4)) % 4),
-        '='
-      );
-      const payload = JSON.parse(atob(padded));
-
-      if (!payload?.exp) {
-        return true;
-      }
-
-      const expiryMs = payload.exp * 1000;
-      return Date.now() >= expiryMs;
-    } catch {
-      return true;
-    }
+  private resetState(): void {
+    this.isLoading = false;
+    this.error = null;
+    this.myCourses = [];
+    this.filteredMyCourses = [];
+    this.categories = [];
+    this.ownedCourseIds.clear();
   }
 }

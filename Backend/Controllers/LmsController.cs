@@ -145,14 +145,14 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             try
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
                 if (user == null)
-                    return Unauthorized(new { message = "User not found." });
+                    return Unauthorized(new { message = "Unauthorized." });
 
                 if (!user.IsActive)
                     return StatusCode(403, new { message = "Your account has been disabled." });
@@ -201,14 +201,14 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             var user = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == userId.Value);
 
             if (user == null)
-                return Unauthorized(new { message = "User not found." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
@@ -244,14 +244,14 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             var user = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == userId.Value);
 
             if (user == null)
-                return Unauthorized(new { message = "User not found." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
@@ -358,14 +358,14 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             var user = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == userId.Value);
 
             if (user == null)
-                return Unauthorized(new { message = "User not found." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
@@ -464,14 +464,14 @@ namespace Backend.Controllers
         {
             var userId = GetCurrentUserId();
             if (userId == null)
-                return Unauthorized(new { message = "Invalid token." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             var user = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == userId.Value);
 
             if (user == null)
-                return Unauthorized(new { message = "User not found." });
+                return Unauthorized(new { message = "Unauthorized." });
 
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });

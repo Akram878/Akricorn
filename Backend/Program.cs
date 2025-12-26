@@ -150,7 +150,7 @@ builder.Services
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return context.Response.WriteAsJsonAsync(new
                     {
-                        message = "Unauthorized: missing or invalid token. Make sure you are logged in as an admin before calling this endpoint."
+                        message = "Unauthorized."
                     });
                 }
 

@@ -1,10 +1,10 @@
 import { Component, AfterViewInit, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
-
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PublicCourse, PublicCoursesService } from '../../core/services/public-courses.service';
 import { AuthService } from '../../core/services/auth.service';
-import { isTokenExpired } from '../../core/utils/auth-token';
+
 import { CourseCardComponent } from '../lms/course-card/course-card';
 
 interface Star3D {
@@ -34,7 +34,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
 
   featuredCourses: PublicCourse[] = [];
   private ownedCourseIds: Set<number> = new Set<number>();
-
+  private authSubscription?: Subscription;
   constructor(
     private publicCoursesService: PublicCoursesService,
     private authService: AuthService
@@ -42,7 +42,13 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadFeaturedCourses();
-    this.loadMyCourses();
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.loadMyCourses();
+      } else {
+        this.ownedCourseIds.clear();
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -79,6 +85,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
     }
+    this.authSubscription?.unsubscribe();
   }
 
   trackByCourseId(index: number, course: PublicCourse): number {
@@ -105,8 +112,8 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadMyCourses(): void {
-    const token = this.authService.getToken();
-    if (!token || isTokenExpired(token)) {
+    if (!this.authService.isAuthenticated()) {
+      this.ownedCourseIds.clear();
       return;
     }
 

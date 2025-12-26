@@ -239,8 +239,11 @@ namespace Backend.Controllers
             if (request == null)
                 return BadRequest(new { message = "Invalid request payload." });
 
-            int userId = GetUserIdFromJwt();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var userId = GetUserIdFromJwt();
+            if (userId == null)
+                return Unauthorized(new { message = "Unauthorized." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId.Value);
 
             if (user == null)
                 return NotFound(new { message = "User not found." });
@@ -291,8 +294,11 @@ namespace Backend.Controllers
             if (request == null)
                 return BadRequest(new { message = "Invalid request payload." });
 
-            int userId = GetUserIdFromJwt();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var userId = GetUserIdFromJwt();
+            if (userId == null)
+                return Unauthorized(new { message = "Unauthorized." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId.Value);
 
             if (user == null)
                 return NotFound(new { message = "User not found." });
@@ -347,8 +353,11 @@ namespace Backend.Controllers
             if (request == null)
                 return BadRequest(new { message = "Invalid request payload." });
 
-            int userId = GetUserIdFromJwt();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var userId = GetUserIdFromJwt();
+            if (userId == null)
+                return Unauthorized(new { message = "Unauthorized." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId.Value);
 
             if (user == null)
                 return NotFound(new { message = "User not found." });
@@ -374,7 +383,7 @@ namespace Backend.Controllers
         //          Helpers
         // ============================
 
-        private int GetUserIdFromJwt()
+        private int? GetUserIdFromJwt()
         {
             var idClaim = User.Claims.FirstOrDefault(c =>
                 c.Type == JwtRegisteredClaimNames.Sub ||
@@ -385,7 +394,7 @@ namespace Backend.Controllers
                 return id;
             }
 
-            throw new UnauthorizedAccessException("Invalid token.");
+            return null;
         }
 
         private static UserDto ToDto(User user)

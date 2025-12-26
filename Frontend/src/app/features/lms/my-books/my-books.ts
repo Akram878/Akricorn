@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Router } from '@angular/router';
+
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -20,28 +20,30 @@ export class MyBooks implements OnInit, OnDestroy {
   error: string | null = null;
   private activeObjectUrl: string | null = null;
   private downloadSubscription?: Subscription;
-
+  private authSubscription?: Subscription;
   constructor(
     private booksService: PublicBooksService,
     private notification: NotificationService,
-    private router: Router,
+
     private http: HttpClient,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('auth_token');
-
-    if (!token || this.isTokenExpired(token)) {
-      this.router.navigate(['/auth/sign'], {
-        queryParams: { returnUrl: '/lms/my-books' },
-      });
-      return;
-    }
-    this.loadBooks();
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.loadBooks();
+      } else {
+        this.resetState();
+      }
+    });
   }
 
   loadBooks(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.resetState();
+      return;
+    }
     this.isLoading = true;
     this.error = null;
 
@@ -53,11 +55,7 @@ export class MyBooks implements OnInit, OnDestroy {
       error: (err) => {
         this.isLoading = false;
 
-        if (err?.status === 401) {
-          this.router.navigate(['/auth/sign'], {
-            queryParams: { returnUrl: '/lms/my-books' },
-          });
-        } else if (err?.error?.message) {
+        if (err?.error?.message) {
           this.error = err.error.message;
         } else {
           this.error = 'Failed to load your books.';
@@ -66,38 +64,13 @@ export class MyBooks implements OnInit, OnDestroy {
     });
   }
 
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payloadSegment = token.split('.')[1];
-      if (!payloadSegment) {
-        return true;
-      }
-
-      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
-      const padded = normalized.padEnd(
-        normalized.length + ((4 - (normalized.length % 4)) % 4),
-        '='
-      );
-      const payload = JSON.parse(atob(padded));
-
-      if (!payload?.exp) {
-        return true;
-      }
-
-      const expiryMs = payload.exp * 1000;
-      return Date.now() >= expiryMs;
-    } catch {
-      return true;
-    }
-  }
-
   openFile(book: MyBook): void {
     if (!book.fileUrl) {
       this.notification.showError('File is not available.');
       return;
     }
 
-    const token = this.authService.getToken();
+    const token = this.authService.getAccessToken();
     if (!token) {
       this.notification.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
       return;
@@ -119,6 +92,7 @@ export class MyBooks implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cleanupObjectUrl();
+    this.authSubscription?.unsubscribe();
   }
   private cleanupObjectUrl(): void {
     if (this.downloadSubscription) {
@@ -129,5 +103,11 @@ export class MyBooks implements OnInit, OnDestroy {
       URL.revokeObjectURL(this.activeObjectUrl);
       this.activeObjectUrl = null;
     }
+  }
+  private resetState(): void {
+    this.cleanupObjectUrl();
+    this.myBooks = [];
+    this.isLoading = false;
+    this.error = null;
   }
 }
