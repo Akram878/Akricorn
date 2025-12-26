@@ -201,7 +201,9 @@
             />
             <label for="privacyPolicy">
               I agree to the
-              <a href="#" (click)="openPrivacyPolicy($event)">Privacy Policy</a>
+              <button type="button" class="policy-link" (click)="openPrivacyPolicy($event)">
+                Privacy Policy
+              </button>
             </label>
           </div>
           <div class="policy-error" *ngIf="submitted && policyCtrl?.invalid">

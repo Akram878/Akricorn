@@ -50,6 +50,16 @@ export class LmsTools implements OnInit {
     return tool.id;
   }
 
+  getToolAvatar(tool: UiTool): string {
+    const name = tool.name?.trim() || '';
+    if (!name) {
+      return '—';
+    }
+
+    const parts = name.split(/\s+/).slice(0, 2);
+    return parts.map((part) => part[0]?.toUpperCase()).join('');
+  }
+
   openTool(tool: UiTool): void {
     if (!tool.url) {
       return;

@@ -40,41 +40,39 @@ namespace Backend.Controllers
                 activeBooks
             });
         }
-        // ============================
-        //         Public Courses
-        // ============================
-        [HttpGet("courses")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetCourses()
-        {
-            var courses = await _context.Courses
-                .Where(c => c.IsActive)
-                .Select(c => new
-                {
-                    c.Id,
-                    c.Title,
-                    c.Description,
-                    c.ThumbnailUrl,
-                    c.Price,
-                    c.Hours,
-                    c.Category,
-                    c.Rating,
-                    pathTitle = c.LearningPathCourses
-                        .Select(lp => lp.LearningPath.Title)
-                        .FirstOrDefault()
-                })
-                .ToListAsync();
-
-            return Ok(courses);
-        }
+       
 
         // ============================
         //       Course Content
         // ============================
         [HttpGet("courses/{courseId}/content")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetCourseContent(int courseId)
         {
+            var userContext = ResolveUserContext();
+            if (!userContext.IsAuthenticated)
+            {
+                return Unauthorized(new { message = "Unauthorized." });
+            }
+
+            if (!userContext.IsAdmin)
+            {
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == userContext.UserId);
+
+                if (user == null)
+                    return Unauthorized(new { message = "Unauthorized." });
+
+                if (!user.IsActive)
+                    return StatusCode(403, new { message = "Your account has been disabled." });
+
+                var enrolled = await _context.UserCourses
+                    .AnyAsync(uc => uc.UserId == userContext.UserId && uc.CourseId == courseId);
+
+                if (!enrolled)
+                    return StatusCode(403, new { message = "You are not enrolled in this course." });
+            }
             var course = await _context.Courses
                 .Include(c => c.Sections)
                     .ThenInclude(s => s.Lessons)
@@ -604,6 +602,39 @@ namespace Backend.Controllers
                 return userId;
 
             return null;
+        }
+
+
+        private UserRequestContext ResolveUserContext()
+        {
+            var isAdmin = User.Claims.Any(c =>
+                string.Equals(c.Type, "IsAdmin", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(c.Value, "true", StringComparison.OrdinalIgnoreCase));
+
+            var userIdClaim = User.Claims.FirstOrDefault(c =>
+                c.Type == "Id" ||
+                c.Type == "id" ||
+                c.Type == ClaimTypes.NameIdentifier ||
+                c.Type == "UserId" ||
+                c.Type == "userId" ||
+                c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return new UserRequestContext(userId, isAdmin);
+            }
+
+            if (isAdmin)
+            {
+                return new UserRequestContext(null, true);
+            }
+
+            return new UserRequestContext(null, false);
+        }
+
+        private record UserRequestContext(int? UserId, bool IsAdmin)
+        {
+            public bool IsAuthenticated => IsAdmin || UserId.HasValue;
         }
     }
 }

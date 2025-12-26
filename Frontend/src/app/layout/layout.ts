@@ -31,7 +31,7 @@ export class Layout implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // 👈 [التعديل 7: الاشتراك في حالة تسجيل الدخول عند تهيئة المكون]
-    this.authSubscription = this.authService.isLoggedIn$.subscribe((status: boolean) => {
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((status: boolean) => {
       this.isLoggedIn = status;
     });
   }

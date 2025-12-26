@@ -182,11 +182,14 @@ $gold-500: #b9822f;
       top: -1px; // عدّلها لـ -2px لو حاب ترفعه أكثر شوي
     }
 
-    a {
+    .policy-link {
+      border: none;
+      background: none;
+      padding: 0;
       color: $gold-300;
       text-decoration: underline;
       text-decoration-style: dotted;
-
+      cursor: pointer;
       &:hover {
         color: $gold-100;
       }

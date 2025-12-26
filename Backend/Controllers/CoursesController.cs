@@ -34,7 +34,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetFeaturedCourses()
         {
             var courses = await BuildCoursesQuery()
-                          .Take(5)
+                         
                           .ToListAsync();
 
             return Ok(courses);

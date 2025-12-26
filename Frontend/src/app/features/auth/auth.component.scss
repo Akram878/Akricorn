@@ -141,7 +141,7 @@ $gold-500: #b9822f;
     @include flex(row, flex-end, center);
     gap: 0.85rem;
 
-    a {
+    .alt-icon-button {
       width: 2.4rem;
       height: 2.4rem;
       border-radius: 999px;
@@ -152,7 +152,8 @@ $gold-500: #b9822f;
       border: 1px solid rgba($gold-300, 0.35);
       box-shadow: 0 14px 32px rgba(0, 0, 0, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(14px);
-
+      cursor: not-allowed;
+      pointer-events: none;
       transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 
       img {

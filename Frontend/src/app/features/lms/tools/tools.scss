@@ -113,6 +113,23 @@ $gold-500: #b9822f;
   gap: 0.8rem;
 }
 
+.lms-tool-card__avatar {
+  flex-shrink: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 167, 74, 0.45);
+  background: radial-gradient(circle at top left, rgba(217, 167, 74, 0.25), transparent 70%),
+    rgba(8, 52, 42, 0.85);
+  color: $gold-100;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .lms-tool-card__icon {
   flex-shrink: 0;
   width: 2.7rem;
@@ -203,15 +220,24 @@ $gold-500: #b9822f;
   color: #bbf7d0;
 }
 
+.lms-tool-card__link {
+  margin-top: 0.65rem;
+  font-size: 0.76rem;
+  color: rgba($gold-200, 0.85);
+  word-break: break-word;
+}
+
 /* ===== Footer ===== */
 
 .lms-tool-card__footer {
   margin-top: 0.4rem;
   display: flex;
   justify-content: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
-/* زر Open tool (Demo) بنفس الروح */
+/* زر Open tool بنفس الروح */
 
 .lms-tool-card .lms-primary-btn {
   padding: 0.5rem 1.05rem;
@@ -247,6 +273,18 @@ $gold-500: #b9822f;
   }
 }
 
+.lms-tool-card .lms-secondary-btn {
+  padding: 0.5rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 167, 74, 0.45);
+  background: transparent;
+  color: rgba($gold-200, 0.9);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.6;
+}
 /* =================== RESPONSIVE =================== */
 
 @media (max-width: 900px) {

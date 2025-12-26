@@ -1,5 +1,5 @@
 <div class="bigBox">
-  <a class="returnbtn" href="#" [routerLink]="['/home']">
+  <a class="returnbtn" [routerLink]="['/home']">
     <svg
       width="800px"
       height="800px"
@@ -41,15 +41,15 @@
     <div class="altBox">
       <p>Sign up with</p>
       <div class="altIcons">
-        <a href="">
+        <button type="button" class="alt-icon-button" disabled aria-disabled="true">
           <img src="assets/icons/facebook.png" alt="" />
-        </a>
-        <a href="">
+        </button>
+        <button type="button" class="alt-icon-button" disabled aria-disabled="true">
           <img src="assets/icons/github.png" alt="" />
-        </a>
-        <a href="">
+        </button>
+        <button type="button" class="alt-icon-button" disabled aria-disabled="true">
           <img src="assets/icons/google.png" alt="" />
-        </a>
+        </button>
       </div>
     </div>
   </div>
