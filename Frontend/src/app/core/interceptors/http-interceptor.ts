@@ -31,10 +31,13 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
 
   // لو الطلب رايح إلى /api/admin → استخدم adminToken فقط
   if (isAdminRequest) {
-    tokenToUse = isAuthRequest ? null : adminAuthService.getAccessToken();
-  } else if (!isPublicLmsRequest) {
+    tokenToUse =
+      isAuthRequest || !adminAuthService.isAuthenticated()
+        ? null
+        : adminAuthService.getAccessToken();
     // LMS محمي + باقي الطلبات → توكن المستخدم فقط
-    tokenToUse = isAuthRequest ? null : authService.getAccessToken();
+    tokenToUse =
+      isAuthRequest || !authService.isAuthenticated() ? null : authService.getAccessToken();
   }
 
   // ================================
@@ -85,42 +88,31 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         const isAdminRequest = req.url.includes('/api/admin');
 
         // ======================
-        //          403
-        // ======================
-        if (error.status === 403) {
-          if (isAdminRequest) {
-            message = error.error?.message || 'You do not have permission to perform this action.';
-
-            if (message) {
-              notification.showError(message);
-            }
-
-            return throwError(() => error);
-          } else {
-            message =
-              error.error?.message || 'Your account has been disabled. Please contact support.';
-
-            if (message) {
-              notification.showError(message);
-            }
-
-            authService.handleAuthFailure();
-
-            return throwError(() => error);
-          }
-        }
-
-        // ======================
         //          401
         // ======================
-       
-
+        if (error.status === 401) {
           if (isAdminRequest) {
             message = 'Admin session has expired. Please log in again.';
             adminAuthService.logout();
           } else {
             message = 'Your session has expired. Please log in again.';
             authService.handleAuthFailure();
+          }
+          if (message) {
+            notification.showError(message);
+          }
+          return throwError(() => error);
+        }
+
+        // ======================
+        //          403
+        // ======================
+        if (error.status === 403) {
+          if (isAdminRequest) {
+            message = error.error?.message || 'You do not have permission to perform this action.';
+          } else {
+            message =
+              error.error?.message || 'Your account has been disabled. Please contact support.';
           }
 
           if (message) {

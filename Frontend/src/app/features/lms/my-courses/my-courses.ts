@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import {
   PublicCoursesService,
@@ -146,12 +146,9 @@ export class MyCourses implements OnInit, OnDestroy {
   }
 
   private loadCourseThumbnails(courses: PublicCourse[]): void {
-    const token = this.authService.getAccessToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       return;
     }
-
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
     for (const course of courses) {
       if (!course.thumbnailUrl || this.courseThumbnails[course.id]) {
@@ -159,7 +156,7 @@ export class MyCourses implements OnInit, OnDestroy {
       }
 
       const resolvedUrl = resolveMediaUrl(course.thumbnailUrl);
-      const subscription = this.http.get(resolvedUrl, { responseType: 'blob', headers }).subscribe({
+      const subscription = this.http.get(resolvedUrl, { responseType: 'blob' }).subscribe({
         next: (blob) => {
           const objectUrl = URL.createObjectURL(blob);
           this.courseThumbnails[course.id] = objectUrl;

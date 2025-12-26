@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AdminAuthService } from './admin-auth.service';
+
 import { API_BASE_URL } from '../config/api.config';
 export interface AdminToolDto {
   id: number;
@@ -42,50 +42,32 @@ export interface ToolFileDto {
 export class AdminToolsService {
   private apiUrl = `${API_BASE_URL}/api/admin/tools`;
 
-  constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
-
-  private getAuthHeaders(): HttpHeaders {
-    const token = this.adminAuth.getToken();
-    return new HttpHeaders({
-      Authorization: token ? `Bearer ${token}` : '',
-    });
-  }
-
+  constructor(private http: HttpClient) {}
   getAll(): Observable<AdminToolDto[]> {
-    return this.http.get<AdminToolDto[]>(this.apiUrl, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.get<AdminToolDto[]>(this.apiUrl);
   }
 
   create(data: CreateToolRequest): Observable<any> {
-    return this.http.post(this.apiUrl, data, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.post(this.apiUrl, data);
   }
 
   update(id: number, data: UpdateToolRequest): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, data, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.put(`${this.apiUrl}/${id}`, data);
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
   toggleActive(id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/${id}/toggle`, {}, { headers: this.getAuthHeaders() });
+    return this.http.patch(`${this.apiUrl}/${id}/toggle`, {});
   }
 
   uploadAvatar(toolId: number, file: File): Observable<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<{ url: string }>(`${this.apiUrl}/${toolId}/upload-avatar`, formData, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.post<{ url: string }>(`${this.apiUrl}/${toolId}/upload-avatar`, formData);
   }
 
   uploadFile(
@@ -97,16 +79,11 @@ export class AdminToolsService {
 
     return this.http.post<{ message: string; fileId: number; url: string }>(
       `${this.apiUrl}/${toolId}/files/upload`,
-      formData,
-      {
-        headers: this.getAuthHeaders(),
-      }
+      formData
     );
   }
 
   deleteFile(fileId: number): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/files/${fileId}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/files/${fileId}`);
   }
 }

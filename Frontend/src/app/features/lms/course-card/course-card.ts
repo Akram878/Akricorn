@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { PublicCourse, PublicCoursesService } from '../../../core/services/public-courses.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { isTokenExpired } from '../../../core/utils/auth-token';
+
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 
 @Component({
@@ -36,9 +36,7 @@ export class CourseCardComponent {
       return;
     }
 
-    const token = this.authService.getToken();
-    if (!token || isTokenExpired(token)) {
-      this.router.navigate(['/auth/login']);
+    if (!this.authService.isAuthenticated()) {
       return;
     }
 

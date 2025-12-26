@@ -4,7 +4,7 @@ import { PublicBooksService, MyBook } from '../../../core/services/public-books.
 import { NotificationService } from '../../../core/services/notification.service';
 
 import { resolveMediaUrl } from '../../../core/utils/media-url';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 @Component({
@@ -70,16 +70,14 @@ export class MyBooks implements OnInit, OnDestroy {
       return;
     }
 
-    const token = this.authService.getAccessToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       this.notification.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
       return;
     }
 
     this.cleanupObjectUrl();
     const url = resolveMediaUrl(book.fileUrl);
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    this.downloadSubscription = this.http.get(url, { responseType: 'blob', headers }).subscribe({
+    this.downloadSubscription = this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
         this.activeObjectUrl = URL.createObjectURL(blob);
         window.open(this.activeObjectUrl, '_blank', 'noopener');

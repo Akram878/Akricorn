@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import {
   PublicCoursesService,
@@ -48,6 +48,7 @@ export class CourseViewer implements OnInit, OnDestroy {
   private courseThumbnailObjectUrl: string | null = null;
   private mediaSubscription?: Subscription;
   private courseThumbnailSubscription?: Subscription;
+  private authSubscription?: Subscription;
   constructor(
     private route: ActivatedRoute,
     private coursesService: PublicCoursesService,
@@ -65,11 +66,20 @@ export class CourseViewer implements OnInit, OnDestroy {
       this.error = 'لم يتم العثور على الكورس المطلوب.';
       return;
     }
-    const token = localStorage.getItem('auth_token');
-    if (!token || this.isTokenExpired(token)) {
+    if (!this.authService.isAuthenticated()) {
       this.error = 'يرجى تسجيل الدخول للوصول إلى الكورس.';
       return;
     }
+
+    this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (!isAuthenticated) {
+        this.cleanupMediaUrl();
+        this.cleanupCourseThumbnail();
+        this.course = null;
+        this.selectedFile = null;
+        this.error = 'يرجى تسجيل الدخول للوصول إلى الكورس.';
+      }
+    });
     this.loadCourse();
   }
 
@@ -116,39 +126,36 @@ export class CourseViewer implements OnInit, OnDestroy {
       return;
     }
 
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       this.handleMediaError(type);
       return;
     }
 
     this.isMediaLoading = true;
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    this.mediaSubscription = this.http
-      .get(resolvedUrl, { responseType: 'blob', headers })
-      .subscribe({
-        next: (blob) => {
-          if (this.selectedFile?.id !== file.id) {
-            this.isMediaLoading = false;
-            return;
-          }
-          this.activeObjectUrl = URL.createObjectURL(blob);
-          const safeUrl =
-            type === 'pdf'
-              ? this.sanitizer.bypassSecurityTrustResourceUrl(this.activeObjectUrl)
-              : null;
-          this.selectedFile = {
-            ...this.selectedFile,
-            displayUrl: this.activeObjectUrl,
-            safeUrl,
-          };
+
+    this.mediaSubscription = this.http.get(resolvedUrl, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        if (this.selectedFile?.id !== file.id) {
           this.isMediaLoading = false;
-        },
-        error: () => {
-          this.isMediaLoading = false;
-          this.handleMediaError(type);
-        },
-      });
+          return;
+        }
+        this.activeObjectUrl = URL.createObjectURL(blob);
+        const safeUrl =
+          type === 'pdf'
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(this.activeObjectUrl)
+            : null;
+        this.selectedFile = {
+          ...this.selectedFile,
+          displayUrl: this.activeObjectUrl,
+          safeUrl,
+        };
+        this.isMediaLoading = false;
+      },
+      error: () => {
+        this.isMediaLoading = false;
+        this.handleMediaError(type);
+      },
+    });
   }
 
   closeViewer(): void {
@@ -230,31 +237,8 @@ export class CourseViewer implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.cleanupMediaUrl();
     this.cleanupCourseThumbnail();
-  }
 
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payloadSegment = token.split('.')[1];
-      if (!payloadSegment) {
-        return true;
-      }
-
-      const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
-      const padded = normalized.padEnd(
-        normalized.length + ((4 - (normalized.length % 4)) % 4),
-        '='
-      );
-      const payload = JSON.parse(atob(padded));
-
-      if (!payload?.exp) {
-        return true;
-      }
-
-      const expiryMs = payload.exp * 1000;
-      return Date.now() >= expiryMs;
-    } catch {
-      return true;
-    }
+    this.authSubscription?.unsubscribe();
   }
 
   private cleanupMediaUrl(): void {
@@ -277,16 +261,15 @@ export class CourseViewer implements OnInit, OnDestroy {
       return;
     }
 
-    const token = this.authService.getToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       this.courseThumbnailUrl = null;
       return;
     }
 
     const resolvedUrl = resolveMediaUrl(thumbnailUrl);
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
     this.courseThumbnailSubscription = this.http
-      .get(resolvedUrl, { responseType: 'blob', headers })
+      .get(resolvedUrl, { responseType: 'blob' })
       .subscribe({
         next: (blob) => {
           this.courseThumbnailObjectUrl = URL.createObjectURL(blob);

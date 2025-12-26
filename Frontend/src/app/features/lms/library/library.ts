@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe, NgIf, NgForOf } from '@angular/common';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import {
   PublicBooksService,
@@ -188,12 +188,9 @@ export class Library implements OnInit, OnDestroy {
   }
 
   private loadBookThumbnails(books: PublicBook[]): void {
-    const token = this.authService.getAccessToken();
-    if (!token) {
+    if (!this.authService.isAuthenticated()) {
       return;
     }
-
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
     for (const book of books) {
       if (!book.thumbnailUrl || this.bookThumbnails[book.id]) {
@@ -201,7 +198,7 @@ export class Library implements OnInit, OnDestroy {
       }
 
       const resolvedUrl = resolveMediaUrl(book.thumbnailUrl);
-      const subscription = this.http.get(resolvedUrl, { responseType: 'blob', headers }).subscribe({
+      const subscription = this.http.get(resolvedUrl, { responseType: 'blob' }).subscribe({
         next: (blob) => {
           const objectUrl = URL.createObjectURL(blob);
           this.bookThumbnails[book.id] = objectUrl;

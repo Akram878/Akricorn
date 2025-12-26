@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AdminAuthService } from './admin-auth.service';
+
 import { API_BASE_URL } from '../config/api.config';
 export interface LessonFileDto {
   id: number;
@@ -41,22 +41,13 @@ export interface CourseContentResponse {
 export class AdminCourseContentService {
   private baseUrl = `${API_BASE_URL}/api/admin/course-content`;
 
-  constructor(private http: HttpClient, private adminAuth: AdminAuthService) {}
-
-  private getAuthHeaders(): HttpHeaders {
-    const token = this.adminAuth.getToken();
-    let headers = new HttpHeaders();
-    if (token) headers = headers.set('Authorization', `Bearer ${token}`);
-    return headers;
-  }
+  constructor(private http: HttpClient) {}
 
   // =============================================
   // GET COURSE CONTENT
   // =============================================
   getCourseContent(courseId: number): Observable<CourseContentDto> {
-    return this.http.get<CourseContentDto>(`${this.baseUrl}/${courseId}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.get<CourseContentDto>(`${this.baseUrl}/${courseId}`);
   }
 
   // =============================================
@@ -66,24 +57,18 @@ export class AdminCourseContentService {
     courseId: number,
     body: { title: string; order: number; forceInsert?: boolean }
   ): Observable<CourseContentResponse> {
-    return this.http.post<CourseContentResponse>(`${this.baseUrl}/${courseId}/sections`, body, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.post<CourseContentResponse>(`${this.baseUrl}/${courseId}/sections`, body);
   }
 
   updateSection(
     sectionId: number,
     body: { title: string; order: number }
   ): Observable<CourseContentResponse> {
-    return this.http.put<CourseContentResponse>(`${this.baseUrl}/sections/${sectionId}`, body, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.put<CourseContentResponse>(`${this.baseUrl}/sections/${sectionId}`, body);
   }
 
   deleteSection(sectionId: number): Observable<CourseContentResponse> {
-    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/sections/${sectionId}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/sections/${sectionId}`);
   }
 
   // =============================================
@@ -95,10 +80,7 @@ export class AdminCourseContentService {
   ): Observable<CourseContentResponse> {
     return this.http.post<CourseContentResponse>(
       `${this.baseUrl}/sections/${sectionId}/lessons`,
-      body,
-      {
-        headers: this.getAuthHeaders(),
-      }
+      body
     );
   }
 
@@ -106,15 +88,11 @@ export class AdminCourseContentService {
     lessonId: number,
     body: { title: string; order: number }
   ): Observable<CourseContentResponse> {
-    return this.http.put<CourseContentResponse>(`${this.baseUrl}/lessons/${lessonId}`, body, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.put<CourseContentResponse>(`${this.baseUrl}/lessons/${lessonId}`, body);
   }
 
   deleteLesson(lessonId: number): Observable<CourseContentResponse> {
-    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/lessons/${lessonId}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/lessons/${lessonId}`);
   }
 
   // =============================================
@@ -126,16 +104,11 @@ export class AdminCourseContentService {
 
     return this.http.post<CourseContentResponse>(
       `${this.baseUrl}/lessons/${lessonId}/upload`,
-      form,
-      {
-        headers: this.getAuthHeaders(),
-      }
+      form
     );
   }
 
   deleteLessonFile(fileId: number): Observable<CourseContentResponse> {
-    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/files/${fileId}`, {
-      headers: this.getAuthHeaders(),
-    });
+    return this.http.delete<CourseContentResponse>(`${this.baseUrl}/files/${fileId}`);
   }
 }

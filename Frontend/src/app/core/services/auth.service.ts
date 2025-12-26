@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { UserStoreService } from './user-store.service';
 import { API_BASE_URL } from '../config/api.config';
-import { getTokenExpiry, isTokenExpired } from '../utils/auth-token';
+
 // ============================
 //       واجهات البيانات
 // ============================
@@ -62,6 +62,7 @@ export interface UpdateAccountSettingsRequest {
 export class AuthService {
   private apiUrl = `${API_BASE_URL}/api/auth`;
   private readonly tokenStorageKey = 'auth_token';
+  private readonly adminTokenStorageKey = 'adminToken';
   // ✅ هنا التعديل المهم
   currentUser$!: Observable<User | null>;
   isLoggedIn$!: Observable<boolean>;
@@ -70,8 +71,14 @@ export class AuthService {
   authState$: Observable<AuthState>;
   isAuthenticated$: Observable<boolean>;
 
+  private adminAuthStateSubject: BehaviorSubject<AuthState>;
+  adminAuthState$: Observable<AuthState>;
+  adminIsAuthenticated$: Observable<boolean>;
+
   private logoutInProgress = false;
   private expiryTimeoutId?: ReturnType<typeof setTimeout>;
+  private adminLogoutInProgress = false;
+  private adminExpiryTimeoutId?: ReturnType<typeof setTimeout>;
 
   constructor(
     private http: HttpClient,
@@ -88,8 +95,14 @@ export class AuthService {
     this.authState$ = this.authStateSubject.asObservable();
     this.isAuthenticated$ = this.authState$.pipe(map((state) => state.isAuthenticated));
 
+    const storedAdminToken = this.getStoredAdminToken();
+    const adminInitialState = this.buildAuthState(storedAdminToken);
+    this.adminAuthStateSubject = new BehaviorSubject<AuthState>(adminInitialState);
+    this.adminAuthState$ = this.adminAuthStateSubject.asObservable();
+    this.adminIsAuthenticated$ = this.adminAuthState$.pipe(map((state) => state.isAuthenticated));
+
     if (initialState.isAuthenticated && initialState.expiresAt) {
-      this.scheduleExpiry(initialState.expiresAt);
+      this.scheduleExpiry(initialState.expiresAt, 'user');
     }
 
     if (!initialState.isAuthenticated && storedToken) {
@@ -97,6 +110,16 @@ export class AuthService {
       this.userStore.setGuest();
       if (initialState.isExpired) {
         this.logout({ redirectToLogin: true });
+      }
+    }
+    if (adminInitialState.isAuthenticated && adminInitialState.expiresAt) {
+      this.scheduleExpiry(adminInitialState.expiresAt, 'admin');
+    }
+
+    if (!adminInitialState.isAuthenticated && storedAdminToken) {
+      this.clearStoredAdminToken();
+      if (adminInitialState.isExpired) {
+        this.logoutAdmin({ redirectToLogin: true });
       }
     }
   }
@@ -214,7 +237,7 @@ export class AuthService {
 
     this.logoutInProgress = true;
     this.clearStoredToken();
-    this.clearExpiryTimer();
+    this.clearExpiryTimer('user');
     this.authStateSubject.next({
       token: null,
       expiresAt: null,
@@ -246,10 +269,6 @@ export class AuthService {
     return this.userStore.getUser();
   }
 
-  getToken(): string | null {
-    return this.authStateSubject.value.token;
-  }
-
   setUser(user: User | null, saveToStorage: boolean = true): void {
     this.userStore.setUser(user ?? null, saveToStorage);
   }
@@ -278,31 +297,67 @@ export class AuthService {
     return token;
   }
 
+  getAdminAccessToken(): string | null {
+    const token = this.adminAuthStateSubject.value.token;
+    if (!token) {
+      return null;
+    }
+
+    if (isTokenExpired(token)) {
+      this.handleAdminAuthFailure();
+      return null;
+    }
+
+    return token;
+  }
+
   private setToken(token: string): void {
     const nextState = this.buildAuthState(token);
     this.storeToken(token);
     this.authStateSubject.next(nextState);
 
     if (nextState.isAuthenticated && nextState.expiresAt) {
-      this.scheduleExpiry(nextState.expiresAt);
+      this.scheduleExpiry(nextState.expiresAt, 'user');
     } else {
-      this.clearExpiryTimer();
+      this.clearExpiryTimer('user');
     }
   }
 
-  private scheduleExpiry(expiresAt: number): void {
-    this.clearExpiryTimer();
+  private setAdminToken(token: string): void {
+    const nextState = this.buildAuthState(token);
+    this.storeAdminToken(token);
+    this.adminAuthStateSubject.next(nextState);
 
-    const timeoutMs = Math.max(0, expiresAt - Date.now());
-    this.expiryTimeoutId = setTimeout(() => {
-      this.handleAuthFailure();
-    }, timeoutMs);
+    if (nextState.isAuthenticated && nextState.expiresAt) {
+      this.scheduleExpiry(nextState.expiresAt, 'admin');
+    } else {
+      this.clearExpiryTimer('admin');
+    }
   }
 
-  private clearExpiryTimer(): void {
-    if (this.expiryTimeoutId) {
+  private scheduleExpiry(expiresAt: number, scope: 'user' | 'admin'): void {
+    this.clearExpiryTimer(scope);
+
+    const timeoutMs = Math.max(0, expiresAt - Date.now());
+    if (scope === 'user') {
+      this.expiryTimeoutId = setTimeout(() => {
+        this.handleAuthFailure();
+      }, timeoutMs);
+    } else {
+      this.adminExpiryTimeoutId = setTimeout(() => {
+        this.handleAdminAuthFailure();
+      }, timeoutMs);
+    }
+  }
+
+  private clearExpiryTimer(scope: 'user' | 'admin'): void {
+    if (scope === 'user' && this.expiryTimeoutId) {
       clearTimeout(this.expiryTimeoutId);
       this.expiryTimeoutId = undefined;
+    }
+    if (scope === 'admin' && this.adminExpiryTimeoutId) {
+      clearTimeout(this.adminExpiryTimeoutId);
+      this.adminExpiryTimeoutId = undefined;
     }
   }
 
@@ -338,6 +393,62 @@ export class AuthService {
   private clearStoredToken(): void {
     localStorage.removeItem(this.tokenStorageKey);
   }
+
+  private storeAdminToken(token: string): void {
+    localStorage.setItem(this.adminTokenStorageKey, token);
+  }
+
+  private getStoredAdminToken(): string | null {
+    return localStorage.getItem(this.adminTokenStorageKey);
+  }
+
+  private clearStoredAdminToken(): void {
+    localStorage.removeItem(this.adminTokenStorageKey);
+  }
+
+  isAdminAuthenticated(): boolean {
+    return this.adminAuthStateSubject.value.isAuthenticated;
+  }
+
+  handleAdminAuthFailure(): void {
+    if (this.adminAuthStateSubject.value.isAuthenticated) {
+      this.logoutAdmin({ redirectToLogin: true });
+    }
+  }
+
+  loginAdmin(token: string): void {
+    if (token) {
+      this.setAdminToken(token);
+    }
+  }
+
+  logoutAdmin(options?: { redirectToLogin?: boolean }): void {
+    if (this.adminLogoutInProgress) {
+      return;
+    }
+
+    this.adminLogoutInProgress = true;
+    this.clearStoredAdminToken();
+    this.clearExpiryTimer('admin');
+    this.adminAuthStateSubject.next({
+      token: null,
+      expiresAt: null,
+      isAuthenticated: false,
+      isExpired: false,
+    });
+
+    if (options?.redirectToLogin) {
+      const currentUrl = this.router.url;
+      const isAuthRoute = currentUrl.startsWith('/dashboard/login');
+      if (!isAuthRoute) {
+        this.router.navigate(['/dashboard/login']);
+      }
+    }
+
+    setTimeout(() => {
+      this.adminLogoutInProgress = false;
+    }, 0);
+  }
 }
 
 export interface AuthState {
@@ -346,3 +457,40 @@ export interface AuthState {
   isAuthenticated: boolean;
   isExpired: boolean;
 }
+
+interface JwtPayload {
+  exp?: number;
+  [key: string]: unknown;
+}
+
+const decodePayload = (token: string): JwtPayload | null => {
+  try {
+    const payloadSegment = token.split('.')[1];
+    if (!payloadSegment) {
+      return null;
+    }
+
+    const normalized = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    return JSON.parse(atob(padded)) as JwtPayload;
+  } catch {
+    return null;
+  }
+};
+
+const getTokenExpiry = (token: string): number | null => {
+  const payload = decodePayload(token);
+  if (!payload?.exp) {
+    return null;
+  }
+
+  return payload.exp * 1000;
+};
+
+const isTokenExpired = (token: string): boolean => {
+  const expiry = getTokenExpiry(token);
+  if (!expiry) {
+    return true;
+  }
+  return Date.now() >= expiry;
+};
