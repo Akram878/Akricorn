@@ -242,7 +242,7 @@ namespace Backend.Data
                .HasOne(bf => bf.FileMetadata)
                .WithMany()
                .HasForeignKey(bf => bf.FileMetadataId)
-               .OnDelete(DeleteBehavior.SetNull);
+               .OnDelete(DeleteBehavior.Cascade);
 
             // ==========================================
             // TOOL FILES
@@ -253,11 +253,11 @@ namespace Backend.Data
                 .HasForeignKey(tf => tf.ToolId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<BookFile>()
-               .HasOne(bf => bf.FileMetadata)
-               .WithMany()
-               .HasForeignKey(bf => bf.FileMetadataId)
-               .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<ToolFile>()
+                .HasOne(tf => tf.FileMetadata)
+                .WithMany()
+                .HasForeignKey(tf => tf.FileMetadataId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // ==========================================
             // LearningPathCourse (Course ↔ LearningPath)
@@ -317,7 +317,7 @@ namespace Backend.Data
               .HasOne(f => f.FileMetadata)
               .WithMany()
               .HasForeignKey(f => f.FileMetadataId)
-              .OnDelete(DeleteBehavior.SetNull);
+              .OnDelete(DeleteBehavior.Cascade);
 
             // ========== DONE ==========
         }

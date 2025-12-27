@@ -10,7 +10,6 @@ using System.IO;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.AspNetCore.StaticFiles;
 namespace Backend.Controllers
 {
     [ApiController]
@@ -44,6 +43,9 @@ namespace Backend.Controllers
             if (file == null)
                 return NotFound(new { message = "File not found." });
 
+            if (file.FileMetadata == null || string.IsNullOrWhiteSpace(file.FileMetadata.StoredName) || string.IsNullOrWhiteSpace(file.FileMetadata.MimeType))
+                return StatusCode(500, new { message = "File metadata is missing or incomplete for this book file." });
+
             if (!userContext.IsAdmin)
             {
                 var user = await _context.Users
@@ -65,21 +67,11 @@ namespace Backend.Controllers
 
             var physicalPath = ResolvePhysicalPath(file);
             if (physicalPath == null || !System.IO.File.Exists(physicalPath))
-            {
-                return NotFound(new { message = "File content not found." });
-            }
+                return StatusCode(500, new { message = "File metadata exists but the stored file is missing." });
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-            var contentType = file.FileMetadata?.MimeType ?? file.ContentType;
-            if (string.IsNullOrWhiteSpace(contentType))
-            {
-                var provider = new FileExtensionContentTypeProvider();
-                if (!provider.TryGetContentType(physicalPath, out contentType))
-                {
-                    contentType = "application/octet-stream";
-                }
-            }
+            var contentType = file.FileMetadata.MimeType;
 
             _logger.LogInformation("Book file request: userId={UserId}, fileId={FileId}, bookId={BookId}", userContext.UserId, fileId, file.BookId);
 
@@ -88,32 +80,11 @@ namespace Backend.Controllers
 
         private string? ResolvePhysicalPath(BookFile file)
         {
-            var storedFileName = file.FileMetadata?.StoredName ?? TryExtractFileName(file.FileUrl);
-            if (string.IsNullOrEmpty(storedFileName))
+            if (file.FileMetadata == null || string.IsNullOrWhiteSpace(file.FileMetadata.StoredName))
                 return null;
 
-            var primaryFolder = BookStorageHelper.GetFilesFolder(file.BookId);
-            var primaryPath = Path.Combine(primaryFolder, storedFileName);
-            if (System.IO.File.Exists(primaryPath))
-                return primaryPath;
-
-            var legacyFolder = BookStorageHelper.GetLegacyFilesFolder(file.BookId);
-            var legacyPath = Path.Combine(legacyFolder, storedFileName);
-            if (System.IO.File.Exists(legacyPath))
-                return legacyPath;
-
-            return primaryPath;
-        }
-
-        private static string? TryExtractFileName(string? fileUrl)
-        {
-            if (string.IsNullOrWhiteSpace(fileUrl))
-                return null;
-
-            if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
-                return Path.GetFileName(uri.LocalPath);
-
-            return Path.GetFileName(fileUrl);
+            var folder = BookStorageHelper.GetFilesFolder(file.BookId);
+            return Path.Combine(folder, file.FileMetadata.StoredName);
         }
 
         private UserRequestContext ResolveUserContext()

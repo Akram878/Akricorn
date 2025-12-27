@@ -104,7 +104,7 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FileMetadataId")
+                    b.Property<int>("FileMetadataId")
                         .HasColumnType("int");
 
                     b.Property<string>("FileName")
@@ -250,7 +250,7 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FileMetadataId")
+                    b.Property<int>("FileMetadataId")
                         .HasColumnType("int");
 
                     b.Property<string>("FileName")
@@ -587,7 +587,7 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FileMetadataId")
+                    b.Property<int>("FileMetadataId")
                         .HasColumnType("int");
 
                     b.Property<string>("FileName")
@@ -679,6 +679,9 @@ namespace Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsFromCourse")
                         .HasColumnType("bit");
@@ -804,7 +807,8 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.FileMetadata", "FileMetadata")
                         .WithMany()
                         .HasForeignKey("FileMetadataId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Book");
 
@@ -846,7 +850,8 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.FileMetadata", "FileMetadata")
                         .WithMany()
                         .HasForeignKey("FileMetadataId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Backend.Models.CourseLesson", "Lesson")
                         .WithMany("Files")
@@ -949,7 +954,9 @@ namespace Backend.Migrations
                 {
                     b.HasOne("Backend.Models.FileMetadata", "FileMetadata")
                         .WithMany()
-                        .HasForeignKey("FileMetadataId");
+                        .HasForeignKey("FileMetadataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Backend.Models.Tool", "Tool")
                         .WithMany("Files")

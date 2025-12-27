@@ -318,48 +318,23 @@ namespace Backend.Controllers
             if (entity == null)
                 return NotFound(new { message = "File not found." });
 
+            if (entity.FileMetadata == null || string.IsNullOrWhiteSpace(entity.FileMetadata.StoredName))
+                return StatusCode(500, new { message = "File metadata is missing or incomplete for this tool file." });
+
             var folder = ToolStorageHelper.GetFilesFolder(entity.ToolId);
-            var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
+            var fileName = entity.FileMetadata.StoredName;
 
-            if (!string.IsNullOrEmpty(fileName))
-            {
-                var physicalPath = Path.Combine(folder, fileName);
-                if (System.IO.File.Exists(physicalPath))
-                    System.IO.File.Delete(physicalPath);
+            var physicalPath = Path.Combine(folder, fileName);
+            if (!System.IO.File.Exists(physicalPath))
+                return StatusCode(500, new { message = "File metadata exists but the stored file is missing." });
 
-                else
-                {
-                    var legacyFolder = ToolStorageHelper.GetLegacyFilesFolder(entity.ToolId);
-                    var legacyPath = Path.Combine(legacyFolder, fileName);
-                    if (System.IO.File.Exists(legacyPath))
-                        System.IO.File.Delete(legacyPath);
-                }
-            }
+            System.IO.File.Delete(physicalPath);
 
             _context.ToolFiles.Remove(entity);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "File deleted." });
         }
-
-        private static string? TryExtractFileName(string fileUrl)
-        {
-            if (string.IsNullOrWhiteSpace(fileUrl))
-                return null;
-
-            try
-            {
-                if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
-                    return Path.GetFileName(uri.AbsolutePath);
-
-                return Path.GetFileName(fileUrl);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
 
         private static ToolDto MapToDto(Tool tool)
         {

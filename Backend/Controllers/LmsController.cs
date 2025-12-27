@@ -399,11 +399,15 @@ namespace Backend.Controllers
             if (book == null)
                 return NotFound(new { message = "Book not found." });
 
-            var ownsBook = await _context.UserBooks
-                .AnyAsync(ub => ub.UserId == userId.Value && ub.BookId == bookId);
+            var userBook = await _context.UserBooks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ub => ub.UserId == userId.Value && ub.BookId == bookId);
 
-            if (!ownsBook)
+            if (userBook == null)
                 return StatusCode(403, new { message = "You must own this book before rating." });
+
+            if (!userBook.CompletedAt.HasValue)
+                return BadRequest(new { message = "Book must be completed before rating." });
 
             var alreadyRated = await _context.BookRatings
                 .AnyAsync(r => r.UserId == userId.Value && r.BookId == bookId);

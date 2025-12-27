@@ -12,7 +12,7 @@
 
         public long SizeBytes { get; set; }
         public string ContentType { get; set; }
-        public int? FileMetadataId { get; set; }
+        public int FileMetadataId { get; set; }
         public FileMetadata FileMetadata { get; set; }
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
     }

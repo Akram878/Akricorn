@@ -328,6 +328,7 @@ namespace Backend.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     BookId = table.Column<int>(type: "int", nullable: false),
                     GrantedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETUTCDATE()"),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsFromCourse = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
@@ -479,7 +480,7 @@ namespace Backend.Migrations
                     FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SizeBytes = table.Column<long>(type: "bigint", nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileMetadataId = table.Column<int>(type: "int", nullable: true)
+                    FileMetadataId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -495,7 +496,7 @@ namespace Backend.Migrations
                         column: x => x.FileMetadataId,
                         principalTable: "FileMetadata",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -509,7 +510,7 @@ namespace Backend.Migrations
                     FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SizeBytes = table.Column<long>(type: "bigint", nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileMetadataId = table.Column<int>(type: "int", nullable: true)
+                    FileMetadataId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -518,7 +519,8 @@ namespace Backend.Migrations
                         name: "FK_ToolFiles_FileMetadata_FileMetadataId",
                         column: x => x.FileMetadataId,
                         principalTable: "FileMetadata",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ToolFiles_Tools_ToolId",
                         column: x => x.ToolId,
@@ -538,7 +540,7 @@ namespace Backend.Migrations
                     FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SizeBytes = table.Column<long>(type: "bigint", nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileMetadataId = table.Column<int>(type: "int", nullable: true),
+                    FileMetadataId = table.Column<int>(type: "int", nullable: false),
                     UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -555,7 +557,7 @@ namespace Backend.Migrations
                         column: x => x.FileMetadataId,
                         principalTable: "FileMetadata",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

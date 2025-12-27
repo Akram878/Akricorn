@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.IO;
-using Microsoft.AspNetCore.StaticFiles;
 namespace Backend.Controllers
 {
     [ApiController]
@@ -36,11 +35,14 @@ namespace Backend.Controllers
             var file = await _context.CourseLessonFiles
                 .Include(f => f.Lesson)
                     .ThenInclude(l => l.Section)
-                      .Include(f => f.FileMetadata)
+                .Include(f => f.FileMetadata)
                 .FirstOrDefaultAsync(f => f.Id == fileId);
 
             if (file == null)
                 return NotFound(new { message = "File not found." });
+
+            if (file.FileMetadata == null || string.IsNullOrWhiteSpace(file.FileMetadata.StoredName) || string.IsNullOrWhiteSpace(file.FileMetadata.MimeType))
+                return StatusCode(500, new { message = "File metadata is missing or incomplete for this lesson file." });
 
             var courseId = file.Lesson.Section.CourseId;
 
@@ -66,19 +68,11 @@ namespace Backend.Controllers
             var physicalPath = ResolvePhysicalPath(file);
             if (physicalPath == null || !System.IO.File.Exists(physicalPath))
             {
-                return NotFound(new { message = "File content not found." });
+                return StatusCode(500, new { message = "File metadata exists but the stored file is missing." });
             }
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var contentType = file.FileMetadata?.MimeType ?? file.ContentType;
-            if (string.IsNullOrWhiteSpace(contentType))
-            {
-                var provider = new FileExtensionContentTypeProvider();
-                if (!provider.TryGetContentType(physicalPath, out contentType))
-                {
-                    contentType = "application/octet-stream";
-                }
-            }
+            var contentType = file.FileMetadata.MimeType;
             _logger.LogInformation("Lesson file request: userId={UserId}, fileId={FileId}, courseId={CourseId}", userContext.UserId, fileId, courseId);
 
             return File(stream, contentType, enableRangeProcessing: true);
@@ -91,34 +85,10 @@ namespace Backend.Controllers
             var courseId = section.CourseId;
             var lessonFolder = CourseStorageHelper.GetLessonFolder(courseId, section.Id, lesson.Id);
 
-            var storedFileName = file.FileMetadata?.StoredName ?? TryExtractFileName(file.FileUrl);
-            if (string.IsNullOrEmpty(storedFileName))
+            if (file.FileMetadata == null || string.IsNullOrWhiteSpace(file.FileMetadata.StoredName))
                 return null;
 
-            var primaryPath = Path.Combine(lessonFolder, storedFileName);
-            if (System.IO.File.Exists(primaryPath))
-                return primaryPath;
-
-            var legacyFolder = Path.Combine(
-                CourseStorageHelper.GetLegacyContentFolder(courseId),
-                $"section-{section.Id}",
-                $"lesson-{lesson.Id}");
-            var legacyPath = Path.Combine(legacyFolder, storedFileName);
-            if (System.IO.File.Exists(legacyPath))
-                return legacyPath;
-
-            return primaryPath;
-        }
-
-        private static string? TryExtractFileName(string? fileUrl)
-        {
-            if (string.IsNullOrWhiteSpace(fileUrl))
-                return null;
-
-            if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
-                return Path.GetFileName(uri.LocalPath);
-
-            return Path.GetFileName(fileUrl);
+            return Path.Combine(lessonFolder, file.FileMetadata.StoredName);
         }
 
         private UserRequestContext ResolveUserContext()
