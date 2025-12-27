@@ -72,8 +72,13 @@ namespace Backend.Controllers
             var issuer = jwtSection["Issuer"];
             var audience = jwtSection["Audience"];
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(issuer) || string.IsNullOrWhiteSpace(audience))
+            {
+                throw new InvalidOperationException("Jwt settings (Key, Issuer, Audience) must be configured.");
+            }
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
             {
@@ -83,15 +88,18 @@ namespace Backend.Controllers
                 new Claim("IsAdmin", "true")
             };
 
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(4),
-                signingCredentials: credentials
-            );
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(4),
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = credentials
+            };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.CreateToken(tokenDescriptor);
+            return handler.WriteToken(token);
         }
     }
 

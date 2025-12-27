@@ -308,10 +308,14 @@
               "RelativeDocumentMoniker": "Data\\AdminSeeder.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Data\\AdminSeeder.cs",
               "RelativeToolTip": "Data\\AdminSeeder.cs",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAUwBwAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAQwBcAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-25T14:16:33.144Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",
@@ -324,10 +328,6 @@
               "ViewState": "AgIAAH0BAAAAAAAAAAAkwIcBAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-06T05:51:11.127Z"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",

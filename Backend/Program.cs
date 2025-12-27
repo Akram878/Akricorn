@@ -111,7 +111,8 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = signingKey
+            IssuerSigningKey = signingKey,
+            ClockSkew = TimeSpan.Zero
         };
 
         // أعد كتابة رد الـ 401 برسالة أوضح بدل الرد الافتراضي الفارغ
@@ -140,6 +141,12 @@ builder.Services
                     context.Token = tokenValue.ToString();
                 }
 
+                return Task.CompletedTask;
+            },
+
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("ADMIN TOKEN VALIDATED");
                 return Task.CompletedTask;
             },
 
