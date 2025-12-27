@@ -11,6 +11,10 @@ export interface AdminLearningPathDto {
 
   thumbnailUrl?: string;
   courseIds: number[];
+  price?: number;
+  discount?: number;
+  rating?: number;
+  ratingCount?: number;
 }
 
 export interface CreateLearningPathRequest {

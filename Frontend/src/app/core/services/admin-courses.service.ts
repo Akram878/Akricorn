@@ -12,6 +12,7 @@ export interface AdminCourseDto {
   hours: number;
   category: string;
   rating: number;
+  ratingCount?: number;
   thumbnailUrl?: string | null;
 
   pathIds: number[];

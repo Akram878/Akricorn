@@ -13,6 +13,7 @@ export interface AdminUserDto {
   role: string;
   isActive: boolean;
   canEditBirthDate: boolean;
+  createdAt?: string;
 }
 
 export interface UpdateUserRoleRequest {

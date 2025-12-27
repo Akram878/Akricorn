@@ -57,7 +57,9 @@ export class DashboardUserDetailComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
     this.http
-      .get<UserOverview>(`${API_BASE_URL}/api/admin/users/${this.userId}/lms-overview`)
+      .get<UserOverview>(`${API_BASE_URL}/api/admin/users/${this.userId}/lms-overview`, {
+        withCredentials: true,
+      })
       .subscribe({
         next: (data) => {
           this.overview = data;

@@ -12,6 +12,8 @@ export interface AdminBookDto {
   fileUrl: string;
   thumbnailUrl?: string | null;
   isActive: boolean;
+  rating?: number;
+  ratingCount?: number;
 
   files: BookFileDto[];
 }
@@ -34,6 +36,10 @@ export interface BookFileDto {
   fileUrl: string;
   sizeBytes: number;
   contentType: string;
+  originalName?: string;
+  downloadUrl?: string;
+  size?: number;
+  mimeType?: string;
 }
 
 @Injectable({

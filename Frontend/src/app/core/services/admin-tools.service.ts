@@ -34,6 +34,10 @@ export interface ToolFileDto {
   fileUrl: string;
   sizeBytes: number;
   contentType: string;
+  originalName?: string;
+  downloadUrl?: string;
+  size?: number;
+  mimeType?: string;
 }
 
 @Injectable({

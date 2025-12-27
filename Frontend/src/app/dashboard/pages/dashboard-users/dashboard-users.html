@@ -1,7 +1,10 @@
 <div class="dashboard-users">
   <div class="header-row">
-    <h2>Users</h2>
-    <button class="btn-primary" (click)="loadUsers()">Reload</button>
+    <div>
+      <h2>Users</h2>
+      <span class="subtitle">Manage all platform users.</span>
+    </div>
+    <button class="btn-secondary" (click)="loadUsers()">Reload</button>
   </div>
 
   <div class="status" *ngIf="isLoading">Loading...</div>
@@ -12,11 +15,13 @@
       <tr>
         <th>ID</th>
         <th>Name</th>
-        <th>Contact</th>
         <th>Email</th>
+        <th>Phone</th>
         <th>City</th>
         <th>Role</th>
         <th>Active</th>
+        <th>Birth Edit</th>
+        <th>Created</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -25,20 +30,34 @@
       <tr *ngFor="let u of users">
         <td>{{ u.id }}</td>
         <td>{{ u.name }} {{ u.family }}</td>
-        <td>+{{ u.countryCode }} {{ u.number }}</td>
         <td>{{ u.email }}</td>
+        <td>+{{ u.countryCode }} {{ u.number }}</td>
         <td>{{ u.city }}</td>
-        <td>{{ u.role }}</td>
+        <td>
+          <select
+            [ngModel]="u.role"
+            (ngModelChange)="onRoleChange(u, $event)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
+          </select>
+        </td>
         <td>
           <span [class.badge-active]="u.isActive" [class.badge-inactive]="!u.isActive">
             {{ u.isActive ? 'Active' : 'Inactive' }}
           </span>
         </td>
         <td>
+          <span [class.badge-yes]="u.canEditBirthDate" [class.badge-no]="!u.canEditBirthDate">
+            {{ u.canEditBirthDate ? 'Yes' : 'No' }}
+          </span>
+        </td>
+        <td>{{ u.createdAt ? (u.createdAt | date : 'mediumDate') : '—' }}</td>
+        <td>
           <button class="btn-secondary" (click)="onToggle(u)">
             {{ u.isActive ? 'Disable' : 'Enable' }}
           </button>
-          <a class="btn-primary" [routerLink]="['/dashboard/users', u.id]">View Details</a>
+          <button class="btn-primary" (click)="goToDetail(u)">View Details</button>
         </td>
       </tr>
     </tbody>
