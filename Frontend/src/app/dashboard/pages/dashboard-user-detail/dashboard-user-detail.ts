@@ -62,7 +62,17 @@ export class DashboardUserDetailComponent implements OnInit {
       })
       .subscribe({
         next: (data) => {
-          this.overview = data;
+          const mappedPaths =
+            data.learningPaths?.map((p: any) => ({
+              id: p.id ?? p.learningPathId ?? p.learningPath?.id,
+              title: p.title ?? p.learningPathTitle ?? p.learningPath?.title ?? 'Learning Path',
+              completionPercent: p.completionPercent ?? 0,
+            })) ?? [];
+
+          this.overview = {
+            ...data,
+            learningPaths: mappedPaths,
+          };
           this.isLoading = false;
         },
         error: () => {

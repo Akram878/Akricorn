@@ -13,9 +13,12 @@ interface AdminLoginRequest {
 }
 
 interface AdminLoginResponse {
-  token: string;
-  username: string;
-  role: string;
+  token?: string;
+  username?: string;
+  role?: string;
+  Token?: string;
+  Username?: string;
+  Role?: string;
 }
 
 @Injectable({
@@ -35,7 +38,10 @@ export class AdminAuthService {
 
     return this.http.post<AdminLoginResponse>(`${this.apiUrl}/login`, body).pipe(
       tap((response) => {
-        this.authService.loginAdmin(response.token);
+        const token = response.token ?? (response as any).Token;
+        if (token) {
+          this.authService.loginAdmin(token);
+        }
       })
     );
   }
