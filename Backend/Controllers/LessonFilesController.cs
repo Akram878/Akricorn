@@ -58,10 +58,9 @@ namespace Backend.Controllers
                 if (!user.IsActive)
                     return StatusCode(403, new { message = "Your account has been disabled." });
 
-                var enrolled = await _context.UserCourses
-                    .AnyAsync(uc => uc.UserId == userContext.UserId && uc.CourseId == courseId);
+                var hasAccess = await HasCourseAccess(userContext.UserId.Value, courseId);
 
-                if (!enrolled)
+                if (!hasAccess)
                     return StatusCode(403, new { message = "You are not enrolled in this course." });
             }
 
@@ -76,6 +75,28 @@ namespace Backend.Controllers
             _logger.LogInformation("Lesson file request: userId={UserId}, fileId={FileId}, courseId={CourseId}", userContext.UserId, fileId, courseId);
 
             return File(stream, contentType, enableRangeProcessing: true);
+        }
+
+        private async Task<bool> HasCourseAccess(int userId, int courseId)
+        {
+            var ownsCourse = await _context.UserCourses
+                .AnyAsync(uc => uc.UserId == userId && uc.CourseId == courseId);
+
+            if (ownsCourse)
+                return true;
+
+            var pathIds = await _context.UserPurchases
+                .Where(up => up.UserId == userId &&
+                             up.PurchaseType == PurchaseType.LearningPath &&
+                             up.LearningPathId != null)
+                .Select(up => up.LearningPathId.Value)
+                .ToListAsync();
+
+            if (pathIds.Count == 0)
+                return false;
+
+            return await _context.LearningPathCourses
+                .AnyAsync(lpc => pathIds.Contains(lpc.LearningPathId) && lpc.CourseId == courseId);
         }
 
         private string? ResolvePhysicalPath(CourseLessonFile file)

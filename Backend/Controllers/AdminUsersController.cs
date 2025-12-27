@@ -68,7 +68,34 @@ namespace Backend.Controllers
             if (u == null)
                 return NotFound(new { message = "User not found." });
 
-            var courseProgress = BuildCourseProgress(u);
+            var courseIds = u.UserCourses.Select(uc => uc.CourseId).Distinct().ToList();
+            var courseProgress = await BuildCourseProgressMap(id, courseIds);
+
+            var activeCourses = new List<AdminUserCourseProgressDto>();
+            var completedCourses = new List<AdminUserCourseProgressDto>();
+
+            foreach (var userCourse in u.UserCourses)
+            {
+                var course = userCourse.Course;
+                courseProgress.TryGetValue(userCourse.CourseId, out var progress);
+                var completionPercent = CalculatePercent(progress.TotalLessons, progress.CompletedLessons);
+
+                var courseDto = new AdminUserCourseProgressDto
+                {
+                    CourseId = course.Id,
+                    CourseTitle = course.Title,
+                    PurchasedAt = userCourse.PurchasedAt,
+                    CompletedAt = progress.CompletedAt ?? userCourse.CompletedAt,
+                    CompletionPercent = completionPercent
+                };
+
+                if (progress.IsCompleted)
+                    completedCourses.Add(courseDto);
+                else if (progress.InProgress || completionPercent > 0)
+                    activeCourses.Add(courseDto);
+                else
+                    activeCourses.Add(courseDto);
+            }
 
             var dto = new AdminUserDetailsDto
             {
@@ -91,8 +118,8 @@ namespace Backend.Controllers
                     LearningPathId = p.LearningPathId,
                     PurchasedAt = p.PurchasedAt
                 }).ToList(),
-                ActiveCourses = courseProgress.Active,
-                CompletedCourses = courseProgress.Completed
+                ActiveCourses = activeCourses,
+                CompletedCourses = completedCourses
             };
 
             return Ok(dto);
@@ -281,42 +308,6 @@ namespace Backend.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User role updated.", role = u.Role });
-        }
-
-        private static (List<AdminUserCourseProgressDto> Active, List<AdminUserCourseProgressDto> Completed) BuildCourseProgress(User user)
-        {
-            var progressByCourse = user.LessonProgresses
-                .GroupBy(p => p.Lesson.Section.CourseId)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var active = new List<AdminUserCourseProgressDto>();
-            var completed = new List<AdminUserCourseProgressDto>();
-
-            foreach (var userCourse in user.UserCourses)
-            {
-                var course = userCourse.Course;
-                var totalLessons = course.TotalLessons;
-                var completedLessons = progressByCourse.TryGetValue(course.Id, out var count) ? count : 0;
-                var completionPercent = totalLessons == 0
-                    ? 0
-                    : Math.Round((double)completedLessons / totalLessons * 100, 2);
-
-                var dto = new AdminUserCourseProgressDto
-                {
-                    CourseId = course.Id,
-                    CourseTitle = course.Title,
-                    PurchasedAt = userCourse.PurchasedAt,
-                    CompletedAt = userCourse.CompletedAt,
-                    CompletionPercent = completionPercent
-                };
-
-                if (userCourse.CompletedAt.HasValue)
-                    completed.Add(dto);
-                else
-                    active.Add(dto);
-            }
-
-            return (active, completed);
         }
 
         private static double CalculatePercent(int total, int completed)

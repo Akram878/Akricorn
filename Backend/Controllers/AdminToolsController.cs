@@ -82,10 +82,16 @@ namespace Backend.Controllers
                 var files = request.Files.Select(f => new ToolFile
                 {
                     ToolId = tool.Id,
-                    FileName = f.FileName,
-                    FileUrl = f.FileUrl,
-                    SizeBytes = f.SizeBytes,
-                    ContentType = f.ContentType
+                    FileMetadata = new FileMetadata
+                    {
+                        OriginalName = f.OriginalName,
+                        StoredName = f.StoredName,
+                        Size = f.Size,
+                        MimeType = f.MimeType ?? "application/octet-stream",
+                        Extension = Path.GetExtension(f.StoredName),
+                        OwnerEntityType = "Tool",
+                        OwnerEntityId = tool.Id
+                    }
                 }).ToList();
 
                 _context.ToolFiles.AddRange(files);
@@ -131,10 +137,16 @@ namespace Backend.Controllers
                 var files = request.Files.Select(f => new ToolFile
                 {
                     ToolId = tool.Id,
-                    FileName = f.FileName,
-                    FileUrl = f.FileUrl,
-                    SizeBytes = f.SizeBytes,
-                    ContentType = f.ContentType
+                    FileMetadata = new FileMetadata
+                    {
+                        OriginalName = f.OriginalName,
+                        StoredName = f.StoredName,
+                        Size = f.Size,
+                        MimeType = f.MimeType ?? "application/octet-stream",
+                        Extension = Path.GetExtension(f.StoredName),
+                        OwnerEntityType = "Tool",
+                        OwnerEntityId = tool.Id
+                    }
                 }).ToList();
 
                 _context.ToolFiles.AddRange(files);
@@ -193,15 +205,15 @@ namespace Backend.Controllers
             var folder = ToolStorageHelper.GetAvatarFolder(id);
             Directory.CreateDirectory(folder);
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var physicalPath = Path.Combine(folder, fileName);
+            var storedName = $"{Guid.NewGuid()}{Path.GetExtension(GetOriginalName(file))}";
+            var physicalPath = Path.Combine(folder, storedName);
 
             using (var stream = new FileStream(physicalPath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            var relativePath = Path.Combine("tools", $"tool-{id}", "avatar", fileName).Replace("\\", "/");
+            var relativePath = Path.Combine("tools", $"tool-{id}", "avatar", storedName).Replace("\\", "/");
             var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
 
             tool.AvatarUrl = url;
@@ -234,22 +246,22 @@ namespace Backend.Controllers
             var folder = ToolStorageHelper.GetFilesFolder(id);
             Directory.CreateDirectory(folder);
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var physicalPath = Path.Combine(folder, fileName);
+            var originalName = GetOriginalName(file);
+            var storedName = $"{Guid.NewGuid()}{Path.GetExtension(originalName)}";
+            var physicalPath = Path.Combine(folder, storedName);
 
             using (var stream = new FileStream(physicalPath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-
-            var extension = Path.GetExtension(file.FileName);
+            var extension = Path.GetExtension(originalName);
             var metadata = new FileMetadata
             {
-                OriginalName = file.FileName,
-                StoredName = fileName,
+                OriginalName = originalName,
+                StoredName = storedName,
                 Size = file.Length,
-                MimeType = file.ContentType ?? "application/octet-stream",
+                MimeType = GetMime(file),
                 Extension = extension,
                 OwnerEntityType = "Tool",
                 OwnerEntityId = id
@@ -260,17 +272,13 @@ namespace Backend.Controllers
             var newFile = new ToolFile
             {
                 ToolId = id,
-                FileName = file.FileName,
-                FileUrl = fileName,
-                SizeBytes = file.Length,
-                ContentType = file.ContentType ?? "application/octet-stream",
                 FileMetadata = metadata
             };
 
             _context.ToolFiles.Add(newFile);
             await _context.SaveChangesAsync();
 
-            var fileAccessUrl = BuildToolFileUrl(newFile.Id);
+            var fileAccessUrl = BuildToolDownloadUrl(newFile.Id);
             return Ok(new { message = "File uploaded.", fileId = newFile.Id, url = fileAccessUrl });
         }
 
@@ -364,10 +372,11 @@ namespace Backend.Controllers
                 Files = files.Select(f => new ToolFileDto
                 {
                     Id = f.Id,
-                    FileName = f.FileMetadata.OriginalName,
-                    FileUrl = BuildToolFileUrlStatic(f.Id),
-                    SizeBytes = f.FileMetadata.Size,
-                    ContentType = f.FileMetadata.MimeType
+                    OriginalName = f.FileMetadata.OriginalName,
+                    StoredName = f.FileMetadata.StoredName,
+                    DownloadUrl = BuildToolDownloadUrlStatic(f.Id),
+                    Size = f.FileMetadata.Size,
+                    MimeType = f.FileMetadata.MimeType
                 }).ToList()
             };
         }
@@ -387,14 +396,38 @@ namespace Backend.Controllers
             return Ok(new { message = "Tool status changed.", isActive = tool.IsActive });
         }
 
-        private static string BuildToolFileUrlStatic(int fileId)
+        private static string BuildToolDownloadUrlStatic(int fileId)
         {
             return $"/api/admin/tools/files/{fileId}";
         }
 
-        private string BuildToolFileUrl(int fileId)
+        private string BuildToolDownloadUrl(int fileId)
         {
             return Url.Content($"/api/admin/tools/files/{fileId}");
+        }
+
+        private static string GetOriginalName(IFormFile file)
+        {
+            var header = file?.ContentDisposition ?? string.Empty;
+            var token = "filename=\"";
+            var start = header.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+            if (start >= 0)
+            {
+                start += token.Length;
+                var end = header.IndexOf("\"", start, StringComparison.OrdinalIgnoreCase);
+                if (end > start)
+                    return header[start..end];
+            }
+
+            return file?.Name ?? string.Empty;
+        }
+
+        private static string GetMime(IFormFile file)
+        {
+            if (file?.Headers != null && file.Headers.TryGetValue("Content-Type", out var values) && values.Count > 0)
+                return values[0];
+
+            return "application/octet-stream";
         }
     }
 
@@ -439,9 +472,10 @@ namespace Backend.Controllers
     public class ToolFileDto
     {
         public int Id { get; set; }
-        public string FileName { get; set; }
-        public string FileUrl { get; set; }
-        public long SizeBytes { get; set; }
-        public string ContentType { get; set; }
+        public string OriginalName { get; set; }
+        public string StoredName { get; set; }
+        public string DownloadUrl { get; set; }
+        public long Size { get; set; }
+        public string MimeType { get; set; }
     }
 }
