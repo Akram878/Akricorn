@@ -31,6 +31,11 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CourseDto>>> GetAll()
         {
+            var ratingStats = await _context.CourseRatings
+                .GroupBy(r => r.CourseId)
+                .Select(g => new { CourseId = g.Key, Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
+                .ToDictionaryAsync(x => x.CourseId, x => x);
+
             var result = await _context.Courses
                 .Include(c => c.LearningPathCourses)
                 .Select(c => new CourseDto
@@ -42,7 +47,8 @@ namespace Backend.Controllers
                     IsActive = c.IsActive,
                     Hours = c.Hours,
                     Category = c.Category,
-                    Rating = c.Rating,
+                    Rating = ratingStats.TryGetValue(c.Id, out var stats) ? stats.Average : c.Rating,
+                    RatingCount = ratingStats.TryGetValue(c.Id, out var stats2) ? stats2.Count : 0,
                     ThumbnailUrl = c.ThumbnailUrl,
                     PathIds = c.LearningPathCourses
                         .Select(lp => lp.LearningPathId)
@@ -66,6 +72,12 @@ namespace Backend.Controllers
             if (course == null)
                 return NotFound(new { message = "Course not found." });
 
+            var ratingStats = await _context.CourseRatings
+                .Where(r => r.CourseId == id)
+                .GroupBy(r => r.CourseId)
+                .Select(g => new { Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
+                .FirstOrDefaultAsync();
+
             var dto = new CourseDto
             {
                 Id = course.Id,
@@ -75,7 +87,8 @@ namespace Backend.Controllers
                 IsActive = course.IsActive,
                 Hours = course.Hours,
                 Category = course.Category,
-                Rating = course.Rating,
+                Rating = ratingStats?.Average ?? course.Rating,
+                RatingCount = ratingStats?.Count ?? 0,
                 ThumbnailUrl = course.ThumbnailUrl,
                 PathIds = course.LearningPathCourses
                     .Select(lp => lp.LearningPathId)
@@ -340,6 +353,7 @@ namespace Backend.Controllers
             public int Hours { get; set; }
             public string Category { get; set; }
             public double Rating { get; set; }
+            public int RatingCount { get; set; }
             public string ThumbnailUrl { get; set; }
             public List<int> PathIds { get; set; } = new();
         }

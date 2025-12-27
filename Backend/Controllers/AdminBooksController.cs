@@ -37,6 +37,11 @@ namespace Backend.Controllers
         {
             try
             {
+                var ratingStats = await _context.BookRatings
+                    .GroupBy(r => r.BookId)
+                    .Select(g => new { BookId = g.Key, Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
+                    .ToDictionaryAsync(x => x.BookId, x => x);
+
                 var books = await ExecuteWithMigrationRetry(async () =>
                 {
                     return await _context.Books
@@ -48,7 +53,7 @@ namespace Backend.Controllers
                 });
 
                 var result = (books ?? new List<Book>())
-                             .Select(book => MapToDto(book))
+                             .Select(book => MapToDto(book, ratingStats.TryGetValue(book.Id, out var stats) ? stats : null))
                              .ToList();
 
                 return Ok(result);
@@ -93,7 +98,13 @@ namespace Backend.Controllers
                 if (book == null)
                     return NotFound(new { message = "Book not found." });
 
-                return Ok(MapToDto(book));
+                var ratingStats = await _context.BookRatings
+                    .Where(r => r.BookId == id)
+                    .GroupBy(r => r.BookId)
+                    .Select(g => new { Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
+                    .FirstOrDefaultAsync();
+
+                return Ok(MapToDto(book, ratingStats));
             }
             catch (SqlException ex)
             {
@@ -464,7 +475,7 @@ namespace Backend.Controllers
                         await _context.SaveChangesAsync();
                     });
 
-                    var dto = MapToDto(book, newFile);
+                    var dto = MapToDto(book, null, newFile);
 
                     var fileAccessUrl = BuildBookFileUrl(newFile.Id);
                     return Ok(new { message = "File uploaded.", fileId = newFile.Id, url = fileAccessUrl, book = dto });
@@ -577,7 +588,7 @@ namespace Backend.Controllers
             return null;
         }
 
-        private static BookDto MapToDto(Book book, BookFile? extraFile = null)
+        private static BookDto MapToDto(Book book, dynamic? ratingStats = null, BookFile? extraFile = null)
         {
             var files = book.Files?.ToList() ?? new List<BookFile>();
             if (extraFile != null && files.All(f => f.Id != extraFile.Id))
@@ -593,6 +604,8 @@ namespace Backend.Controllers
                 FileUrl = primaryFile != null ? BuildBookFileUrlStatic(primaryFile.Id) : string.Empty,
                 ThumbnailUrl = book.ThumbnailUrl,
                 IsActive = book.IsActive,
+                Rating = ratingStats?.Average ?? 0,
+                RatingCount = ratingStats?.Count ?? 0,
                 Files = files.Select(f => new BookFileDto
                 {
                     Id = f.Id,
@@ -686,6 +699,8 @@ namespace Backend.Controllers
         public string FileUrl { get; set; }
         public string? ThumbnailUrl { get; set; }
         public bool IsActive { get; set; }
+        public double Rating { get; set; }
+        public int RatingCount { get; set; }
         public List<BookFileDto> Files { get; set; } = new();
     }
 

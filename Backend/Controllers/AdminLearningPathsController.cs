@@ -28,6 +28,11 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LearningPathDto>>> GetAll()
         {
+            var ratingStats = await _context.LearningPathRatings
+                .GroupBy(r => r.LearningPathId)
+                .Select(g => new { LearningPathId = g.Key, Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
+                .ToDictionaryAsync(x => x.LearningPathId, x => x);
+
             var paths = await _context.LearningPaths
                 .Include(lp => lp.LearningPathCourses)
                 .ToListAsync();
@@ -40,7 +45,8 @@ namespace Backend.Controllers
                 IsActive = lp.IsActive,
 
                 Price = lp.Price,
-                Rating = lp.Rating,
+                Rating = ratingStats.TryGetValue(lp.Id, out var stats) ? stats.Average : lp.Rating,
+                RatingCount = ratingStats.TryGetValue(lp.Id, out var stats2) ? stats2.Count : 0,
                 Discount = lp.Discount,
 
                 ThumbnailUrl = lp.ThumbnailUrl,
@@ -67,6 +73,12 @@ namespace Backend.Controllers
             if (path == null)
                 return NotFound(new { message = "Learning path not found." });
 
+            var ratingStats = await _context.LearningPathRatings
+                .Where(r => r.LearningPathId == id)
+                .GroupBy(r => r.LearningPathId)
+                .Select(g => new { Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
+                .FirstOrDefaultAsync();
+
             var dto = new LearningPathDto
             {
                 Id = path.Id,
@@ -75,7 +87,8 @@ namespace Backend.Controllers
                 IsActive = path.IsActive,
 
                 Price = path.Price,
-                Rating = path.Rating,
+                Rating = ratingStats?.Average ?? path.Rating,
+                RatingCount = ratingStats?.Count ?? 0,
                 Discount = path.Discount,
 
                 ThumbnailUrl = path.ThumbnailUrl,
@@ -268,6 +281,7 @@ namespace Backend.Controllers
 
         public decimal Price { get; set; }
         public double Rating { get; set; }
+        public int RatingCount { get; set; }
         public decimal Discount { get; set; }
 
         public string ThumbnailUrl { get; set; }

@@ -83,6 +83,24 @@ namespace Backend.Controllers
 
             _context.UserCourses.Add(userCourse);
 
+            var hasPurchase = await _context.UserPurchases
+                .AnyAsync(up => up.UserId == userId.Value &&
+                                up.PurchaseType == PurchaseType.Course &&
+                                up.CourseId == course.Id);
+
+            if (!hasPurchase)
+            {
+                var userPurchase = new UserPurchase
+                {
+                    UserId = userId.Value,
+                    PurchaseType = PurchaseType.Course,
+                    CourseId = course.Id,
+                    PurchasedAt = DateTime.UtcNow
+                };
+
+                _context.UserPurchases.Add(userPurchase);
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new

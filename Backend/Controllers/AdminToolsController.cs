@@ -286,27 +286,22 @@ namespace Backend.Controllers
             if (entity == null)
                 return NotFound(new { message = "File not found." });
 
-            var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
-          
-            if (string.IsNullOrEmpty(fileName))
-                return NotFound(new { message = "File content not found." });
+            if (entity.FileMetadata == null ||
+                string.IsNullOrWhiteSpace(entity.FileMetadata.StoredName) ||
+                string.IsNullOrWhiteSpace(entity.FileMetadata.MimeType))
+            {
+                return StatusCode(500, new { message = "File metadata is missing or incomplete for this tool file." });
+            }
+
+            var fileName = entity.FileMetadata.StoredName;
 
             var folder = ToolStorageHelper.GetFilesFolder(entity.ToolId);
             var physicalPath = Path.Combine(folder, fileName);
             if (!System.IO.File.Exists(physicalPath))
-            {
-                var legacyFolder = ToolStorageHelper.GetLegacyFilesFolder(entity.ToolId);
-                var legacyPath = Path.Combine(legacyFolder, fileName);
-                if (!System.IO.File.Exists(legacyPath))
-                    return NotFound(new { message = "File content not found." });
-
-                physicalPath = legacyPath;
-            }
+                return StatusCode(500, new { message = "File metadata exists but the stored file is missing." });
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var contentType = string.IsNullOrWhiteSpace(entity.FileMetadata?.MimeType)
-              ? (string.IsNullOrWhiteSpace(entity.ContentType) ? "application/octet-stream" : entity.ContentType)
-              : entity.FileMetadata.MimeType;
+            var contentType = entity.FileMetadata.MimeType;
 
             return File(stream, contentType, enableRangeProcessing: true);
         }
