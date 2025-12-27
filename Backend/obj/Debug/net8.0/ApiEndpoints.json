@@ -843,7 +843,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "Backend.Controllers.AdminUserDto",
+        "Type": "Backend.Controllers.AdminUserDetailsDto",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -1150,6 +1150,27 @@
     "Parameters": [
       {
         "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "CompleteLesson",
+    "RelativePath": "api/lms/my-courses/{courseId}/lessons/{lessonId}/complete",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "lessonId",
         "Type": "System.Int32",
         "IsRequired": true
       }

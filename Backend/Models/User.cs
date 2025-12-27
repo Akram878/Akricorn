@@ -38,11 +38,21 @@ namespace Backend.Models
 
         public virtual ICollection<UserLearningPathCourseProgress> LearningPathCourseProgresses { get; set; }
 
+        public virtual ICollection<UserLessonProgress> LessonProgresses { get; set; }
+        public virtual ICollection<UserPurchase> Purchases { get; set; }
+        public virtual ICollection<CourseRating> CourseRatings { get; set; }
+        public virtual ICollection<BookRating> BookRatings { get; set; }
+        public virtual ICollection<LearningPathRating> LearningPathRatings { get; set; }
         public User()
         {
             UserCourses = new HashSet<UserCourse>();
             UserBooks = new HashSet<UserBook>();
             LearningPathCourseProgresses = new HashSet<UserLearningPathCourseProgress>();
+            LessonProgresses = new HashSet<UserLessonProgress>();
+            Purchases = new HashSet<UserPurchase>();
+            CourseRatings = new HashSet<CourseRating>();
+            BookRatings = new HashSet<BookRating>();
+            LearningPathRatings = new HashSet<LearningPathRating>();
         }
     }
 }

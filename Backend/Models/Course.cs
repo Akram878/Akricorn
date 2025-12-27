@@ -17,12 +17,14 @@ namespace Backend.Models
         public int Hours { get; set; }          // عدد ساعات الكورس
         public string Category { get; set; }    // Beginner, Intermediate...
         public double Rating { get; set; }      // تقييم 0 – 5
-
+        public int TotalSections { get; set; }
+        public int TotalLessons { get; set; }
         // 🔥 صورة الكورس
         public string ThumbnailUrl { get; set; }
 
-      
 
+        public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();
+        public ICollection<CourseRating> Ratings { get; set; } = new List<CourseRating>();
         // مسارات يتبع لها الكورس
         public ICollection<LearningPathCourse> LearningPathCourses { get; set; }
     }

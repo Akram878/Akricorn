@@ -18,10 +18,14 @@ namespace Backend.Data
         public DbSet<UserBook> UserBooks { get; set; }
 
         public DbSet<BookFile> BookFiles { get; set; }
+        public DbSet<FileMetadata> FileMetadata { get; set; }
 
         public DbSet<UserCourse> UserCourses { get; set; }
 
         public DbSet<UserLearningPathCourseProgress> UserLearningPathCourseProgresses { get; set; }
+
+        public DbSet<UserLessonProgress> UserLessonProgresses { get; set; }
+        public DbSet<UserPurchase> UserPurchases { get; set; }
 
         // ========== ADMIN ==========
         public DbSet<AdminAccount> AdminAccounts { get; set; }
@@ -36,6 +40,10 @@ namespace Backend.Data
         public DbSet<CourseSection> CourseSections { get; set; }
         public DbSet<CourseLesson> CourseLessons { get; set; }
         public DbSet<CourseLessonFile> CourseLessonFiles { get; set; }
+
+        public DbSet<CourseRating> CourseRatings { get; set; }
+        public DbSet<BookRating> BookRatings { get; set; }
+        public DbSet<LearningPathRating> LearningPathRatings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,7 +69,7 @@ namespace Backend.Data
 
             modelBuilder.Entity<UserCourse>()
                 .HasOne(uc => uc.Course)
-                .WithMany()
+               .WithMany(c => c.UserCourses)
                 .HasForeignKey(uc => uc.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -124,6 +132,103 @@ namespace Backend.Data
                 .HasDefaultValueSql("GETUTCDATE()");
 
 
+
+            // ==========================================
+            // UserLessonProgress
+            // ==========================================
+            modelBuilder.Entity<UserLessonProgress>()
+                .HasKey(ulp => new { ulp.UserId, ulp.LessonId });
+
+            modelBuilder.Entity<UserLessonProgress>()
+                .HasOne(ulp => ulp.User)
+                .WithMany(u => u.LessonProgresses)
+                .HasForeignKey(ulp => ulp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserLessonProgress>()
+                .HasOne(ulp => ulp.Lesson)
+                .WithMany()
+                .HasForeignKey(ulp => ulp.LessonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ==========================================
+            // UserPurchases
+            // ==========================================
+            modelBuilder.Entity<UserPurchase>()
+                .HasOne(up => up.User)
+                .WithMany(u => u.Purchases)
+                .HasForeignKey(up => up.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserPurchase>()
+                .HasOne(up => up.Course)
+                .WithMany()
+                .HasForeignKey(up => up.CourseId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<UserPurchase>()
+                .HasOne(up => up.Book)
+                .WithMany()
+                .HasForeignKey(up => up.BookId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<UserPurchase>()
+                .HasOne(up => up.LearningPath)
+                .WithMany()
+                .HasForeignKey(up => up.LearningPathId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // ==========================================
+            // Ratings
+            // ==========================================
+            modelBuilder.Entity<CourseRating>()
+                .HasIndex(r => new { r.UserId, r.CourseId })
+                .IsUnique();
+
+            modelBuilder.Entity<CourseRating>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.CourseRatings)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CourseRating>()
+                .HasOne(r => r.Course)
+                .WithMany(c => c.Ratings)
+                .HasForeignKey(r => r.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BookRating>()
+                .HasIndex(r => new { r.UserId, r.BookId })
+                .IsUnique();
+
+            modelBuilder.Entity<BookRating>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.BookRatings)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BookRating>()
+                .HasOne(r => r.Book)
+                .WithMany(b => b.Ratings)
+                .HasForeignKey(r => r.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LearningPathRating>()
+                .HasIndex(r => new { r.UserId, r.LearningPathId })
+                .IsUnique();
+
+            modelBuilder.Entity<LearningPathRating>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.LearningPathRatings)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LearningPathRating>()
+                .HasOne(r => r.LearningPath)
+                .WithMany(lp => lp.Ratings)
+                .HasForeignKey(r => r.LearningPathId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // ==========================================
             // BOOK FILES
             // ==========================================
@@ -133,7 +238,11 @@ namespace Backend.Data
                 .HasForeignKey(bf => bf.BookId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
+            modelBuilder.Entity<BookFile>()
+               .HasOne(bf => bf.FileMetadata)
+               .WithMany()
+               .HasForeignKey(bf => bf.FileMetadataId)
+               .OnDelete(DeleteBehavior.SetNull);
 
             // ==========================================
             // TOOL FILES
@@ -144,7 +253,11 @@ namespace Backend.Data
                 .HasForeignKey(tf => tf.ToolId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
+            modelBuilder.Entity<BookFile>()
+               .HasOne(bf => bf.FileMetadata)
+               .WithMany()
+               .HasForeignKey(bf => bf.FileMetadataId)
+               .OnDelete(DeleteBehavior.SetNull);
 
             // ==========================================
             // LearningPathCourse (Course ↔ LearningPath)
@@ -199,6 +312,12 @@ namespace Backend.Data
                 .WithMany(l => l.Files)
                 .HasForeignKey(f => f.LessonId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CourseLessonFile>()
+              .HasOne(f => f.FileMetadata)
+              .WithMany()
+              .HasForeignKey(f => f.FileMetadataId)
+              .OnDelete(DeleteBehavior.SetNull);
 
             // ========== DONE ==========
         }

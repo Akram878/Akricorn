@@ -378,6 +378,9 @@ namespace Backend.Controllers
             if (userCourse == null)
                 return NotFound(new { message = "Course not found in your library." });
 
+            if (!await IsCourseCompletedByLessons(userId.Value, courseId))
+                return BadRequest(new { message = "Complete all lessons before finishing the course." });
+
             var now = DateTime.UtcNow;
             userCourse.CompletedAt = now;
 
@@ -450,6 +453,101 @@ namespace Backend.Controllers
                 learningPaths = pathStatuses
             });
         }
+        [HttpPost("my-courses/{courseId}/lessons/{lessonId}/complete")]
+        [Authorize]
+        public async Task<IActionResult> CompleteLesson(int courseId, int lessonId)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized(new { message = "Unauthorized." });
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId.Value);
+
+            if (user == null)
+                return Unauthorized(new { message = "Unauthorized." });
+
+            if (!user.IsActive)
+                return StatusCode(403, new { message = "Your account has been disabled." });
+
+            var lesson = await _context.CourseLessons
+                .Include(l => l.Section)
+                .FirstOrDefaultAsync(l => l.Id == lessonId);
+
+            if (lesson == null || lesson.Section.CourseId != courseId)
+                return NotFound(new { message = "Lesson not found in this course." });
+
+            var ownsCourse = await _context.UserCourses
+                .AnyAsync(uc => uc.UserId == userId.Value && uc.CourseId == courseId);
+
+            if (!ownsCourse)
+                return StatusCode(403, new { message = "You are not enrolled in this course." });
+
+            var existing = await _context.UserLessonProgresses
+                .FirstOrDefaultAsync(p => p.UserId == userId.Value && p.LessonId == lessonId);
+
+            if (existing == null)
+            {
+                _context.UserLessonProgresses.Add(new UserLessonProgress
+                {
+                    UserId = userId.Value,
+                    LessonId = lessonId,
+                    CompletedAt = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+            }
+
+            var isCompleted = await IsCourseCompletedByLessons(userId.Value, courseId);
+            if (isCompleted)
+            {
+                var userCourse = await _context.UserCourses
+                    .Include(uc => uc.Course)
+                        .ThenInclude(c => c.LearningPathCourses)
+                            .ThenInclude(lp => lp.LearningPath)
+                    .FirstOrDefaultAsync(uc => uc.UserId == userId.Value && uc.CourseId == courseId);
+
+                if (userCourse != null && userCourse.CompletedAt == null)
+                {
+                    var now = DateTime.UtcNow;
+                    userCourse.CompletedAt = now;
+
+                    var pathIds = userCourse.Course.LearningPathCourses?
+                        .Select(lp => lp.LearningPathId)
+                        .Distinct()
+                        .ToList() ?? new List<int>();
+
+                    if (pathIds.Count > 0)
+                    {
+                        var existingProgress = await _context.UserLearningPathCourseProgresses
+                            .Where(p => p.UserId == userId.Value &&
+                                        p.CourseId == courseId &&
+                                        pathIds.Contains(p.LearningPathId))
+                            .ToListAsync();
+
+                        foreach (var pathId in pathIds)
+                        {
+                            if (!existingProgress.Any(p => p.LearningPathId == pathId))
+                            {
+                                _context.UserLearningPathCourseProgresses.Add(
+                                    new UserLearningPathCourseProgress
+                                    {
+                                        UserId = userId.Value,
+                                        CourseId = courseId,
+                                        LearningPathId = pathId,
+                                        CompletedAt = now
+                                    });
+                            }
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return Ok(new { message = "Lesson marked as completed.", courseCompleted = isCompleted });
+        }
+
 
 
 
@@ -614,6 +712,9 @@ namespace Backend.Controllers
                     p.Id,
                     p.Title,
                     p.Description,
+                p.Price,
+                p.Rating,
+                p.Discount,
                 coursesCount = totalCourses,
                 completedCourses = completedCount,
                 completionPercent,
@@ -637,6 +738,22 @@ namespace Backend.Controllers
         private string BuildBookFileUrl(int fileId)
         {
             return Url.Content($"/api/books/files/{fileId}");
+        }
+
+        private async Task<bool> IsCourseCompletedByLessons(int userId, int courseId)
+        {
+            var totalLessons = await _context.CourseLessons
+                .Where(l => l.Section.CourseId == courseId)
+                .CountAsync();
+
+            if (totalLessons == 0)
+                return true;
+
+            var completedLessons = await _context.UserLessonProgresses
+                .Where(p => p.UserId == userId && p.Lesson.Section.CourseId == courseId)
+                .CountAsync();
+
+            return completedLessons >= totalLessons;
         }
         private double CalculateCompletionPercent(
             IDictionary<int, int> totalByPath,

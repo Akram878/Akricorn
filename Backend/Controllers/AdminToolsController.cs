@@ -31,6 +31,7 @@ namespace Backend.Controllers
         {
             var tools = await _context.Tools
                    .Include(t => t.Files)
+                     .ThenInclude(f => f.FileMetadata)
                 .OrderBy(t => t.DisplayOrder)
                 .ToListAsync();
 
@@ -45,6 +46,7 @@ namespace Backend.Controllers
         {
             var tool = await _context.Tools
                .Include(t => t.Files)
+               .ThenInclude(f => f.FileMetadata)
                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tool == null)
@@ -99,6 +101,7 @@ namespace Backend.Controllers
         {
             var tool = await _context.Tools
               .Include(t => t.Files)
+              .ThenInclude(f => f.FileMetadata)
               .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tool == null)
@@ -148,6 +151,7 @@ namespace Backend.Controllers
         {
             var tool = await _context.Tools
                 .Include(t => t.Files)
+                  .ThenInclude(f => f.FileMetadata)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tool == null)
@@ -183,6 +187,9 @@ namespace Backend.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file uploaded." });
 
+            if (!FileValidationHelper.ValidateIconFile(file, out var validationError))
+                return BadRequest(new { message = validationError });
+
             var folder = ToolStorageHelper.GetAvatarFolder(id);
             Directory.CreateDirectory(folder);
 
@@ -212,13 +219,17 @@ namespace Backend.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadFile(int id, IFormFile file)
         {
-            var tool = await _context.Tools.Include(t => t.Files).FirstOrDefaultAsync(t => t.Id == id);
+            var tool = await _context.Tools.Include(t => t.Files).ThenInclude(f => f.FileMetadata).FirstOrDefaultAsync(t => t.Id == id);
 
             if (tool == null)
                 return NotFound(new { message = "Tool not found." });
 
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file uploaded." });
+
+            if (!FileValidationHelper.ValidateToolFile(file, out var toolValidationError))
+                return BadRequest(new { message = toolValidationError });
+
 
             var folder = ToolStorageHelper.GetFilesFolder(id);
             Directory.CreateDirectory(folder);
@@ -231,14 +242,29 @@ namespace Backend.Controllers
                 await file.CopyToAsync(stream);
             }
 
-          
+
+            var extension = Path.GetExtension(file.FileName);
+            var metadata = new FileMetadata
+            {
+                OriginalName = file.FileName,
+                StoredName = fileName,
+                Size = file.Length,
+                MimeType = file.ContentType ?? "application/octet-stream",
+                Extension = extension,
+                OwnerEntityType = "Tool",
+                OwnerEntityId = id
+            };
+
+            _context.FileMetadata.Add(metadata);
+
             var newFile = new ToolFile
             {
                 ToolId = id,
                 FileName = file.FileName,
                 FileUrl = fileName,
                 SizeBytes = file.Length,
-                ContentType = file.ContentType ?? "application/octet-stream"
+                ContentType = file.ContentType ?? "application/octet-stream",
+                FileMetadata = metadata
             };
 
             _context.ToolFiles.Add(newFile);
@@ -255,12 +281,13 @@ namespace Backend.Controllers
         [HttpGet("files/{fileId:int}")]
         public async Task<IActionResult> DownloadFile(int fileId)
         {
-            var entity = await _context.ToolFiles.FirstOrDefaultAsync(f => f.Id == fileId);
-
+            var entity = await _context.ToolFiles.Include(f => f.FileMetadata).FirstOrDefaultAsync(f => f.Id == fileId);
+          
             if (entity == null)
                 return NotFound(new { message = "File not found." });
 
-            var fileName = TryExtractFileName(entity.FileUrl);
+            var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
+          
             if (string.IsNullOrEmpty(fileName))
                 return NotFound(new { message = "File content not found." });
 
@@ -277,9 +304,9 @@ namespace Backend.Controllers
             }
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var contentType = string.IsNullOrWhiteSpace(entity.ContentType)
-                ? "application/octet-stream"
-                : entity.ContentType;
+            var contentType = string.IsNullOrWhiteSpace(entity.FileMetadata?.MimeType)
+              ? (string.IsNullOrWhiteSpace(entity.ContentType) ? "application/octet-stream" : entity.ContentType)
+              : entity.FileMetadata.MimeType;
 
             return File(stream, contentType, enableRangeProcessing: true);
         }
@@ -291,13 +318,13 @@ namespace Backend.Controllers
         [HttpDelete("files/{fileId:int}")]
         public async Task<IActionResult> DeleteFile(int fileId)
         {
-            var entity = await _context.ToolFiles.FirstOrDefaultAsync(f => f.Id == fileId);
+            var entity = await _context.ToolFiles.Include(f => f.FileMetadata).FirstOrDefaultAsync(f => f.Id == fileId);
 
             if (entity == null)
                 return NotFound(new { message = "File not found." });
 
             var folder = ToolStorageHelper.GetFilesFolder(entity.ToolId);
-            var fileName = TryExtractFileName(entity.FileUrl);
+            var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
 
             if (!string.IsNullOrEmpty(fileName))
             {
@@ -354,10 +381,10 @@ namespace Backend.Controllers
                 Files = tool.Files?.Select(f => new ToolFileDto
                 {
                     Id = f.Id,
-                    FileName = f.FileName,
+                    FileName = f.FileMetadata?.OriginalName ?? f.FileName,
                     FileUrl = BuildToolFileUrlStatic(f.Id),
-                    SizeBytes = f.SizeBytes,
-                    ContentType = f.ContentType
+                    SizeBytes = f.FileMetadata?.Size ?? f.SizeBytes,
+                    ContentType = f.FileMetadata?.MimeType ?? f.ContentType
                 }).ToList() ?? new List<ToolFileDto>()
             };
         }

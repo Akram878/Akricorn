@@ -38,6 +38,7 @@ namespace Backend.Controllers
 
             var file = await _context.BookFiles
                 .Include(f => f.Book)
+                .Include(f => f.FileMetadata)
                 .FirstOrDefaultAsync(f => f.Id == fileId);
 
             if (file == null)
@@ -70,7 +71,7 @@ namespace Backend.Controllers
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-            var contentType = file.ContentType;
+            var contentType = file.FileMetadata?.MimeType ?? file.ContentType;
             if (string.IsNullOrWhiteSpace(contentType))
             {
                 var provider = new FileExtensionContentTypeProvider();
@@ -87,7 +88,7 @@ namespace Backend.Controllers
 
         private string? ResolvePhysicalPath(BookFile file)
         {
-            var storedFileName = TryExtractFileName(file.FileUrl);
+            var storedFileName = file.FileMetadata?.StoredName ?? TryExtractFileName(file.FileUrl);
             if (string.IsNullOrEmpty(storedFileName))
                 return null;
 

@@ -1441,17 +1441,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminUserDto"
+                  "$ref": "#/components/schemas/AdminUserDetailsDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminUserDto"
+                  "$ref": "#/components/schemas/AdminUserDetailsDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminUserDto"
+                  "$ref": "#/components/schemas/AdminUserDetailsDto"
                 }
               }
             }
@@ -1945,6 +1945,38 @@
         }
       }
     },
+    "/api/lms/my-courses/{courseId}/lessons/{lessonId}/complete": {
+      "post": {
+        "tags": [
+          "Lms"
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "lessonId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/lms/my-books": {
       "get": {
         "tags": [
@@ -2043,6 +2075,99 @@
         },
         "additionalProperties": false
       },
+      "AdminUserCourseProgressDto": {
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "courseTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchasedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completionPercent": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminUserDetailsDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "family": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "canEditBirthDate": {
+            "type": "boolean"
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "purchases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserPurchaseDto"
+            },
+            "nullable": true
+          },
+          "activeCourses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserCourseProgressDto"
+            },
+            "nullable": true
+          },
+          "completedCourses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserCourseProgressDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AdminUserDto": {
         "type": "object",
         "properties": {
@@ -2083,6 +2208,39 @@
           },
           "isActive": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminUserPurchaseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "purchaseType": {
+            "type": "string",
+            "nullable": true
+          },
+          "courseId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "bookId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "learningPathId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "purchasedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -2242,10 +2400,6 @@
             "type": "string",
             "nullable": true
           },
-          "fileUrl": {
-            "type": "string",
-            "nullable": true
-          },
           "isActive": {
             "type": "boolean"
           }
@@ -2310,6 +2464,18 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "discount": {
+            "type": "number",
+            "format": "double"
           },
           "thumbnailUrl": {
             "type": "string",
@@ -2427,6 +2593,18 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "discount": {
+            "type": "number",
+            "format": "double"
           },
           "thumbnailUrl": {
             "type": "string",
@@ -2622,10 +2800,6 @@
             "type": "string",
             "nullable": true
           },
-          "fileUrl": {
-            "type": "string",
-            "nullable": true
-          },
           "isActive": {
             "type": "boolean"
           }
@@ -2690,6 +2864,18 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "discount": {
+            "type": "number",
+            "format": "double"
           },
           "thumbnailUrl": {
             "type": "string",

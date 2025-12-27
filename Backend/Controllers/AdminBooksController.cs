@@ -42,7 +42,9 @@ namespace Backend.Controllers
                     return await _context.Books
                         .AsNoTracking()
                         .Include(b => b.Files)
+                          .ThenInclude(f => f.FileMetadata)
                         .ToListAsync();
+
                 });
 
                 var result = (books ?? new List<Book>())
@@ -85,6 +87,7 @@ namespace Backend.Controllers
                     return await _context.Books
                         .AsNoTracking()
                         .Include(b => b.Files)
+                          .ThenInclude(f => f.FileMetadata)
                         .FirstOrDefaultAsync(b => b.Id == id);
                 });
                 if (book == null)
@@ -134,7 +137,7 @@ namespace Backend.Controllers
                 Price = request.Price,
                 Category = request.Category,
                 ThumbnailUrl = request.ThumbnailUrl,
-                FileUrl = request.FileUrl,
+              
                 IsActive = request.IsActive
             };
 
@@ -196,7 +199,7 @@ namespace Backend.Controllers
                 book.Title = request.Title;
                 book.Description = request.Description;
                 book.Price = request.Price;
-                book.FileUrl = request.FileUrl;
+              
                 book.Category = request.Category;
                 book.ThumbnailUrl = request.ThumbnailUrl;
                 book.IsActive = request.IsActive;
@@ -241,7 +244,7 @@ namespace Backend.Controllers
                 var book = await ExecuteWithMigrationRetry(async () =>
                 {
                     return await _context.Books
-                        .Include(b => b.Files)
+                       
                         .FirstOrDefaultAsync(b => b.Id == id);
                 });
 
@@ -345,6 +348,10 @@ namespace Backend.Controllers
                 if (file == null || file.Length == 0)
                     return BadRequest(new { message = "No file uploaded." });
 
+                if (!FileValidationHelper.ValidateIconFile(file, out var validationError))
+                    return BadRequest(new { message = validationError });
+
+
                 var folder = BookStorageHelper.GetThumbnailFolder(id);
                 Directory.CreateDirectory(folder);
 
@@ -402,13 +409,16 @@ namespace Backend.Controllers
             {
                 var book = await ExecuteWithMigrationRetry(async () =>
                 {
-                    return await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == id);
+                    return await _context.Books.Include(b => b.Files).ThenInclude(f => f.FileMetadata).FirstOrDefaultAsync(b => b.Id == id);
                 });
                 if (book == null)
                     return NotFound(new { message = "Book not found." });
 
                 if (file == null || file.Length == 0)
                     return BadRequest(new { message = "No file uploaded." });
+
+                if (!FileValidationHelper.ValidateBookFile(file, out var validationError))
+                    return BadRequest(new { message = validationError });
 
                 var folder = BookStorageHelper.GetFilesFolder(id);
                 Directory.CreateDirectory(folder);
@@ -422,23 +432,34 @@ namespace Backend.Controllers
                     {
                         await file.CopyToAsync(stream);
                     }
-                 
+
+                    var extension = Path.GetExtension(file.FileName);
+                    var metadata = new FileMetadata
+                    {
+                        OriginalName = file.FileName,
+                        StoredName = fileName,
+                        Size = file.Length,
+                        MimeType = file.ContentType ?? "application/octet-stream",
+                        Extension = extension,
+                        OwnerEntityType = "Book",
+                        OwnerEntityId = id
+                    };
+
+                    _context.FileMetadata.Add(metadata);
 
                     var newFile = new BookFile
                     {
                         BookId = id,
                         FileName = file.FileName,
                         FileUrl = fileName,
-                        SizeBytes = file.Length,
-                        ContentType = file.ContentType ?? "application/octet-stream"
+                        ContentType = file.ContentType ?? "application/octet-stream",
+                        FileMetadata = metadata
                     };
 
                     await ExecuteWithMigrationRetry(async () =>
                     {
                         _context.BookFiles.Add(newFile);
 
-                        if (string.IsNullOrEmpty(book.FileUrl))
-                            book.FileUrl = fileName;
 
                         await _context.SaveChangesAsync();
                     });
@@ -480,6 +501,7 @@ namespace Backend.Controllers
                 {
                     return await _context.BookFiles
                         .Include(f => f.Book)
+                         .Include(f => f.FileMetadata)
                         .FirstOrDefaultAsync(f => f.Id == fileId);
                 });
                 if (entity == null)
@@ -487,7 +509,7 @@ namespace Backend.Controllers
 
                 var bookId = entity.BookId;
                 var folder = BookStorageHelper.GetFilesFolder(bookId);
-                var fileName = TryExtractFileName(entity.FileUrl);
+                var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
                 if (!string.IsNullOrEmpty(fileName))
                 {
                     var physicalPath = Path.Combine(folder, fileName);
@@ -513,16 +535,9 @@ namespace Backend.Controllers
 
                     var book = await ExecuteWithMigrationRetry(async () =>
                     {
-                        return await _context.Books.Include(b => b.Files).FirstOrDefaultAsync(b => b.Id == bookId);
+                        return await _context.Books.Include(b => b.Files).ThenInclude(f => f.FileMetadata).FirstOrDefaultAsync(b => b.Id == bookId);
                     });
-                    if (book != null && book.FileUrl == entity.FileUrl)
-                    {
-                        book.FileUrl = book.Files.FirstOrDefault()?.FileUrl ?? string.Empty;
-                        await ExecuteWithMigrationRetry(async () =>
-                        {
-                            await _context.SaveChangesAsync();
-                        });
-                    }
+                  
 
                     return Ok(new { message = "File deleted." });
                 }
@@ -581,10 +596,10 @@ namespace Backend.Controllers
                 Files = files.Select(f => new BookFileDto
                 {
                     Id = f.Id,
-                    FileName = f.FileName,
+                    FileName = f.FileMetadata?.OriginalName ?? f.FileName,
                     FileUrl = BuildBookFileUrlStatic(f.Id),
-                    SizeBytes = f.SizeBytes,
-                    ContentType = f.ContentType
+                    SizeBytes = f.FileMetadata?.Size ?? f.SizeBytes,
+                    ContentType = f.FileMetadata?.MimeType ?? f.ContentType
                 }).ToList()
             };
         }
@@ -690,7 +705,7 @@ namespace Backend.Controllers
         public decimal Price { get; set; }
         public string Category { get; set; }
         public string? ThumbnailUrl { get; set; }
-        public string FileUrl { get; set; }
+      
         public bool IsActive { get; set; } = true;
     }
     public class CreateBookRequest : BaseBookRequest

@@ -36,6 +36,7 @@ namespace Backend.Controllers
             var file = await _context.CourseLessonFiles
                 .Include(f => f.Lesson)
                     .ThenInclude(l => l.Section)
+                      .Include(f => f.FileMetadata)
                 .FirstOrDefaultAsync(f => f.Id == fileId);
 
             if (file == null)
@@ -69,7 +70,7 @@ namespace Backend.Controllers
             }
 
             var stream = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var contentType = file.ContentType;
+            var contentType = file.FileMetadata?.MimeType ?? file.ContentType;
             if (string.IsNullOrWhiteSpace(contentType))
             {
                 var provider = new FileExtensionContentTypeProvider();
@@ -90,7 +91,7 @@ namespace Backend.Controllers
             var courseId = section.CourseId;
             var lessonFolder = CourseStorageHelper.GetLessonFolder(courseId, section.Id, lesson.Id);
 
-            var storedFileName = TryExtractFileName(file.FileUrl);
+            var storedFileName = file.FileMetadata?.StoredName ?? TryExtractFileName(file.FileUrl);
             if (string.IsNullOrEmpty(storedFileName))
                 return null;
 

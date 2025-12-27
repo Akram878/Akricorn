@@ -37,7 +37,6 @@ namespace Backend.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ThumbnailUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -61,6 +60,8 @@ namespace Backend.Migrations
                     Hours = table.Column<int>(type: "int", nullable: false),
                     Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Rating = table.Column<double>(type: "float", nullable: false),
+                    TotalSections = table.Column<int>(type: "int", nullable: false),
+                    TotalLessons = table.Column<int>(type: "int", nullable: false),
                     ThumbnailUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -77,6 +78,9 @@ namespace Backend.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Rating = table.Column<double>(type: "float", nullable: false),
+                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ThumbnailUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -128,29 +132,6 @@ namespace Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BookFiles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BookId = table.Column<int>(type: "int", nullable: false),
-                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
-                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BookFiles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_BookFiles_Books_BookId",
-                        column: x => x.BookId,
-                        principalTable: "Books",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CourseSections",
                 columns: table => new
                 {
@@ -197,24 +178,116 @@ namespace Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ToolFiles",
+                name: "FileMetadata",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ToolId = table.Column<int>(type: "int", nullable: false),
-                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
-                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    OriginalName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StoredName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Size = table.Column<long>(type: "bigint", nullable: false),
+                    MimeType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Extension = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageWidth = table.Column<int>(type: "int", nullable: true),
+                    ImageHeight = table.Column<int>(type: "int", nullable: true),
+                    OwnerEntityType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OwnerEntityId = table.Column<int>(type: "int", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ToolId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ToolFiles", x => x.Id);
+                    table.PrimaryKey("PK_FileMetadata", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ToolFiles_Tools_ToolId",
+                        name: "FK_FileMetadata_Tools_ToolId",
                         column: x => x.ToolId,
                         principalTable: "Tools",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BookRatings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BookRatings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BookRatings_Books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BookRatings_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseRatings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseRatings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseRatings_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseRatings_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LearningPathRatings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    LearningPathId = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LearningPathRatings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LearningPathRatings_LearningPaths_LearningPathId",
+                        column: x => x.LearningPathId,
+                        principalTable: "LearningPaths",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LearningPathRatings_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -333,6 +406,48 @@ namespace Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserPurchases",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    PurchaseType = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: true),
+                    BookId = table.Column<int>(type: "int", nullable: true),
+                    LearningPathId = table.Column<int>(type: "int", nullable: true),
+                    PurchasedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPurchases", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserPurchases_Books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_UserPurchases_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_UserPurchases_LearningPaths_LearningPathId",
+                        column: x => x.LearningPathId,
+                        principalTable: "LearningPaths",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_UserPurchases_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CourseLessons",
                 columns: table => new
                 {
@@ -354,6 +469,65 @@ namespace Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BookFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileMetadataId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BookFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BookFiles_Books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "Books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BookFiles_FileMetadata_FileMetadataId",
+                        column: x => x.FileMetadataId,
+                        principalTable: "FileMetadata",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ToolFiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ToolId = table.Column<int>(type: "int", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileMetadataId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ToolFiles_FileMetadata_FileMetadataId",
+                        column: x => x.FileMetadataId,
+                        principalTable: "FileMetadata",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ToolFiles_Tools_ToolId",
+                        column: x => x.ToolId,
+                        principalTable: "Tools",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CourseLessonFiles",
                 columns: table => new
                 {
@@ -364,6 +538,7 @@ namespace Backend.Migrations
                     FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SizeBytes = table.Column<long>(type: "bigint", nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileMetadataId = table.Column<int>(type: "int", nullable: true),
                     UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -375,12 +550,64 @@ namespace Backend.Migrations
                         principalTable: "CourseLessons",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseLessonFiles_FileMetadata_FileMetadataId",
+                        column: x => x.FileMetadataId,
+                        principalTable: "FileMetadata",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserLessonProgresses",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    LessonId = table.Column<int>(type: "int", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLessonProgresses", x => new { x.UserId, x.LessonId });
+                    table.ForeignKey(
+                        name: "FK_UserLessonProgresses_CourseLessons_LessonId",
+                        column: x => x.LessonId,
+                        principalTable: "CourseLessons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserLessonProgresses_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_BookFiles_BookId",
                 table: "BookFiles",
                 column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookFiles_FileMetadataId",
+                table: "BookFiles",
+                column: "FileMetadataId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookRatings_BookId",
+                table: "BookRatings",
+                column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookRatings_UserId_BookId",
+                table: "BookRatings",
+                columns: new[] { "UserId", "BookId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseLessonFiles_FileMetadataId",
+                table: "CourseLessonFiles",
+                column: "FileMetadataId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CourseLessonFiles_LessonId",
@@ -393,9 +620,25 @@ namespace Backend.Migrations
                 column: "SectionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CourseRatings_CourseId",
+                table: "CourseRatings",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseRatings_UserId_CourseId",
+                table: "CourseRatings",
+                columns: new[] { "UserId", "CourseId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CourseSections_CourseId",
                 table: "CourseSections",
                 column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FileMetadata_ToolId",
+                table: "FileMetadata",
+                column: "ToolId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LearningPathCourses_CourseId",
@@ -403,9 +646,25 @@ namespace Backend.Migrations
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LearningPathRatings_LearningPathId",
+                table: "LearningPathRatings",
+                column: "LearningPathId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LearningPathRatings_UserId_LearningPathId",
+                table: "LearningPathRatings",
+                columns: new[] { "UserId", "LearningPathId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Payments_UserId",
                 table: "Payments",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolFiles_FileMetadataId",
+                table: "ToolFiles",
+                column: "FileMetadataId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ToolFiles_ToolId",
@@ -431,6 +690,31 @@ namespace Backend.Migrations
                 name: "IX_UserLearningPathCourseProgresses_LearningPathId",
                 table: "UserLearningPathCourseProgresses",
                 column: "LearningPathId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLessonProgresses_LessonId",
+                table: "UserLessonProgresses",
+                column: "LessonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPurchases_BookId",
+                table: "UserPurchases",
+                column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPurchases_CourseId",
+                table: "UserPurchases",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPurchases_LearningPathId",
+                table: "UserPurchases",
+                column: "LearningPathId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPurchases_UserId",
+                table: "UserPurchases",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -443,10 +727,19 @@ namespace Backend.Migrations
                 name: "BookFiles");
 
             migrationBuilder.DropTable(
+                name: "BookRatings");
+
+            migrationBuilder.DropTable(
                 name: "CourseLessonFiles");
 
             migrationBuilder.DropTable(
+                name: "CourseRatings");
+
+            migrationBuilder.DropTable(
                 name: "LearningPathCourses");
+
+            migrationBuilder.DropTable(
+                name: "LearningPathRatings");
 
             migrationBuilder.DropTable(
                 name: "Payments");
@@ -464,10 +757,16 @@ namespace Backend.Migrations
                 name: "UserLearningPathCourseProgresses");
 
             migrationBuilder.DropTable(
-                name: "CourseLessons");
+                name: "UserLessonProgresses");
 
             migrationBuilder.DropTable(
-                name: "Tools");
+                name: "UserPurchases");
+
+            migrationBuilder.DropTable(
+                name: "FileMetadata");
+
+            migrationBuilder.DropTable(
+                name: "CourseLessons");
 
             migrationBuilder.DropTable(
                 name: "Books");
@@ -477,6 +776,9 @@ namespace Backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Tools");
 
             migrationBuilder.DropTable(
                 name: "CourseSections");

@@ -46,6 +46,7 @@ public class AdminCourseContentController : ControllerBase
             .Include(c => c.Sections)
                 .ThenInclude(s => s.Lessons)
                     .ThenInclude(l => l.Files)
+                       .ThenInclude(f => f.FileMetadata)
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
         if (course == null)
@@ -71,7 +72,7 @@ public class AdminCourseContentController : ControllerBase
                             files = l.Files.Select(f => new
                             {
                                 id = f.Id,
-                                fileName = f.FileName,
+                                fileName = f.FileMetadata?.OriginalName ?? f.FileName,
                                 fileUrl = BuildLessonFileUrl(f.Id)
                             })
                         })
@@ -100,10 +101,10 @@ public class AdminCourseContentController : ControllerBase
         return Ok(content);
     }
 
-        // ============================================================
-        // CREATE SECTION
-        // ============================================================
-        [HttpPost("{courseId}/sections")]
+    // ============================================================
+    // CREATE SECTION
+    // ============================================================
+    [HttpPost("{courseId}/sections")]
     public async Task<IActionResult> CreateSection(int courseId, [FromBody] CreateSectionRequest request)
     {
         if (!await _context.Courses.AnyAsync(c => c.Id == courseId))
@@ -135,6 +136,7 @@ public class AdminCourseContentController : ControllerBase
 
         _context.CourseSections.Add(section);
         await _context.SaveChangesAsync();
+        await UpdateCourseTotals(courseId);
         var sectionFolder = CourseStorageHelper.GetSectionFolder(courseId, section.Id);
         Directory.CreateDirectory(sectionFolder);
         var content = await BuildCourseContentDto(courseId);
@@ -189,7 +191,7 @@ public class AdminCourseContentController : ControllerBase
             Directory.Delete(sectionFolder, true);
         _context.CourseSections.Remove(section);
         await _context.SaveChangesAsync();
-
+        await UpdateCourseTotals(courseId);
         var content = await BuildCourseContentDto(courseId);
 
         return Ok(new { message = "Section deleted.", content });
@@ -233,6 +235,7 @@ public class AdminCourseContentController : ControllerBase
         _context.CourseLessons.Add(lesson);
 
         await _context.SaveChangesAsync();
+        await UpdateCourseTotals(section.CourseId);
         var lessonFolder = CourseStorageHelper.GetLessonFolder(section.CourseId, sectionId, lesson.Id);
         Directory.CreateDirectory(lessonFolder);
 
@@ -290,7 +293,7 @@ public class AdminCourseContentController : ControllerBase
             Directory.Delete(lessonFolder, true);
         _context.CourseLessons.Remove(lesson);
         await _context.SaveChangesAsync();
-
+        await UpdateCourseTotals(courseId);
         var content = await BuildCourseContentDto(courseId);
 
         return Ok(new { message = "Lesson deleted.", content });
@@ -316,6 +319,12 @@ public class AdminCourseContentController : ControllerBase
 
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file uploaded." });
+
+
+
+            if (!FileValidationHelper.ValidateCourseFile(file, out var validationError))
+                return BadRequest(new { message = validationError });
+
             var folder = CourseStorageHelper.GetLessonFolder(lesson.Section.CourseId, lesson.SectionId, lesson.Id);
             Directory.CreateDirectory(folder);
 
@@ -327,14 +336,28 @@ public class AdminCourseContentController : ControllerBase
                 await file.CopyToAsync(stream);
             }
 
-           
+            var extension = Path.GetExtension(file.FileName);
+            var metadata = new FileMetadata
+            {
+                OriginalName = file.FileName,
+                StoredName = fileName,
+                Size = file.Length,
+                MimeType = file.ContentType ?? "application/octet-stream",
+                Extension = extension,
+                OwnerEntityType = "CourseLesson",
+                OwnerEntityId = lesson.Id
+            };
+
+            _context.FileMetadata.Add(metadata);
+
             var newFile = new CourseLessonFile
             {
                 LessonId = lessonId,
                 FileName = file.FileName,
                 FileUrl = fileName,
                 SizeBytes = file.Length,
-                ContentType = file.ContentType ?? "application/octet-stream"
+                ContentType = file.ContentType ?? "application/octet-stream",
+                FileMetadata = metadata
             };
 
             _context.CourseLessonFiles.Add(newFile);
@@ -367,6 +390,7 @@ public class AdminCourseContentController : ControllerBase
         var entity = await _context.CourseLessonFiles
                 .Include(f => f.Lesson)
                     .ThenInclude(l => l.Section)
+                     .Include(f => f.FileMetadata)
                 .FirstOrDefaultAsync(f => f.Id == fileId);
         if (entity == null)
             return NotFound(new { message = "File not found." });
@@ -376,7 +400,7 @@ public class AdminCourseContentController : ControllerBase
         var lessonId = entity.LessonId;
         var fileFolder = CourseStorageHelper.GetLessonFolder(courseId, sectionId, lessonId);
 
-        var fileName = TryExtractFileName(entity.FileUrl);
+        var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
         if (!string.IsNullOrEmpty(fileName))
         {
             var physicalPath = Path.Combine(fileFolder, fileName);
@@ -410,8 +434,27 @@ public class AdminCourseContentController : ControllerBase
             return Path.GetFileName(uri.LocalPath);
 
         return Path.GetFileName(fileUrl);
+
+
+    }
+
+    private async Task UpdateCourseTotals(int courseId)
+    {
+        var totalSections = await _context.CourseSections.CountAsync(s => s.CourseId == courseId);
+        var totalLessons = await _context.CourseLessons
+            .Where(l => l.Section.CourseId == courseId)
+            .CountAsync();
+
+        var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId);
+        if (course == null)
+            return;
+
+        course.TotalSections = totalSections;
+        course.TotalLessons = totalLessons;
+        await _context.SaveChangesAsync();
     }
 }
+
 
 
 // ============================================================

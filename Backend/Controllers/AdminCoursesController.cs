@@ -297,6 +297,9 @@ namespace Backend.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file uploaded." });
 
+            if (!FileValidationHelper.ValidateIconFile(file, out var validationError))
+                return BadRequest(new { message = validationError });
+
             var folder = CourseStorageHelper.GetThumbnailFolder(courseId);
             Directory.CreateDirectory(folder);
 

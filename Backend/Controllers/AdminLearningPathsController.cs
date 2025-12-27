@@ -38,7 +38,11 @@ namespace Backend.Controllers
                 Title = lp.Title,
                 Description = lp.Description,
                 IsActive = lp.IsActive,
-            
+
+                Price = lp.Price,
+                Rating = lp.Rating,
+                Discount = lp.Discount,
+
                 ThumbnailUrl = lp.ThumbnailUrl,
                 CourseIds = lp.LearningPathCourses?
                     .OrderBy(pc => pc.StepOrder)
@@ -69,7 +73,11 @@ namespace Backend.Controllers
                 Title = path.Title,
                 Description = path.Description,
                 IsActive = path.IsActive,
-              
+
+                Price = path.Price,
+                Rating = path.Rating,
+                Discount = path.Discount,
+
                 ThumbnailUrl = path.ThumbnailUrl,
                 CourseIds = path.LearningPathCourses?
                     .OrderBy(pc => pc.StepOrder)
@@ -95,7 +103,11 @@ namespace Backend.Controllers
                 Title = request.Title,
                 Description = request.Description,
                 IsActive = request.IsActive,
-               
+
+                Price = request.Price,
+                Rating = request.Rating,
+                Discount = request.Discount,
+
                 ThumbnailUrl = request.ThumbnailUrl
             };
 
@@ -154,7 +166,11 @@ namespace Backend.Controllers
             path.Title = request.Title;
             path.Description = request.Description;
             path.IsActive = request.IsActive;
-         
+
+            path.Price = request.Price;
+            path.Rating = request.Rating;
+            path.Discount = request.Discount;
+
             path.ThumbnailUrl = request.ThumbnailUrl;
 
 
@@ -249,7 +265,11 @@ namespace Backend.Controllers
         public string Title { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; }
-      
+
+        public decimal Price { get; set; }
+        public double Rating { get; set; }
+        public decimal Discount { get; set; }
+
         public string ThumbnailUrl { get; set; }
         public List<int> CourseIds { get; set; } = new();
     }
@@ -259,7 +279,11 @@ namespace Backend.Controllers
         public string Title { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; } = true;
-   
+
+        public decimal Price { get; set; }
+        public double Rating { get; set; }
+        public decimal Discount { get; set; }
+
         public string ThumbnailUrl { get; set; }
         public List<int> CourseIds { get; set; } = new();
     }
@@ -269,7 +293,11 @@ namespace Backend.Controllers
         public string Title { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; } = true;
-      
+
+        public decimal Price { get; set; }
+        public double Rating { get; set; }
+        public decimal Discount { get; set; }
+
         public string ThumbnailUrl { get; set; }
         public List<int> CourseIds { get; set; } = new();
     }

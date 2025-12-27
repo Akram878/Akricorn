@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Backend.Data;
@@ -48,14 +49,28 @@ namespace Backend.Controllers
         // GET: /api/admin/users/{id}
         // إرجاع مستخدم واحد بالتفصيل
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<AdminUserDto>> GetById(int id)
+        public async Task<ActionResult<AdminUserDetailsDto>> GetById(int id)
         {
-            var u = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var u = await _context.Users
+                .Include(x => x.UserCourses)
+                    .ThenInclude(uc => uc.Course)
+                .Include(x => x.LessonProgresses)
+                    .ThenInclude(p => p.Lesson)
+                        .ThenInclude(l => l.Section)
+                .Include(x => x.Purchases)
+                    .ThenInclude(p => p.Course)
+                .Include(x => x.Purchases)
+                    .ThenInclude(p => p.Book)
+                .Include(x => x.Purchases)
+                    .ThenInclude(p => p.LearningPath)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (u == null)
                 return NotFound(new { message = "User not found." });
 
-            var dto = new AdminUserDto
+            var courseProgress = BuildCourseProgress(u);
+
+            var dto = new AdminUserDetailsDto
             {
                 Id = u.Id,
                 Name = u.Name,
@@ -66,7 +81,18 @@ namespace Backend.Controllers
                 City = u.City,
                 Role = u.Role,
                 IsActive = u.IsActive,
-                CanEditBirthDate = u.CanEditBirthDate
+                CanEditBirthDate = u.CanEditBirthDate,
+                Purchases = u.Purchases.Select(p => new AdminUserPurchaseDto
+                {
+                    Id = p.Id,
+                    PurchaseType = p.PurchaseType.ToString(),
+                    CourseId = p.CourseId,
+                    BookId = p.BookId,
+                    LearningPathId = p.LearningPathId,
+                    PurchasedAt = p.PurchasedAt
+                }).ToList(),
+                ActiveCourses = courseProgress.Active,
+                CompletedCourses = courseProgress.Completed
             };
 
             return Ok(dto);
@@ -106,6 +132,42 @@ namespace Backend.Controllers
 
             return Ok(new { message = "User role updated.", role = u.Role });
         }
+
+        private static (List<AdminUserCourseProgressDto> Active, List<AdminUserCourseProgressDto> Completed) BuildCourseProgress(User user)
+        {
+            var progressByCourse = user.LessonProgresses
+                .GroupBy(p => p.Lesson.Section.CourseId)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var active = new List<AdminUserCourseProgressDto>();
+            var completed = new List<AdminUserCourseProgressDto>();
+
+            foreach (var userCourse in user.UserCourses)
+            {
+                var course = userCourse.Course;
+                var totalLessons = course.TotalLessons;
+                var completedLessons = progressByCourse.TryGetValue(course.Id, out var count) ? count : 0;
+                var completionPercent = totalLessons == 0
+                    ? 0
+                    : Math.Round((double)completedLessons / totalLessons * 100, 2);
+
+                var dto = new AdminUserCourseProgressDto
+                {
+                    CourseId = course.Id,
+                    CourseTitle = course.Title,
+                    PurchasedAt = userCourse.PurchasedAt,
+                    CompletedAt = userCourse.CompletedAt,
+                    CompletionPercent = completionPercent
+                };
+
+                if (userCourse.CompletedAt.HasValue)
+                    completed.Add(dto);
+                else
+                    active.Add(dto);
+            }
+
+            return (active, completed);
+        }
     }
 
     // DTOs خاصة بلوحة تحكم الأدمن
@@ -130,5 +192,31 @@ namespace Backend.Controllers
     public class AdminUpdateUserRoleRequest
     {
         public string Role { get; set; }
+    }
+
+    public class AdminUserDetailsDto : AdminUserDto
+    {
+        public List<AdminUserPurchaseDto> Purchases { get; set; } = new();
+        public List<AdminUserCourseProgressDto> ActiveCourses { get; set; } = new();
+        public List<AdminUserCourseProgressDto> CompletedCourses { get; set; } = new();
+    }
+
+    public class AdminUserPurchaseDto
+    {
+        public int Id { get; set; }
+        public string PurchaseType { get; set; }
+        public int? CourseId { get; set; }
+        public int? BookId { get; set; }
+        public int? LearningPathId { get; set; }
+        public DateTime PurchasedAt { get; set; }
+    }
+
+    public class AdminUserCourseProgressDto
+    {
+        public int CourseId { get; set; }
+        public string CourseTitle { get; set; }
+        public DateTime? PurchasedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
+        public double CompletionPercent { get; set; }
     }
 }

@@ -16,5 +16,6 @@
         public string AvatarUrl { get; set; }     // الصورة الرمزية للأداة
 
         public ICollection<ToolFile> Files { get; set; }
+        public ICollection<FileMetadata> FileMetadata { get; set; } = new List<FileMetadata>();
     }
 }
