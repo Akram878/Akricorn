@@ -187,6 +187,17 @@
   align-items: center;
 }
 
+.rating-chip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.rating-count {
+  color: #6b7280;
+  font-size: 12px;
+}
+
 .path-courses-list {
   padding-left: 18px;
   margin: 0;

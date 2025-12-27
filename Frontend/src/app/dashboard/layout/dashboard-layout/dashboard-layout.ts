@@ -11,9 +11,19 @@ import { AdminAuthService } from '../../../core/services/admin-auth.service';
   styleUrl: './dashboard-layout.scss',
 })
 export class DashboardLayoutComponent {
+  menuOpen = false;
+
   constructor(public adminAuth: AdminAuthService) {}
 
   onLogout(): void {
     this.adminAuth.logout();
+  }
+
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu(): void {
+    this.menuOpen = false;
   }
 }

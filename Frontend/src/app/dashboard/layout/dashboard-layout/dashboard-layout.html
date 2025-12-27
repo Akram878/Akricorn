@@ -1,101 +1,41 @@
-<div class="dashboard-shell dashboard-shell--dark">
-  <!-- Sidebar -->
-  <aside class="dashboard-shell__sidebar">
-    <div class="sidebar-brand">
-      <div class="sidebar-brand__logo">
-        <!-- مجرد مربع ذهبي بسيط يمكن استبداله بصورة شعار -->
-
-        <div class="brand-text">
-          <span class="brand-text__title">Akricorn</span>
-          <span class="brand-text__subtitle">Admin Panel</span>
-        </div>
+<div class="dashboard-shell">
+  <header class="topbar">
+    <div class="topbar__left">
+      <button class="topbar__hamburger" type="button" (click)="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="topbar__brand">
+        <div class="topbar__logo">Akricorn</div>
+        <div class="topbar__title">Admin Dashboard</div>
       </div>
     </div>
-
-    <nav class="sidebar-nav">
-      <div class="sidebar-nav__section-label">Main</div>
-
-      <a
-        class="sidebar-nav__link"
-        routerLink="/dashboard"
-        routerLinkActive="sidebar-nav__link--active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <span class="sidebar-nav__text">Overview</span>
-      </a>
-
-      <a
-        class="sidebar-nav__link"
-        routerLink="/dashboard/courses"
-        routerLinkActive="sidebar-nav__link--active"
-      >
-        <span class="sidebar-nav__text">Courses</span>
-      </a>
-
-      <a
-        class="sidebar-nav__link"
-        routerLink="/dashboard/books"
-        routerLinkActive="sidebar-nav__link--active"
-      >
-        <span class="sidebar-nav__text">Books</span>
-      </a>
-
-      <a
-        class="sidebar-nav__link"
-        routerLink="/dashboard/paths"
-        routerLinkActive="sidebar-nav__link--active"
-      >
-        <span class="sidebar-nav__text">Learning Paths</span>
-      </a>
-
-      <a
-        class="sidebar-nav__link"
-        routerLink="/dashboard/tools"
-        routerLinkActive="sidebar-nav__link--active"
-      >
-        <span class="sidebar-nav__text">Tools</span>
-      </a>
-
-      <a
-        class="sidebar-nav__link"
-        routerLink="/dashboard/users"
-        routerLinkActive="sidebar-nav__link--active"
-      >
-        <span class="sidebar-nav__text">Users</span>
-      </a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <button class="btn-outline btn-outline--full" (click)="onLogout()">Logout</button>
+    <div class="topbar__right">
+      <span class="topbar__role">Admin</span>
     </div>
-  </aside>
+  </header>
 
-  <!-- Main -->
-  <main class="dashboard-shell__main">
-    <!-- Top bar -->
-    <header class="dashboard-topbar">
-      <div class="dashboard-topbar__left">
-        <div class="topbar-title">
-          <h1 class="topbar-title__main">Dashboard</h1>
-          <p class="topbar-title__subtitle">
-            Manage courses, library and users inside the Akricorn learning platform.
-          </p>
-        </div>
-      </div>
+  <nav class="menu" [class.menu--open]="menuOpen">
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="closeMenu()"
+    >
+      Overview
+    </a>
+    <a routerLink="/dashboard/users" routerLinkActive="active" (click)="closeMenu()">Users</a>
+    <a routerLink="/dashboard/courses" routerLinkActive="active" (click)="closeMenu()">Courses</a>
+    <a routerLink="/dashboard/books" routerLinkActive="active" (click)="closeMenu()">Books</a>
+    <a routerLink="/dashboard/paths" routerLinkActive="active" (click)="closeMenu()"
+      >Learning Paths</a
+    >
+    <a routerLink="/dashboard/tools" routerLinkActive="active" (click)="closeMenu()">Tools</a>
+    <button type="button" class="menu__logout" (click)="onLogout()">Logout</button>
+  </nav>
 
-      <div class="dashboard-topbar__right">
-        <div class="topbar-chip">
-          <span class="topbar-chip__dot"></span>
-          <span class="topbar-chip__text">Admin</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Content wrapper -->
-    <section class="dashboard-shell__content">
-      <div class="dashboard-page-wrapper">
-        <router-outlet></router-outlet>
-      </div>
-    </section>
+  <main class="dashboard-content" (click)="closeMenu()">
+    <router-outlet></router-outlet>
   </main>
 </div>

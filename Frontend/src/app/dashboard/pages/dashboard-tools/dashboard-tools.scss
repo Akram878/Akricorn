@@ -348,6 +348,18 @@ textarea {
   font-size: 12px;
 }
 
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-download {
+  color: #3b6ae3;
+  text-decoration: none;
+  font-size: 13px;
+}
+
 .form-actions {
   display: flex;
   gap: 10px;

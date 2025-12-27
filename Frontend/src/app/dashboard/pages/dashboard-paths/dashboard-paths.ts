@@ -9,6 +9,13 @@ import {
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminCoursesService, AdminCourseDto } from '../../../core/services/admin-courses.service';
 
+type PathView = AdminLearningPathDto & {
+  price?: number;
+  discount?: number;
+  rating?: number;
+  ratingCount?: number;
+};
+
 @Component({
   selector: 'app-dashboard-paths',
   standalone: true,
@@ -17,7 +24,7 @@ import { AdminCoursesService, AdminCourseDto } from '../../../core/services/admi
   styleUrl: './dashboard-paths.scss',
 })
 export class DashboardPaths implements OnInit {
-  paths: AdminLearningPathDto[] = [];
+  paths: PathView[] = [];
   isLoading = false;
   error: string | null = null;
 
@@ -47,6 +54,8 @@ export class DashboardPaths implements OnInit {
       description: ['', [Validators.required, Validators.maxLength(2000)]],
       thumbnailUrl: ['', [Validators.maxLength(500)]],
 
+      price: [0, [Validators.required, Validators.min(0)]],
+      discount: [0, [Validators.min(0)]],
       isActive: [true],
     });
   }
@@ -62,7 +71,7 @@ export class DashboardPaths implements OnInit {
 
     this.adminPaths.getAll().subscribe({
       next: (data) => {
-        this.paths = data;
+        this.paths = data as PathView[];
         this.isLoading = false;
       },
       error: () => {
@@ -101,6 +110,8 @@ export class DashboardPaths implements OnInit {
       description: '',
       thumbnailUrl: '',
 
+      price: 0,
+      discount: 0,
       isActive: true,
     });
     this.selectedCourseIds = [];
@@ -110,7 +121,7 @@ export class DashboardPaths implements OnInit {
   }
 
   // فتح مودال تعديل مسار
-  onEdit(path: AdminLearningPathDto): void {
+  onEdit(path: PathView): void {
     this.editMode = true;
     this.editingPathId = path.id;
 
@@ -119,6 +130,8 @@ export class DashboardPaths implements OnInit {
       description: path.description,
       thumbnailUrl: path.thumbnailUrl ?? '',
 
+      price: path.price ?? 0,
+      discount: path.discount ?? 0,
       isActive: path.isActive,
     });
 
@@ -138,6 +151,8 @@ export class DashboardPaths implements OnInit {
       description: '',
       thumbnailUrl: '',
 
+      price: 0,
+      discount: 0,
       isActive: true,
     });
     this.selectedCourseIds = [];
@@ -183,11 +198,13 @@ export class DashboardPaths implements OnInit {
     this.error = null;
 
     const value = this.pathForm.value;
-    const payload: CreateLearningPathRequest | UpdateLearningPathRequest = {
+    const payload: any = {
       title: value.title,
       description: value.description,
       thumbnailUrl: value.thumbnailUrl,
 
+      price: value.price,
+      discount: value.discount,
       isActive: value.isActive,
       courseIds: [...this.selectedCourseIds], // الترتيب مهم هنا
     };

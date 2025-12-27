@@ -9,6 +9,15 @@ import {
 } from '../../../core/services/admin-books.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BookEditorComponent } from './book-content-editor/book-content-editor';
+type BookFileView = BookFileDto & {
+  originalName?: string;
+  downloadUrl?: string;
+  size?: number;
+  mimeType?: string;
+};
+
+type BookView = AdminBookDto & { rating?: number; ratingCount?: number; files?: BookFileView[] };
+
 @Component({
   selector: 'app-dashboard-books',
   standalone: true,
@@ -20,8 +29,8 @@ export class DashboardBooks implements OnInit {
   @ViewChild(BookEditorComponent)
   editorComponent!: BookEditorComponent;
 
-  books: AdminBookDto[] = [];
-  bookFiles: BookFileDto[] = [];
+  books: BookView[] = [];
+  bookFiles: BookFileView[] = [];
 
   // فورم إنشاء / تعديل كتاب
   isLoading = false;
@@ -41,7 +50,6 @@ export class DashboardBooks implements OnInit {
       category: ['', [Validators.required, Validators.maxLength(150)]],
       description: ['', [Validators.required, Validators.maxLength(4000)]],
       price: [0, [Validators.required, Validators.min(0)]],
-      fileUrl: ['', [Validators.maxLength(500)]],
       thumbnailUrl: [''],
       isActive: [true],
     });
@@ -57,7 +65,7 @@ export class DashboardBooks implements OnInit {
 
     this.adminBooks.getAll().subscribe({
       next: (data) => {
-        this.books = data;
+        this.books = data as BookView[];
         this.isLoading = false;
       },
       error: () => {
@@ -80,7 +88,6 @@ export class DashboardBooks implements OnInit {
       category: '',
       description: '',
       price: 0,
-      fileUrl: '',
       thumbnailUrl: '',
       isActive: true,
     });
@@ -97,15 +104,14 @@ export class DashboardBooks implements OnInit {
     this.adminBooks.getById(book.id).subscribe({
       next: (res) => {
         this.isLoadingDetails = false;
-        this.selectedBook = res;
-        this.bookFiles = res.files ?? [];
+        this.selectedBook = res as BookView;
+        this.bookFiles = (res.files as BookFileView[]) ?? [];
 
         this.bookForm.setValue({
           title: res.title,
           category: res.category,
           description: res.description,
           price: res.price,
-          fileUrl: res.fileUrl,
           thumbnailUrl: res.thumbnailUrl ?? '',
           isActive: res.isActive,
         });
@@ -129,7 +135,7 @@ export class DashboardBooks implements OnInit {
       description: v.description,
       category: v.category,
       price: v.price,
-      fileUrl: v.fileUrl ?? '',
+      fileUrl: '',
       thumbnailUrl: this.selectedThumbnailFile
         ? this.selectedBook?.thumbnailUrl ?? ''
         : v.thumbnailUrl,
@@ -204,7 +210,7 @@ export class DashboardBooks implements OnInit {
     this.selectedThumbnailFile = file;
   }
 
-  handleFilesUpdated(files: BookFileDto[]): void {
+  handleFilesUpdated(files: BookFileView[]): void {
     this.bookFiles = files;
   }
 

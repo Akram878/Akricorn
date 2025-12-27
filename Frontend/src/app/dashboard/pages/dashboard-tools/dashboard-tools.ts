@@ -9,6 +9,15 @@ import {
 } from '../../../core/services/admin-tools.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+type ToolFileView = ToolFileDto & {
+  originalName?: string;
+  downloadUrl?: string;
+  size?: number;
+  mimeType?: string;
+};
+
+type ToolView = AdminToolDto & { files?: ToolFileView[] };
+
 @Component({
   selector: 'app-dashboard-tools',
   standalone: true,
@@ -17,7 +26,7 @@ import { firstValueFrom } from 'rxjs';
   styleUrl: './dashboard-tools.scss',
 })
 export class DashboardTools implements OnInit {
-  tools: AdminToolDto[] = [];
+  tools: ToolView[] = [];
   isLoading = false;
   error: string | null = null;
 
@@ -28,7 +37,7 @@ export class DashboardTools implements OnInit {
   editingTool: AdminToolDto | null = null;
   toolForm: FormGroup;
 
-  toolFiles: ToolFileDto[] = [];
+  toolFiles: ToolFileView[] = [];
   pendingFiles: File[] = [];
   avatarFile: File | null = null;
   avatarPreview: string | null = null;
@@ -38,6 +47,8 @@ export class DashboardTools implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.required, Validators.maxLength(2000)]],
       url: ['', [Validators.maxLength(500)]],
+      category: ['', [Validators.maxLength(150)]],
+      displayOrder: [1, [Validators.min(1)]],
       isActive: [true],
     });
   }
@@ -52,7 +63,7 @@ export class DashboardTools implements OnInit {
 
     this.adminTools.getAll().subscribe({
       next: (data) => {
-        this.tools = data;
+        this.tools = data as ToolView[];
         this.isLoading = false;
       },
       error: () => {
@@ -74,7 +85,8 @@ export class DashboardTools implements OnInit {
       name: '',
       description: '',
       url: '',
-
+      category: '',
+      displayOrder: this.tools.length + 1,
       isActive: true,
     });
     this.showForm = true;
@@ -85,7 +97,7 @@ export class DashboardTools implements OnInit {
     this.isEditMode = true;
     this.editingToolId = tool.id;
     this.editingTool = tool;
-    this.toolFiles = [...(tool.files || [])];
+    this.toolFiles = [...((tool.files as ToolFileView[]) || [])];
     this.pendingFiles = [];
     this.avatarFile = null;
     this.avatarPreview = tool.avatarUrl ?? null;
@@ -94,7 +106,8 @@ export class DashboardTools implements OnInit {
       name: tool.name,
       description: tool.description,
       url: tool.url,
-
+      category: tool.category ?? '',
+      displayOrder: tool.displayOrder ?? 1,
       isActive: tool.isActive,
     });
 
@@ -112,7 +125,8 @@ export class DashboardTools implements OnInit {
       name: '',
       description: '',
       url: '',
-
+      category: '',
+      displayOrder: this.tools.length + 1,
       isActive: true,
     });
     this.toolFiles = [];
@@ -165,8 +179,8 @@ export class DashboardTools implements OnInit {
       url: value.url,
 
       isActive: value.isActive,
-      category: this.editingTool?.category ?? 'General',
-      displayOrder: this.editingTool?.displayOrder ?? this.tools.length + 1,
+      category: value.category || 'General',
+      displayOrder: value.displayOrder || this.tools.length + 1,
     };
 
     try {

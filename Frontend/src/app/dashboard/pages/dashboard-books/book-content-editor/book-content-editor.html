@@ -41,17 +41,6 @@
         <label for="description">Description</label>
         <textarea id="description" rows="3" formControlName="description"></textarea>
       </div>
-
-      <div class="form-field full-width">
-        <label for="fileUrl">Primary file URL</label>
-        <input
-          id="fileUrl"
-          type="text"
-          formControlName="fileUrl"
-          placeholder="Optional direct link"
-        />
-        <small class="field-hint">Will be auto-set from uploads if left empty.</small>
-      </div>
     </div>
 
     <div class="book-editor__panels">
@@ -93,8 +82,19 @@
         <ul class="file-list" *ngIf="bookFiles.length > 0">
           <li *ngFor="let f of bookFiles" class="file-item">
             <div>
-              <div class="file-name">{{ f.fileName }}</div>
-              <div class="file-meta">{{ f.sizeBytes | number }} bytes</div>
+              <div class="file-name">{{ f.originalName ?? f.fileName }}</div>
+              <div class="file-meta">
+                {{ ((f.size ?? f.sizeBytes ?? 0) / 1024) | number : '1.0-1' }} KB •
+                {{ f.mimeType ?? f.contentType }}
+              </div>
+              <a
+                class="file-download"
+                [attr.href]="f.downloadUrl ?? f.fileUrl"
+                target="_blank"
+                rel="noopener"
+              >
+                Download
+              </a>
             </div>
             <button
               type="button"

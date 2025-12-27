@@ -38,6 +38,7 @@ import { DashboardBooks } from './dashboard/pages/dashboard-books/dashboard-book
 import { DashboardPaths } from './dashboard/pages/dashboard-paths/dashboard-paths';
 import { DashboardTools } from './dashboard/pages/dashboard-tools/dashboard-tools';
 import { DashboardUsers } from './dashboard/pages/dashboard-users/dashboard-users';
+import { DashboardUserDetailComponent } from './dashboard/pages/dashboard-user-detail/dashboard-user-detail';
 
 import { MyCourses } from './features/lms/my-courses/my-courses';
 import { MyBooks } from './features/lms/my-books/my-books';
@@ -136,6 +137,7 @@ export const routes: Routes = [
       { path: 'paths', component: DashboardPaths },
       { path: 'tools', component: DashboardTools },
       { path: 'users', component: DashboardUsers },
+      { path: 'users/:id', component: DashboardUserDetailComponent },
     ],
   },
 

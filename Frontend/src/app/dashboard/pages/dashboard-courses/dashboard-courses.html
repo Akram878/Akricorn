@@ -27,7 +27,8 @@
 
           <th>Hours</th>
           <th>Price</th>
-          <th>Path</th>
+          <th>Rating</th>
+          <th>Path IDs</th>
           <th>Active</th>
 
           <th>Actions</th>
@@ -42,7 +43,13 @@
 
           <td>{{ c.hours }}</td>
           <td>{{ c.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
-          <td>{{ c.pathIds?.length ? c.pathIds[0] : '-' }}</td>
+          <td>
+            <div class="rating-chip">
+              <span>{{ (c.rating ?? 0) | number : '1.1-1' }}</span>
+              <span class="rating-count">({{ c.ratingCount ?? 0 }})</span>
+            </div>
+          </td>
+          <td>{{ c.pathIds?.length ? c.pathIds.join(', ') : '-' }}</td>
 
           <td>
             <span [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">

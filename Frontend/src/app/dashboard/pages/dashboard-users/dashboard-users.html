@@ -17,7 +17,6 @@
         <th>City</th>
         <th>Role</th>
         <th>Active</th>
-        <th>Birth Edit</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -35,12 +34,11 @@
             {{ u.isActive ? 'Active' : 'Inactive' }}
           </span>
         </td>
-        <td>{{ u.canEditBirthDate ? 'Yes' : 'No' }}</td>
         <td>
           <button class="btn-secondary" (click)="onToggle(u)">
             {{ u.isActive ? 'Disable' : 'Enable' }}
           </button>
-          <button class="btn-primary" (click)="onChangeRole(u)">Change Role</button>
+          <a class="btn-primary" [routerLink]="['/dashboard/users', u.id]">View Details</a>
         </td>
       </tr>
     </tbody>

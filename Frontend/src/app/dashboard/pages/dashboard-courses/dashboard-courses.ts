@@ -24,7 +24,7 @@ export class DashboardCourses implements OnInit {
   @ViewChild(CourseContentEditor)
   contentEditor!: CourseContentEditor;
 
-  courses: AdminCourseDto[] = [];
+  courses: (AdminCourseDto & { rating?: number; ratingCount?: number })[] = [];
   paths: AdminLearningPathDto[] = [];
 
   isLoading = false;

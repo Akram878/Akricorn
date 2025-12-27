@@ -3,6 +3,13 @@ import { CommonModule, CurrencyPipe, NgIf, NgForOf } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AdminBooksService, BookFileDto } from '../../../../core/services/admin-books.service';
 
+type BookFileView = BookFileDto & {
+  originalName?: string;
+  downloadUrl?: string;
+  size?: number;
+  mimeType?: string;
+};
+
 @Component({
   selector: 'app-book-editor',
   standalone: true,
@@ -16,14 +23,14 @@ export class BookEditorComponent implements OnChanges {
   @Input() isCreateMode = false;
   @Input() isSaving = false;
   @Input() isLoadingDetails = false;
-  @Input() files: BookFileDto[] = [];
+  @Input() files: BookFileView[] = [];
 
   @Output() closeEditor = new EventEmitter<void>();
   @Output() submitForm = new EventEmitter<void>();
   @Output() thumbnailSelected = new EventEmitter<File>();
-  @Output() filesUpdated = new EventEmitter<BookFileDto[]>();
+  @Output() filesUpdated = new EventEmitter<BookFileView[]>();
 
-  bookFiles: BookFileDto[] = [];
+  bookFiles: BookFileView[] = [];
   uploading = false;
   deletingFileId: number | null = null;
   error: string | null = null;
@@ -67,7 +74,7 @@ export class BookEditorComponent implements OnChanges {
     files.forEach((file) => {
       this.adminBooks.uploadFile(this.bookId, file).subscribe({
         next: (res) => {
-          this.bookFiles = res.book?.files ?? this.bookFiles;
+          this.bookFiles = (res.book?.files as BookFileView[]) ?? this.bookFiles;
           this.filesUpdated.emit(this.bookFiles);
           completed++;
           if (completed === files.length) this.uploading = false;

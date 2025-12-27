@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { AdminUsersService, AdminUserDto } from '../../../core/services/admin-users.service';
 
 @Component({
   selector: 'app-dashboard-users',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf],
+  imports: [CommonModule, NgIf, NgForOf, RouterLink],
   templateUrl: './dashboard-users.html',
   styleUrl: './dashboard-users.scss',
 })
@@ -14,7 +15,7 @@ export class DashboardUsers implements OnInit {
   isLoading = false;
   error: string | null = null;
 
-  constructor(private adminUsers: AdminUsersService) {}
+  constructor(private adminUsers: AdminUsersService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -43,23 +44,6 @@ export class DashboardUsers implements OnInit {
       },
       error: () => {
         this.error = 'Failed to change status.';
-      },
-    });
-  }
-
-  onChangeRole(user: AdminUserDto): void {
-    const newRole = prompt(
-      `New role for "${user.name} ${user.family}" (current: ${user.role})`,
-      user.role
-    );
-    if (!newRole) return;
-
-    this.adminUsers.changeRole(user.id, newRole).subscribe({
-      next: (res) => {
-        user.role = res.role;
-      },
-      error: () => {
-        this.error = 'Failed to update role.';
       },
     });
   }

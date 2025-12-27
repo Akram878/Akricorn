@@ -1,0 +1,109 @@
+:host {
+  display: block;
+}
+
+.user-detail {
+  background: #0b1220;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.user-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.user-detail__header h2 {
+  margin: 4px 0 0 0;
+  font-size: 20px;
+}
+
+.user-detail__header p {
+  margin: 4px 0 0 0;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.back-link {
+  color: #38bdf8;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.tags {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.tag {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.tag--status {
+  background: #0f172a;
+}
+
+.card {
+  margin-top: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px;
+  background: #0f172a;
+}
+
+.card h3,
+.card h4 {
+  margin: 0 0 10px 0;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+}
+
+th {
+  text-align: left;
+  color: #cbd5e1;
+}
+
+.empty {
+  padding: 10px 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.status {
+  padding: 10px 12px;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.status.error {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fecdd3;
+}

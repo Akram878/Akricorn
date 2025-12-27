@@ -1,4 +1,38 @@
-<div class="dashboard-home">
-  <h2>Welcome to Akricorn Admin Dashboard</h2>
-  <p>Select a section from the sidebar to start managing content.</p>
+<div class="overview">
+  <div class="overview__header">
+    <div>
+      <h2>Overview</h2>
+      <p>Platform-wide snapshot for administrators.</p>
+    </div>
+  </div>
+
+  <div class="status" *ngIf="error">{{ error }}</div>
+  <div class="status" *ngIf="isLoading">Loading...</div>
+
+  <div class="stats-grid" *ngIf="stats && !isLoading">
+    <div class="stat-card">
+      <div class="stat-card__label">Total users</div>
+      <div class="stat-card__value">{{ stats.totalUsers }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Active users</div>
+      <div class="stat-card__value">{{ stats.activeUsers }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Courses</div>
+      <div class="stat-card__value">{{ stats.courses }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Books</div>
+      <div class="stat-card__value">{{ stats.books }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Learning paths</div>
+      <div class="stat-card__value">{{ stats.learningPaths }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Tools</div>
+      <div class="stat-card__value">{{ stats.tools }}</div>
+    </div>
+  </div>
 </div>

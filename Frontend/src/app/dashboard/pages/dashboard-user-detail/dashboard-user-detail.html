@@ -1,0 +1,149 @@
+<div class="user-detail">
+  <div class="user-detail__header">
+    <div>
+      <a routerLink="/dashboard/users" class="back-link">← Users</a>
+      <h2>User Details</h2>
+      <p *ngIf="user">{{ user.name }} {{ user.family }} • {{ user.email }}</p>
+      <p *ngIf="!user">User ID {{ userId }}</p>
+    </div>
+    <div class="tags">
+      <span class="tag" *ngIf="user">{{ user.role }}</span>
+      <span class="tag tag--status" *ngIf="user">{{ user.isActive ? 'Active' : 'Disabled' }}</span>
+    </div>
+  </div>
+
+  <div class="status" *ngIf="isLoading">Loading...</div>
+  <div class="status error" *ngIf="error">{{ error }}</div>
+
+  <ng-container *ngIf="overview && !isLoading">
+    <section class="card">
+      <h3>Purchases</h3>
+      <div class="split">
+        <div>
+          <h4>Courses</h4>
+          <table *ngIf="overview.purchases?.courses?.length; else noCoursePurchases">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of overview.purchases.courses">
+                <td>{{ c.id ?? c.courseId ?? '-' }}</td>
+                <td>{{ c.title ?? c.name ?? 'Course' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noCoursePurchases
+            ><div class="empty">No course purchases.</div></ng-template
+          >
+        </div>
+
+        <div>
+          <h4>Books</h4>
+          <table *ngIf="overview.purchases?.books?.length; else noBookPurchases">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let b of overview.purchases.books">
+                <td>{{ b.id ?? b.bookId ?? '-' }}</td>
+                <td>{{ b.title ?? 'Book' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noBookPurchases><div class="empty">No book purchases.</div></ng-template>
+        </div>
+
+        <div>
+          <h4>Learning Paths</h4>
+          <table *ngIf="overview.purchases?.paths?.length; else noPathPurchases">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of overview.purchases.paths">
+                <td>{{ p.id ?? p.learningPathId ?? '-' }}</td>
+                <td>{{ p.title ?? 'Path' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noPathPurchases
+            ><div class="empty">No learning path purchases.</div></ng-template
+          >
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Course Progress</h3>
+      <div class="split">
+        <div>
+          <h4>Active</h4>
+          <table *ngIf="overview.courses?.active?.length; else noActive">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of overview.courses.active">
+                <td>{{ c.title ?? c.courseTitle ?? 'Course' }}</td>
+                <td>{{ c.completionPercent ?? c.progress ?? 0 }}%</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noActive><div class="empty">No active courses.</div></ng-template>
+        </div>
+
+        <div>
+          <h4>Completed</h4>
+          <table *ngIf="overview.courses?.completed?.length; else noCompleted">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Completed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of overview.courses.completed">
+                <td>{{ c.title ?? c.courseTitle ?? 'Course' }}</td>
+                <td>{{ c.completedAt || 'Yes' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noCompleted><div class="empty">No completed courses.</div></ng-template>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Learning Paths</h3>
+      <table *ngIf="overview.learningPaths?.length; else noPaths">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Completion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of overview.learningPaths">
+            <td>{{ p.id ?? p.learningPathId ?? '-' }}</td>
+            <td>{{ p.title ?? 'Learning Path' }}</td>
+            <td>{{ p.completionPercent ?? 0 }}%</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noPaths><div class="empty">No learning path progress.</div></ng-template>
+    </section>
+  </ng-container>
+</div>

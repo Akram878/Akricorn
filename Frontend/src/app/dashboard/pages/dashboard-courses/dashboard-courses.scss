@@ -195,3 +195,14 @@
 .editor-wrapper {
   margin-top: 12px;
 }
+
+.rating-chip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.rating-count {
+  color: #6b7280;
+  font-size: 12px;
+}
