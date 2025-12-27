@@ -61,6 +61,9 @@ namespace Backend.Controllers
             if (string.IsNullOrWhiteSpace(request.Name))
                 return BadRequest(new { message = "Name is required." });
 
+            if (request.Files?.Any() == true)
+                return BadRequest(new { message = "Files must be uploaded using the dedicated upload endpoint." });
+
           
             var tool = new Tool
             {
@@ -76,27 +79,6 @@ namespace Backend.Controllers
 
             _context.Tools.Add(tool);
             await _context.SaveChangesAsync();
-
-            if (request.Files?.Any() == true)
-            {
-                var files = request.Files.Select(f => new ToolFile
-                {
-                    ToolId = tool.Id,
-                    FileMetadata = new FileMetadata
-                    {
-                        OriginalName = f.OriginalName,
-                        StoredName = f.StoredName,
-                        Size = f.Size,
-                        MimeType = f.MimeType ?? "application/octet-stream",
-                        Extension = Path.GetExtension(f.StoredName),
-                        OwnerEntityType = "Tool",
-                        OwnerEntityId = tool.Id
-                    }
-                }).ToList();
-
-                _context.ToolFiles.AddRange(files);
-                await _context.SaveChangesAsync();
-            }
 
             return Ok(new { message = "Tool created successfully.", toolId = tool.Id });
         }
@@ -116,6 +98,9 @@ namespace Backend.Controllers
             if (string.IsNullOrWhiteSpace(request.Name))
                 return BadRequest(new { message = "Name is required." });
 
+            if (request.Files?.Any() == true)
+                return BadRequest(new { message = "Files must be uploaded using the dedicated upload endpoint." });
+
            
 
             tool.Name = request.Name;
@@ -125,32 +110,6 @@ namespace Backend.Controllers
             tool.IsActive = request.IsActive;
             tool.DisplayOrder = request.DisplayOrder;
             tool.AvatarUrl = string.IsNullOrWhiteSpace(request.AvatarUrl) ? tool.AvatarUrl : request.AvatarUrl;
-
-            if (request.Files?.Any() == true)
-            {
-
-                if (tool.Files != null && tool.Files.Any())
-                {
-                    _context.ToolFiles.RemoveRange(tool.Files);
-                }
-
-                var files = request.Files.Select(f => new ToolFile
-                {
-                    ToolId = tool.Id,
-                    FileMetadata = new FileMetadata
-                    {
-                        OriginalName = f.OriginalName,
-                        StoredName = f.StoredName,
-                        Size = f.Size,
-                        MimeType = f.MimeType ?? "application/octet-stream",
-                        Extension = Path.GetExtension(f.StoredName),
-                        OwnerEntityType = "Tool",
-                        OwnerEntityId = tool.Id
-                    }
-                }).ToList();
-
-                _context.ToolFiles.AddRange(files);
-            }
 
             await _context.SaveChangesAsync();
 

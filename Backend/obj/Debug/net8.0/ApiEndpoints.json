@@ -855,6 +855,22 @@
   },
   {
     "ContainingType": "Backend.Controllers.AdminUsersController",
+    "Method": "GetLmsOverview",
+    "RelativePath": "api/admin/users/{id}/lms-overview",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.AdminUsersController",
     "Method": "ChangeRole",
     "RelativePath": "api/admin/users/{id}/role",
     "HttpMethod": "PATCH",
@@ -1106,6 +1122,22 @@
   },
   {
     "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "PurchaseLearningPath",
+    "RelativePath": "api/lms/learning-paths/{pathId}/purchase",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "pathId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
     "Method": "GetMyBooks",
     "RelativePath": "api/lms/my-books",
     "HttpMethod": "GET",
@@ -1231,6 +1263,69 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "RateBook",
+    "RelativePath": "api/ratings/book/{bookId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.LmsController\u002BRatingRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "RateCourse",
+    "RelativePath": "api/ratings/course/{courseId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "courseId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.LmsController\u002BRatingRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.LmsController",
+    "Method": "RateLearningPath",
+    "RelativePath": "api/ratings/path/{learningPathId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "learningPathId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "Backend.Controllers.LmsController\u002BRatingRequest",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   }
 ]

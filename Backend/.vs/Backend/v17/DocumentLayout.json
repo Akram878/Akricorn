@@ -271,8 +271,7 @@
               "RelativeToolTip": "Models\\UserLoginRequest.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T10:11:45.481Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T10:11:45.481Z"
             },
             {
               "$type": "Document",
@@ -284,8 +283,7 @@
               "RelativeToolTip": "Models\\UserPurchase.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAAowB8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-27T06:54:36.567Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-27T06:54:36.567Z"
             },
             {
               "$type": "Document",
@@ -297,8 +295,7 @@
               "RelativeToolTip": "Controllers\\AuthController.cs",
               "ViewState": "AgIAAH0BAAAAAAAAAAAkwIcBAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T05:51:11.127Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T05:51:11.127Z"
             },
             {
               "$type": "Document",
@@ -308,7 +305,7 @@
               "RelativeDocumentMoniker": "Controllers\\AdminToolsController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AdminToolsController.cs",
               "RelativeToolTip": "Controllers\\AdminToolsController.cs",
-              "ViewState": "AgIAAMQBAAAAAAAAAAAiwNIBAAAyAAAAAAAAAA==",
+              "ViewState": "AgIAAMQBAAAAAAAAAAA2wNIBAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-30T09:11:56.05Z",
               "EditorCaption": ""
@@ -323,8 +320,7 @@
               "RelativeToolTip": "Models\\UserCourse.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T07:05:37.87Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-29T07:05:37.87Z"
             },
             {
               "$type": "Document",
@@ -336,8 +332,7 @@
               "RelativeToolTip": "Models\\FileMetadata.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-27T06:47:53.247Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-27T06:47:53.247Z"
             },
             {
               "$type": "Document",
@@ -349,8 +344,7 @@
               "RelativeToolTip": "Models\\CourseSection.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-07T14:56:12.709Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-07T14:56:12.709Z"
             },
             {
               "$type": "Document",
@@ -362,8 +356,7 @@
               "RelativeToolTip": "Helpers\\BookStorageHelper.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-13T02:39:03.626Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-13T02:39:03.626Z"
             },
             {
               "$type": "Document",
@@ -375,8 +368,7 @@
               "RelativeToolTip": "Helpers\\CountryCatalog.cs",
               "ViewState": "AgIAAKIAAAAAAAAAAAAowKsAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-25T10:32:27.378Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-25T10:32:27.378Z"
             },
             {
               "$type": "Document",
@@ -388,8 +380,7 @@
               "RelativeToolTip": "Helpers\\CourseStorageHelper.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAQwAcAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-10T11:12:13.336Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-10T11:12:13.336Z"
             },
             {
               "$type": "Document",
@@ -401,8 +392,7 @@
               "RelativeToolTip": "Helpers\\FileValidationHelper.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-27T06:44:22.218Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-27T06:44:22.218Z"
             },
             {
               "$type": "Document",
@@ -414,8 +404,7 @@
               "RelativeToolTip": "Helpers\\ToolStorageHelper.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-14T07:55:47.403Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-14T07:55:47.403Z"
             },
             {
               "$type": "Document",
@@ -427,8 +416,7 @@
               "RelativeToolTip": "Controllers\\AdminBooksController.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAAACMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-30T08:41:16.392Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-30T08:41:16.392Z"
             },
             {
               "$type": "Document",
@@ -440,8 +428,7 @@
               "RelativeToolTip": "Controllers\\AdminCoursesController.cs",
               "ViewState": "AgIAAB4AAAAAAAAAAIAwwDIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-10T02:31:32.246Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-10T02:31:32.246Z"
             },
             {
               "$type": "Document",

@@ -1459,6 +1459,29 @@
         }
       }
     },
+    "/api/admin/users/{id}/lms-overview": {
+      "get": {
+        "tags": [
+          "AdminUsers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/admin/users/{id}/toggle": {
       "patch": {
         "tags": [
@@ -1887,6 +1910,155 @@
         }
       }
     },
+    "/api/lms/learning-paths/{pathId}/purchase": {
+      "post": {
+        "tags": [
+          "Lms"
+        ],
+        "parameters": [
+          {
+            "name": "pathId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ratings/course/{courseId}": {
+      "post": {
+        "tags": [
+          "Lms"
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ratings/book/{bookId}": {
+      "post": {
+        "tags": [
+          "Lms"
+        ],
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ratings/path/{learningPathId}": {
+      "post": {
+        "tags": [
+          "Lms"
+        ],
+        "parameters": [
+          {
+            "name": "learningPathId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RatingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/lms/my-courses": {
       "get": {
         "tags": [
@@ -2281,7 +2453,7 @@
             "type": "string",
             "nullable": true
           },
-          "fileUrl": {
+          "downloadUrl": {
             "type": "string",
             "nullable": true
           },
@@ -2291,6 +2463,14 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "ratingCount": {
+            "type": "integer",
+            "format": "int32"
           },
           "files": {
             "type": "array",
@@ -2309,19 +2489,23 @@
             "type": "integer",
             "format": "int32"
           },
-          "fileName": {
+          "originalName": {
             "type": "string",
             "nullable": true
           },
-          "fileUrl": {
+          "storedName": {
             "type": "string",
             "nullable": true
           },
-          "sizeBytes": {
+          "downloadUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "size": {
             "type": "integer",
             "format": "int64"
           },
-          "contentType": {
+          "mimeType": {
             "type": "string",
             "nullable": true
           }
@@ -2361,6 +2545,10 @@
           "rating": {
             "type": "number",
             "format": "double"
+          },
+          "ratingCount": {
+            "type": "integer",
+            "format": "int32"
           },
           "thumbnailUrl": {
             "type": "string",
@@ -2432,10 +2620,6 @@
             "type": "string",
             "nullable": true
           },
-          "rating": {
-            "type": "number",
-            "format": "double"
-          },
           "thumbnailUrl": {
             "type": "string",
             "nullable": true
@@ -2466,10 +2650,6 @@
             "type": "boolean"
           },
           "price": {
-            "type": "number",
-            "format": "double"
-          },
-          "rating": {
             "type": "number",
             "format": "double"
           },
@@ -2602,6 +2782,10 @@
             "type": "number",
             "format": "double"
           },
+          "ratingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
           "discount": {
             "type": "number",
             "format": "double"
@@ -2629,6 +2813,20 @@
             "nullable": true
           },
           "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RatingRequest": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
             "type": "string",
             "nullable": true
           }
@@ -2732,19 +2930,23 @@
             "type": "integer",
             "format": "int32"
           },
-          "fileName": {
+          "originalName": {
             "type": "string",
             "nullable": true
           },
-          "fileUrl": {
+          "storedName": {
             "type": "string",
             "nullable": true
           },
-          "sizeBytes": {
+          "downloadUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "size": {
             "type": "integer",
             "format": "int64"
           },
-          "contentType": {
+          "mimeType": {
             "type": "string",
             "nullable": true
           }
@@ -2832,10 +3034,6 @@
             "type": "string",
             "nullable": true
           },
-          "rating": {
-            "type": "number",
-            "format": "double"
-          },
           "thumbnailUrl": {
             "type": "string",
             "nullable": true
@@ -2866,10 +3064,6 @@
             "type": "boolean"
           },
           "price": {
-            "type": "number",
-            "format": "double"
-          },
-          "rating": {
             "type": "number",
             "format": "double"
           },
