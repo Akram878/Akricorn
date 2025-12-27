@@ -303,11 +303,6 @@ export class AuthService {
       return null;
     }
 
-    if (isTokenExpired(token)) {
-      this.handleAdminAuthFailure();
-      return null;
-    }
-
     return token;
   }
 
