@@ -328,15 +328,16 @@ namespace Backend.Controllers
             foreach (var existing in Directory.GetFiles(folder))
                 System.IO.File.Delete(existing);
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var path = Path.Combine(folder, fileName);
+            var originalName = ExtractOriginalName(file);
+            var storedName = $"{Guid.NewGuid()}{Path.GetExtension(originalName)}";
+            var path = Path.Combine(folder, storedName);
 
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            var relativePath = Path.Combine("courses", $"course-{courseId}", "thumbnail", fileName)
+            var relativePath = Path.Combine("courses", $"course-{courseId}", "thumbnail", storedName)
                .Replace("\\", "/");
 
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
@@ -391,6 +392,31 @@ namespace Backend.Controllers
             public double Rating { get; set; }
             public string ThumbnailUrl { get; set; }
             public List<int> PathIds { get; set; } = new();
+        }
+
+        private static string ExtractOriginalName(IFormFile file)
+        {
+            var disposition = file?.ContentDisposition ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(disposition))
+            {
+                var tokens = disposition.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var token in tokens)
+                {
+                    var trimmed = token.Trim();
+                    if (trimmed.StartsWith("filename*", StringComparison.OrdinalIgnoreCase) ||
+                        trimmed.StartsWith("filename", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var idx = trimmed.IndexOf('=');
+                        if (idx >= 0 && idx + 1 < trimmed.Length)
+                        {
+                            var value = trimmed[(idx + 1)..].Trim('\"');
+                            return Uri.UnescapeDataString(value);
+                        }
+                    }
+                }
+            }
+
+            return "file";
         }
 
         private void EnsureCourseDirectories(int courseId)

@@ -72,8 +72,8 @@ public class AdminCourseContentController : ControllerBase
                             files = l.Files.Select(f => new
                             {
                                 id = f.Id,
-                                fileName = f.FileMetadata?.OriginalName ?? f.FileName,
-                                fileUrl = BuildLessonFileUrl(f.Id)
+                                name = f.FileMetadata?.OriginalName ?? throw new InvalidOperationException("File metadata missing."),
+                                downloadUrl = BuildLessonDownloadUrl(f.Id)
                             })
                         })
                 })
@@ -82,7 +82,7 @@ public class AdminCourseContentController : ControllerBase
 
     }
 
-    private string BuildLessonFileUrl(int fileId)
+    private string BuildLessonDownloadUrl(int fileId)
     {
         return Url.Content($"/api/lessons/files/{fileId}");
     }
@@ -328,21 +328,22 @@ public class AdminCourseContentController : ControllerBase
             var folder = CourseStorageHelper.GetLessonFolder(lesson.Section.CourseId, lesson.SectionId, lesson.Id);
             Directory.CreateDirectory(folder);
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var path = Path.Combine(folder, fileName);
+            var originalName = ExtractOriginalName(file);
+            var storedName = $"{Guid.NewGuid()}{Path.GetExtension(originalName)}";
+            var path = Path.Combine(folder, storedName);
 
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            var extension = Path.GetExtension(file.FileName);
+            var extension = Path.GetExtension(originalName);
             var metadata = new FileMetadata
             {
-                OriginalName = file.FileName,
-                StoredName = fileName,
+                OriginalName = originalName,
+                StoredName = storedName,
                 Size = file.Length,
-                MimeType = file.ContentType ?? "application/octet-stream",
+                MimeType = ResolveMimeType(file),
                 Extension = extension,
                 OwnerEntityType = "CourseLesson",
                 OwnerEntityId = lesson.Id
@@ -353,10 +354,6 @@ public class AdminCourseContentController : ControllerBase
             var newFile = new CourseLessonFile
             {
                 LessonId = lessonId,
-                FileName = file.FileName,
-                FileUrl = fileName,
-                SizeBytes = file.Length,
-                ContentType = file.ContentType ?? "application/octet-stream",
                 FileMetadata = metadata
             };
 
@@ -364,7 +361,7 @@ public class AdminCourseContentController : ControllerBase
             await _context.SaveChangesAsync();
 
             var content = await BuildCourseContentDto(lesson.Section.CourseId);
-            var fileAccessUrl = BuildLessonFileUrl(newFile.Id);
+            var fileAccessUrl = BuildLessonDownloadUrl(newFile.Id);
 
             return Ok(new
             {
@@ -400,24 +397,10 @@ public class AdminCourseContentController : ControllerBase
         var lessonId = entity.LessonId;
         var fileFolder = CourseStorageHelper.GetLessonFolder(courseId, sectionId, lessonId);
 
-        var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
-        if (!string.IsNullOrEmpty(fileName))
-        {
-            var physicalPath = Path.Combine(fileFolder, fileName);
-            if (System.IO.File.Exists(physicalPath))
-                System.IO.File.Delete(physicalPath);
-
-            else
-            {
-                var legacyFolder = Path.Combine(
-                    CourseStorageHelper.GetLegacyContentFolder(courseId),
-                    $"section-{sectionId}",
-                    $"lesson-{lessonId}");
-                var legacyPath = Path.Combine(legacyFolder, fileName);
-                if (System.IO.File.Exists(legacyPath))
-                    System.IO.File.Delete(legacyPath);
-            }
-        }
+        var metadata = entity.FileMetadata ?? throw new InvalidOperationException("File metadata missing for lesson file.");
+        var physicalPath = Path.Combine(fileFolder, metadata.StoredName);
+        if (System.IO.File.Exists(physicalPath))
+            System.IO.File.Delete(physicalPath);
 
         _context.CourseLessonFiles.Remove(entity);
         await _context.SaveChangesAsync();
@@ -426,16 +409,6 @@ public class AdminCourseContentController : ControllerBase
         var content = await BuildCourseContentDto(courseId);
 
         return Ok(new { message = "File deleted.", content });
-    }
-
-    private static string TryExtractFileName(string fileUrl)
-    {
-        if (Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
-            return Path.GetFileName(uri.LocalPath);
-
-        return Path.GetFileName(fileUrl);
-
-
     }
 
     private async Task UpdateCourseTotals(int courseId)
@@ -452,6 +425,37 @@ public class AdminCourseContentController : ControllerBase
         course.TotalSections = totalSections;
         course.TotalLessons = totalLessons;
         await _context.SaveChangesAsync();
+    }
+
+    private static string ExtractOriginalName(IFormFile file)
+    {
+        var disposition = file?.ContentDisposition ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(disposition))
+        {
+            var tokens = disposition.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var token in tokens)
+            {
+                var trimmed = token.Trim();
+                if (trimmed.StartsWith("filename*", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.StartsWith("filename", StringComparison.OrdinalIgnoreCase))
+                {
+                    var idx = trimmed.IndexOf('=');
+                    if (idx >= 0 && idx + 1 < trimmed.Length)
+                    {
+                        var value = trimmed[(idx + 1)..].Trim('\"');
+                        return Uri.UnescapeDataString(value);
+                    }
+                }
+            }
+        }
+
+        return "file";
+    }
+
+    private static string ResolveMimeType(IFormFile file)
+    {
+        var mime = file?.Headers?["Content-Type"].ToString();
+        return string.IsNullOrWhiteSpace(mime) ? "application/octet-stream" : mime;
     }
 }
 

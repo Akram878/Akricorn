@@ -366,8 +366,9 @@ namespace Backend.Controllers
                 var folder = BookStorageHelper.GetThumbnailFolder(id);
                 Directory.CreateDirectory(folder);
 
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                var physicalPath = Path.Combine(folder, fileName);
+                var originalName = ExtractOriginalName(file);
+                var storedName = $"{Guid.NewGuid()}{Path.GetExtension(originalName)}";
+                var physicalPath = Path.Combine(folder, storedName);
 
                 try
                 {
@@ -377,7 +378,7 @@ namespace Backend.Controllers
                         await file.CopyToAsync(stream);
                     }
 
-                    var relativePath = Path.Combine("books", $"book-{id}", "thumbnail", fileName).Replace("\\", "/");
+                    var relativePath = Path.Combine("books", $"book-{id}", "thumbnail", storedName).Replace("\\", "/");
                     var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
 
                     book.ThumbnailUrl = url;
@@ -434,8 +435,9 @@ namespace Backend.Controllers
                 var folder = BookStorageHelper.GetFilesFolder(id);
                 Directory.CreateDirectory(folder);
 
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                var physicalPath = Path.Combine(folder, fileName);
+                var originalName = ExtractOriginalName(file);
+                var storedName = $"{Guid.NewGuid()}{Path.GetExtension(originalName)}";
+                var physicalPath = Path.Combine(folder, storedName);
 
                 try
                 {
@@ -444,13 +446,13 @@ namespace Backend.Controllers
                         await file.CopyToAsync(stream);
                     }
 
-                    var extension = Path.GetExtension(file.FileName);
+                    var extension = Path.GetExtension(originalName);
                     var metadata = new FileMetadata
                     {
-                        OriginalName = file.FileName,
-                        StoredName = fileName,
+                        OriginalName = originalName,
+                        StoredName = storedName,
                         Size = file.Length,
-                        MimeType = file.ContentType ?? "application/octet-stream",
+                        MimeType = ResolveMimeType(file),
                         Extension = extension,
                         OwnerEntityType = "Book",
                         OwnerEntityId = id
@@ -461,9 +463,6 @@ namespace Backend.Controllers
                     var newFile = new BookFile
                     {
                         BookId = id,
-                        FileName = file.FileName,
-                        FileUrl = fileName,
-                        ContentType = file.ContentType ?? "application/octet-stream",
                         FileMetadata = metadata
                     };
 
@@ -477,7 +476,7 @@ namespace Backend.Controllers
 
                     var dto = MapToDto(book, null, newFile);
 
-                    var fileAccessUrl = BuildBookFileUrl(newFile.Id);
+                    var fileAccessUrl = BuildBookDownloadUrl(newFile.Id);
                     return Ok(new { message = "File uploaded.", fileId = newFile.Id, url = fileAccessUrl, book = dto });
                 }
                 catch (Exception ex)
@@ -520,20 +519,10 @@ namespace Backend.Controllers
 
                 var bookId = entity.BookId;
                 var folder = BookStorageHelper.GetFilesFolder(bookId);
-                var fileName = entity.FileMetadata?.StoredName ?? TryExtractFileName(entity.FileUrl);
-                if (!string.IsNullOrEmpty(fileName))
-                {
-                    var physicalPath = Path.Combine(folder, fileName);
-                    if (System.IO.File.Exists(physicalPath))
-                        System.IO.File.Delete(physicalPath);
-                    else
-                    {
-                        var legacyFolder = BookStorageHelper.GetLegacyFilesFolder(bookId);
-                        var legacyPath = Path.Combine(legacyFolder, fileName);
-                        if (System.IO.File.Exists(legacyPath))
-                            System.IO.File.Delete(legacyPath);
-                    }
-                }
+                var metadata = entity.FileMetadata ?? throw new InvalidOperationException("File metadata missing for book file.");
+                var physicalPath = Path.Combine(folder, metadata.StoredName);
+                if (System.IO.File.Exists(physicalPath))
+                    System.IO.File.Delete(physicalPath);
 
                 try
                 {
@@ -542,13 +531,6 @@ namespace Backend.Controllers
                         _context.BookFiles.Remove(entity);
                         await _context.SaveChangesAsync();
                     });
-
-
-                    var book = await ExecuteWithMigrationRetry(async () =>
-                    {
-                        return await _context.Books.Include(b => b.Files).ThenInclude(f => f.FileMetadata).FirstOrDefaultAsync(b => b.Id == bookId);
-                    });
-                  
 
                     return Ok(new { message = "File deleted." });
                 }
@@ -594,6 +576,8 @@ namespace Backend.Controllers
             if (extraFile != null && files.All(f => f.Id != extraFile.Id))
                 files.Add(extraFile);
             var primaryFile = files.OrderBy(f => f.Id).FirstOrDefault();
+            if (primaryFile != null && primaryFile.FileMetadata == null)
+                throw new InvalidOperationException("File metadata missing for primary book file.");
             return new BookDto
             {
                 Id = book.Id,
@@ -601,7 +585,7 @@ namespace Backend.Controllers
                 Description = book.Description,
                 Price = book.Price,
                 Category = book.Category,
-                FileUrl = primaryFile != null ? BuildBookFileUrlStatic(primaryFile.Id) : string.Empty,
+                DownloadUrl = primaryFile != null ? BuildBookDownloadUrlStatic(primaryFile.Id) : string.Empty,
                 ThumbnailUrl = book.ThumbnailUrl,
                 IsActive = book.IsActive,
                 Rating = ratingStats?.Average ?? 0,
@@ -609,10 +593,11 @@ namespace Backend.Controllers
                 Files = files.Select(f => new BookFileDto
                 {
                     Id = f.Id,
-                    FileName = f.FileMetadata?.OriginalName ?? f.FileName,
-                    FileUrl = BuildBookFileUrlStatic(f.Id),
-                    SizeBytes = f.FileMetadata?.Size ?? f.SizeBytes,
-                    ContentType = f.FileMetadata?.MimeType ?? f.ContentType
+                    OriginalName = f.FileMetadata?.OriginalName ?? throw new InvalidOperationException("File metadata missing for book file."),
+                    StoredName = f.FileMetadata.StoredName,
+                    DownloadUrl = BuildBookDownloadUrlStatic(f.Id),
+                    Size = f.FileMetadata.Size,
+                    MimeType = f.FileMetadata.MimeType
                 }).ToList()
             };
         }
@@ -665,23 +650,45 @@ namespace Backend.Controllers
         }
 
 
-        private static string? TryExtractFileName(string url)
-        {
-            if (string.IsNullOrWhiteSpace(url)) return null;
-
-            var parts = url.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            return parts.LastOrDefault();
-        }
-
-
-        private static string BuildBookFileUrlStatic(int fileId)
+        private static string BuildBookDownloadUrlStatic(int fileId)
         {
             return $"/api/books/files/{fileId}";
         }
 
-        private string BuildBookFileUrl(int fileId)
+        private string BuildBookDownloadUrl(int fileId)
         {
             return Url.Content($"/api/books/files/{fileId}");
+        }
+
+        private static string ExtractOriginalName(IFormFile file)
+        {
+            var disposition = file?.ContentDisposition ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(disposition))
+            {
+                var tokens = disposition.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var token in tokens)
+                {
+                    var trimmed = token.Trim();
+                    if (trimmed.StartsWith("filename*", StringComparison.OrdinalIgnoreCase) ||
+                        trimmed.StartsWith("filename", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var idx = trimmed.IndexOf('=');
+                        if (idx >= 0 && idx + 1 < trimmed.Length)
+                        {
+                            var value = trimmed[(idx + 1)..].Trim('\"');
+                            return Uri.UnescapeDataString(value);
+                        }
+                    }
+                }
+            }
+
+            return "file";
+        }
+
+        private static string ResolveMimeType(IFormFile file)
+        {
+            var mime = file?.Headers?["Content-Type"].ToString();
+            return string.IsNullOrWhiteSpace(mime) ? "application/octet-stream" : mime;
         }
     }
 
@@ -696,7 +703,7 @@ namespace Backend.Controllers
         public string Description { get; set; }
         public decimal Price { get; set; }
         public string Category { get; set; }
-        public string FileUrl { get; set; }
+        public string DownloadUrl { get; set; }
         public string? ThumbnailUrl { get; set; }
         public bool IsActive { get; set; }
         public double Rating { get; set; }
@@ -707,10 +714,11 @@ namespace Backend.Controllers
     public class BookFileDto
     {
         public int Id { get; set; }
-        public string FileName { get; set; }
-        public string FileUrl { get; set; }
-        public long SizeBytes { get; set; }
-        public string ContentType { get; set; }
+        public string OriginalName { get; set; }
+        public string StoredName { get; set; }
+        public string DownloadUrl { get; set; }
+        public long Size { get; set; }
+        public string MimeType { get; set; }
     }
 
     public abstract class BaseBookRequest

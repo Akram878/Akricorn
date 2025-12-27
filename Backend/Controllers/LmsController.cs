@@ -72,11 +72,12 @@ namespace Backend.Controllers
             if (!hasAccess)
                 return StatusCode(403, new { message = "You are not enrolled in this course." });
             }
-            var course = await _context.Courses
-                .Include(c => c.Sections)
-                    .ThenInclude(s => s.Lessons)
-                        .ThenInclude(l => l.Files)
-                .FirstOrDefaultAsync(c => c.Id == courseId && c.IsActive);
+        var course = await _context.Courses
+            .Include(c => c.Sections)
+                .ThenInclude(s => s.Lessons)
+                    .ThenInclude(l => l.Files)
+                        .ThenInclude(f => f.FileMetadata)
+            .FirstOrDefaultAsync(c => c.Id == courseId && c.IsActive);
 
             if (course == null)
                 return NotFound(new { message = "Course not found." });
@@ -100,8 +101,8 @@ namespace Backend.Controllers
                                 .Select(f => new
                                 {
                                     fileId = f.Id,
-                                    fileName = f.FileName,
-                                    fileUrl = BuildLessonFileUrl(f.Id),
+                                    name = f.FileMetadata?.OriginalName ?? throw new InvalidOperationException("File metadata missing."),
+                                    url = BuildLessonDownloadUrl(f.Id),
                                     uploadedAt = f.UploadedAt
                                 })
                         })
@@ -601,13 +602,14 @@ namespace Backend.Controllers
             if (!hasAccess)
                 return StatusCode(403, new { message = "You are not enrolled in this course." });
 
-            var course = await _context.Courses
-                .Include(c => c.Sections)
-                    .ThenInclude(s => s.Lessons)
+        var course = await _context.Courses
+            .Include(c => c.Sections)
+                .ThenInclude(s => s.Lessons)
                         .ThenInclude(l => l.Files)
-                .Include(c => c.LearningPathCourses)
-                    .ThenInclude(lp => lp.LearningPath)
-                .FirstOrDefaultAsync(c => c.Id == courseId && c.IsActive);
+                            .ThenInclude(f => f.FileMetadata)
+            .Include(c => c.LearningPathCourses)
+                .ThenInclude(lp => lp.LearningPath)
+            .FirstOrDefaultAsync(c => c.Id == courseId && c.IsActive);
 
             if (course == null)
                 return NotFound(new { message = "Course not found in your library." });
@@ -683,8 +685,8 @@ namespace Backend.Controllers
                                 .Select(f => new
                                 {
                                     id = f.Id,
-                                    name = f.FileName,
-                                    url = BuildLessonFileUrl(f.Id),
+                                    name = f.FileMetadata?.OriginalName ?? throw new InvalidOperationException("File metadata missing."),
+                                    url = BuildLessonDownloadUrl(f.Id),
                                     uploadedAt = f.UploadedAt
                                 })
                         })
@@ -1008,7 +1010,7 @@ namespace Backend.Controllers
                     ub.Book.Price,
                     ub.Book.Category,
                     ub.Book.ThumbnailUrl,
-                fileUrl = primaryFileId > 0 ? BuildBookFileUrl(primaryFileId) : string.Empty,
+                downloadUrl = primaryFileId > 0 ? BuildBookDownloadUrl(primaryFileId) : string.Empty,
                 ub.GrantedAt,
                     ub.IsFromCourse
             };
@@ -1169,13 +1171,13 @@ namespace Backend.Controllers
         //         Utilities
         // ============================
 
-        private string BuildLessonFileUrl(int fileId)
+        private string BuildLessonDownloadUrl(int fileId)
         {
             return Url.Content($"/api/lessons/files/{fileId}");
         }
 
 
-        private string BuildBookFileUrl(int fileId)
+        private string BuildBookDownloadUrl(int fileId)
         {
             return Url.Content($"/api/books/files/{fileId}");
         }
