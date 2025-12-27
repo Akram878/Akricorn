@@ -126,7 +126,6 @@ namespace Backend.Controllers
                     IsActive = request.IsActive,
                     Hours = request.Hours,
                     Category = request.Category,
-                    Rating = request.Rating,
                     ThumbnailUrl = request.ThumbnailUrl
                 };
 
@@ -199,7 +198,6 @@ namespace Backend.Controllers
                 course.IsActive = request.IsActive;
                 course.Hours = request.Hours;
                 course.Category = request.Category;
-                course.Rating = request.Rating;
                 course.ThumbnailUrl = request.ThumbnailUrl;
 
                 // Update Learning Paths 
@@ -376,7 +374,6 @@ namespace Backend.Controllers
             public bool IsActive { get; set; } = true;
             public int Hours { get; set; }
             public string Category { get; set; }
-            public double Rating { get; set; }
             public string ThumbnailUrl { get; set; }
             public List<int> PathIds { get; set; } = new();
         }
@@ -389,7 +386,6 @@ namespace Backend.Controllers
             public bool IsActive { get; set; } = true;
             public int Hours { get; set; }
             public string Category { get; set; }
-            public double Rating { get; set; }
             public string ThumbnailUrl { get; set; }
             public List<int> PathIds { get; set; } = new();
         }

@@ -118,7 +118,6 @@ namespace Backend.Controllers
                 IsActive = request.IsActive,
 
                 Price = request.Price,
-                Rating = request.Rating,
                 Discount = request.Discount,
 
                 ThumbnailUrl = request.ThumbnailUrl
@@ -181,7 +180,6 @@ namespace Backend.Controllers
             path.IsActive = request.IsActive;
 
             path.Price = request.Price;
-            path.Rating = request.Rating;
             path.Discount = request.Discount;
 
             path.ThumbnailUrl = request.ThumbnailUrl;
@@ -295,7 +293,6 @@ namespace Backend.Controllers
         public bool IsActive { get; set; } = true;
 
         public decimal Price { get; set; }
-        public double Rating { get; set; }
         public decimal Discount { get; set; }
 
         public string ThumbnailUrl { get; set; }
@@ -309,7 +306,6 @@ namespace Backend.Controllers
         public bool IsActive { get; set; } = true;
 
         public decimal Price { get; set; }
-        public double Rating { get; set; }
         public decimal Discount { get; set; }
 
         public string ThumbnailUrl { get; set; }
