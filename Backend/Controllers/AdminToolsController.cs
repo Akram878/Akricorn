@@ -338,6 +338,19 @@ namespace Backend.Controllers
 
         private static ToolDto MapToDto(Tool tool)
         {
+            var files = tool.Files ?? new List<ToolFile>();
+
+            foreach (var file in files)
+            {
+                if (file.FileMetadata == null ||
+                    string.IsNullOrWhiteSpace(file.FileMetadata.OriginalName) ||
+                    string.IsNullOrWhiteSpace(file.FileMetadata.StoredName) ||
+                    string.IsNullOrWhiteSpace(file.FileMetadata.MimeType))
+                {
+                    throw new InvalidOperationException($"File metadata is missing or incomplete for tool file {file.Id}.");
+                }
+            }
+
             return new ToolDto
             {
                 Id = tool.Id,
@@ -348,14 +361,14 @@ namespace Backend.Controllers
                 IsActive = tool.IsActive,
                 DisplayOrder = tool.DisplayOrder,
                 AvatarUrl = tool.AvatarUrl,
-                Files = tool.Files?.Select(f => new ToolFileDto
+                Files = files.Select(f => new ToolFileDto
                 {
                     Id = f.Id,
-                    FileName = f.FileMetadata?.OriginalName ?? f.FileName,
+                    FileName = f.FileMetadata.OriginalName,
                     FileUrl = BuildToolFileUrlStatic(f.Id),
-                    SizeBytes = f.FileMetadata?.Size ?? f.SizeBytes,
-                    ContentType = f.FileMetadata?.MimeType ?? f.ContentType
-                }).ToList() ?? new List<ToolFileDto>()
+                    SizeBytes = f.FileMetadata.Size,
+                    ContentType = f.FileMetadata.MimeType
+                }).ToList()
             };
         }
 

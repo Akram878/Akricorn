@@ -36,25 +36,34 @@ namespace Backend.Controllers
                 .Select(g => new { CourseId = g.Key, Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
                 .ToDictionaryAsync(x => x.CourseId, x => x);
 
-            var result = await _context.Courses
+            var courses = await _context.Courses
                 .Include(c => c.LearningPathCourses)
-                .Select(c => new CourseDto
-                {
-                    Id = c.Id,
-                    Title = c.Title,
-                    Description = c.Description,
-                    Price = c.Price,
-                    IsActive = c.IsActive,
-                    Hours = c.Hours,
-                    Category = c.Category,
-                    Rating = ratingStats.TryGetValue(c.Id, out var stats) ? stats.Average : c.Rating,
-                    RatingCount = ratingStats.TryGetValue(c.Id, out var stats2) ? stats2.Count : 0,
-                    ThumbnailUrl = c.ThumbnailUrl,
-                    PathIds = c.LearningPathCourses
-                        .Select(lp => lp.LearningPathId)
-                        .ToList()
-                })
                 .ToListAsync();
+
+            var result = courses
+                .Select(c =>
+                {
+                    var hasStats = ratingStats.TryGetValue(c.Id, out var stats);
+                    var hasStats2 = ratingStats.TryGetValue(c.Id, out var stats2);
+
+                    return new CourseDto
+                    {
+                        Id = c.Id,
+                        Title = c.Title,
+                        Description = c.Description,
+                        Price = c.Price,
+                        IsActive = c.IsActive,
+                        Hours = c.Hours,
+                        Category = c.Category,
+                        Rating = hasStats ? stats.Average : c.Rating,
+                        RatingCount = hasStats2 ? stats2.Count : 0,
+                        ThumbnailUrl = c.ThumbnailUrl,
+                        PathIds = c.LearningPathCourses
+                            .Select(lp => lp.LearningPathId)
+                            .ToList()
+                    };
+                })
+                .ToList();
 
             return Ok(result);
         }
