@@ -372,7 +372,16 @@ export class AuthService {
     }
 
     const expiresAt = getTokenExpiry(token);
-    const expired = expiresAt ? Date.now() >= expiresAt : true;
+    if (!expiresAt) {
+      return {
+        token,
+        expiresAt: null,
+        isAuthenticated: true,
+        isExpired: false,
+      };
+    }
+
+    const expired = Date.now() >= expiresAt;
 
     return {
       token: expired ? null : token,

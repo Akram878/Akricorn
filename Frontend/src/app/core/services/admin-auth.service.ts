@@ -8,8 +8,8 @@ import { API_BASE_URL } from '../config/api.config';
 import { AuthService } from './auth.service';
 
 interface AdminLoginRequest {
-  username: string;
-  password: string;
+  Username: string;
+  Password: string;
 }
 
 interface AdminLoginResponse {
@@ -34,7 +34,7 @@ export class AdminAuthService {
   }
 
   login(username: string, password: string): Observable<AdminLoginResponse> {
-    const body: AdminLoginRequest = { username, password };
+    const body: AdminLoginRequest = { Username: username, Password: password };
 
     return this.http.post<AdminLoginResponse>(`${this.apiUrl}/login`, body).pipe(
       tap((response) => {
@@ -55,6 +55,6 @@ export class AdminAuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.authService.isAdminAuthenticated();
+    return !!this.authService.getAdminAccessToken();
   }
 }

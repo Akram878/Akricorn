@@ -12,20 +12,14 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const adminAuthService = inject(AdminAuthService);
 
-  const isAuthRequest =
-    req.url.includes('/api/auth/login') ||
-    req.url.includes('/api/auth/signup') ||
-    req.url.includes('/api/admin/login');
+  const isAuthRequest = req.url.includes('/api/auth/login') || req.url.includes('/api/auth/signup');
   let tokenToUse: string | null = null;
 
   const isAdminRequest = req.url.includes('/api/admin');
 
   // لو الطلب رايح إلى /api/admin → استخدم adminToken فقط
   if (isAdminRequest) {
-    tokenToUse =
-      isAuthRequest || !adminAuthService.isAuthenticated()
-        ? null
-        : adminAuthService.getAccessToken();
+    tokenToUse = req.url.includes('/api/admin/login') ? null : adminAuthService.getAccessToken();
   } else {
     // LMS محمي + باقي الطلبات → توكن المستخدم فقط
     tokenToUse =
