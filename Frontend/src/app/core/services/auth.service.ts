@@ -499,7 +499,7 @@ const getTokenExpiry = (token: string): number | null => {
 const isTokenExpired = (token: string): boolean => {
   const expiry = getTokenExpiry(token);
   if (!expiry) {
-    return true;
+    return false;
   }
   return Date.now() >= expiry;
 };
