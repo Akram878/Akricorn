@@ -4,8 +4,9 @@ namespace Backend.Models
 {
     public enum AdminRole
     {
-        Owner = 1,
-        Admin = 2
+        SuperAdmin = 1,
+        Owner = 2,
+        Admin = 3
     }
 
     public class AdminAccount

@@ -6,8 +6,8 @@ namespace Backend.Data
 {
     public class AdminSeeder
     {
-        private const string DefaultUsername = "owner";
-        private const string DefaultPassword = "Owner123!";
+        private const string DefaultUsername = "admin";
+        private const string DefaultPassword = "Admin@123";
 
         private readonly AppDbContext _db;
         private readonly PasswordHasher<AdminAccount> _passwordHasher;
@@ -33,7 +33,7 @@ namespace Backend.Data
             var admin = new AdminAccount
             {
                 Username = DefaultUsername,
-                Role = AdminRole.Owner,
+                Role = AdminRole.SuperAdmin,
                 IsActive = true
             };
 
