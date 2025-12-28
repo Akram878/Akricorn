@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgForOf, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/config/api.config';
 import { AdminUsersService, AdminUserDto } from '../../../core/services/admin-users.service';
 
@@ -21,7 +21,7 @@ interface UserOverview {
 @Component({
   selector: 'app-dashboard-user-detail',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, RouterLink, HttpClientModule],
+  imports: [CommonModule, NgIf, NgForOf, RouterLink],
   templateUrl: './dashboard-user-detail.html',
   styleUrl: './dashboard-user-detail.scss',
 })
