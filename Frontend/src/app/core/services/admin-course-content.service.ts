@@ -5,8 +5,10 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 export interface LessonFileDto {
   id: number;
-  fileName: string;
-  fileUrl: string;
+  name: string;
+  downloadUrl: string;
+  fileName?: string;
+  fileUrl?: string;
 }
 
 export interface LessonDto {

@@ -207,7 +207,7 @@
               <!-- FILE LIST -->
               <div class="files-list">
                 <div class="file-row" *ngFor="let f of l.files">
-                  <span>{{ f.fileName }}</span>
+                  <span>{{ f.name || f.fileName }}</span>
                   <button class="btn-danger" (click)="deleteFile(f.id)">Delete</button>
                 </div>
               </div>

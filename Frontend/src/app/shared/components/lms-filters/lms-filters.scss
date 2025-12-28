@@ -82,6 +82,24 @@ $gold-400: #d9a74a;
   gap: 0.85rem;
 }
 
+.lms-secondary-btn {
+  border: none;
+  outline: none;
+  margin: 1rem 0;
+  border-radius: 0.3rem;
+  color: hsl(168, 78.95%, 3.73%);
+  padding: 0.75rem;
+  background: linear-gradient(
+    180deg,
+    hsl(45, 48.78%, 67.84%) 0%,
+    hsl(43.33, 46.96%, 54.9%) 40%,
+    #c89445 100%
+  );
+
+  &:hover {
+    cursor: pointer;
+  }
+}
 .lms-filters__field {
   display: flex;
   flex-direction: column;
@@ -157,6 +175,14 @@ $gold-400: #d9a74a;
     flex-direction: column;
   }
 
+  .lms-filters__panel {
+    max-width: 100%;
+  }
+
+  .lms-filters__select {
+    height: 44px;
+    width: 5rem;
+  }
   @media (min-width: 993px) {
     .lms-filters__panel {
       flex-direction: row;
@@ -201,6 +227,12 @@ $gold-400: #d9a74a;
     z-index: 50;
     height: 100dvh;
     max-height: 100dvh;
+    overflow: auto;
+
+    scrollbar-width: none;
+
+    /* Internet Explorer 10+ */
+    -ms-overflow-style: none;
   }
 
   .lms-filters__panel.is-open {

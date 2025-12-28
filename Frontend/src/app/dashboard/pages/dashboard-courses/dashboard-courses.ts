@@ -122,11 +122,6 @@ export class DashboardCourses implements OnInit {
 
       learningPathId: course.pathIds?.length ? course.pathIds[0] : null,
     });
-
-    setTimeout(() => {
-      this.contentEditor.courseId = course.id;
-      this.contentEditor.loadContent();
-    });
   }
 
   // ===================== SAVE =====================
@@ -163,11 +158,6 @@ export class DashboardCourses implements OnInit {
             ...payload,
             id: res.id,
           };
-
-          setTimeout(() => {
-            this.contentEditor.courseId = res.id;
-            this.contentEditor.loadContent();
-          });
 
           this.uploadThumbnailIfNeeded(res.id);
 

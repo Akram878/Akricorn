@@ -19,6 +19,12 @@
   margin-bottom: 16px;
 }
 
+.editor-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .btn-icon {
   padding: 10px 12px;
   border-radius: 10px;
