@@ -21,7 +21,9 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
   if (isAdminRequest) {
     tokenToUse = req.url.includes('/api/admin/login')
       ? null
-      : adminAuthService.getAccessToken() ?? localStorage.getItem('adminToken');
+      : adminAuthService.isAuthenticated()
+      ? adminAuthService.getAccessToken()
+      : null;
   } else {
     // LMS محمي + باقي الطلبات → توكن المستخدم فقط
     tokenToUse =

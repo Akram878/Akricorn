@@ -55,6 +55,10 @@ export class AdminAuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.authService.getAdminAccessToken();
+    return this.authService.isAdminAuthenticated();
+  }
+
+  restoreAdminSession(): Observable<void> {
+    return this.authService.restoreAdminSession();
   }
 }

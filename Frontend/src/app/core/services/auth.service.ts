@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, defer, map, of, shareReplay, tap } from 'rxjs';
 import { UserStoreService } from './user-store.service';
 import { API_BASE_URL } from '../config/api.config';
 
@@ -79,6 +79,8 @@ export class AuthService {
   private expiryTimeoutId?: ReturnType<typeof setTimeout>;
   private adminLogoutInProgress = false;
   private adminExpiryTimeoutId?: ReturnType<typeof setTimeout>;
+  private adminSessionRestored = false;
+  private adminSessionRestore$?: Observable<void>;
 
   constructor(
     private http: HttpClient,
@@ -95,9 +97,7 @@ export class AuthService {
     this.authState$ = this.authStateSubject.asObservable();
     this.isAuthenticated$ = this.authState$.pipe(map((state) => state.isAuthenticated));
 
-    const storedAdminToken = this.getStoredAdminToken();
-    const adminInitialState = this.buildAuthState(storedAdminToken);
-    this.adminAuthStateSubject = new BehaviorSubject<AuthState>(adminInitialState);
+    this.adminAuthStateSubject = new BehaviorSubject<AuthState>(this.buildAuthState(null));
     this.adminAuthState$ = this.adminAuthStateSubject.asObservable();
     this.adminIsAuthenticated$ = this.adminAuthState$.pipe(map((state) => state.isAuthenticated));
 
@@ -110,16 +110,6 @@ export class AuthService {
       this.userStore.setGuest();
       if (initialState.isExpired) {
         this.logout({ redirectToLogin: true });
-      }
-    }
-    if (adminInitialState.isAuthenticated && adminInitialState.expiresAt) {
-      this.scheduleExpiry(adminInitialState.expiresAt, 'admin');
-    }
-
-    if (!adminInitialState.isAuthenticated && storedAdminToken) {
-      this.clearStoredAdminToken();
-      if (adminInitialState.isExpired) {
-        this.logoutAdmin({ redirectToLogin: true });
       }
     }
   }
@@ -304,6 +294,35 @@ export class AuthService {
     }
 
     return token;
+  }
+
+  restoreAdminSession(): Observable<void> {
+    if (this.adminSessionRestore$) {
+      return this.adminSessionRestore$;
+    }
+
+    this.adminSessionRestore$ = defer(() => {
+      if (!this.adminSessionRestored) {
+        this.adminSessionRestored = true;
+        const storedAdminToken = this.getStoredAdminToken();
+        const nextState = this.buildAuthState(storedAdminToken);
+        this.adminAuthStateSubject.next(nextState);
+
+        if (nextState.isAuthenticated && nextState.expiresAt) {
+          this.scheduleExpiry(nextState.expiresAt, 'admin');
+        } else {
+          this.clearExpiryTimer('admin');
+        }
+
+        if (!nextState.isAuthenticated && storedAdminToken) {
+          this.clearStoredAdminToken();
+        }
+      }
+
+      return of(undefined);
+    }).pipe(shareReplay({ bufferSize: 1, refCount: false }));
+
+    return this.adminSessionRestore$;
   }
 
   private setToken(token: string): void {
