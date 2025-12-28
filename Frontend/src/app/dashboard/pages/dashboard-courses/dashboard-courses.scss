@@ -1,36 +1,35 @@
 :host {
   display: block;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  color: #0f172a;
+  color: #e2e8f0;
 }
 
 .dashboard-courses {
-  background: #ffffff;
-  border: 1px solid #e3e7ee;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: #0b1220;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px;
 }
 
 .header-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .header-row__title h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: #f8fafc;
 }
 
 .header-row__subtitle {
   display: block;
-  margin-top: 6px;
-  color: #6b7280;
+  margin-top: 4px;
+  color: #94a3af;
   font-size: 14px;
 }
 
@@ -55,37 +54,32 @@
 }
 
 .btn-primary {
-  background: #3b6ae3;
-  color: #ffffff;
-  box-shadow: none;
+  background: #38bdf8;
+  color: #0b1220;
 }
 
 .btn-primary:hover {
-  background: #335ccc;
-}
-
-.btn-primary:active {
-  transform: translateY(1px);
+  background: #0ea5e9;
 }
 
 .btn-secondary {
-  background: #f5f7fb;
-  color: #1f2733;
-  border-color: #d8deea;
+  background: #111827;
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .btn-secondary:hover {
-  background: #e9edf5;
+  background: #1f2937;
 }
 
 .btn-danger {
-  background: #f9ebec;
-  color: #b42318;
-  border-color: #f2c7c9;
+  background: rgba(248, 113, 113, 0.15);
+  color: #fecdd3;
+  border-color: rgba(248, 113, 113, 0.4);
 }
 
 .btn-danger:hover {
-  background: #f3d9db;
+  background: rgba(248, 113, 113, 0.25);
 }
 
 .btn-small {
@@ -116,24 +110,24 @@
 .status {
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f5f7fb;
-  color: #4b5563;
-  border: 1px solid #e4e8f1;
+  background: #111827;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 12px;
   font-size: 14px;
 }
 
 .status.error {
-  background: #fef2f2;
-  color: #b42318;
-  border-color: #f2c7c9;
+  background: #331c1e;
+  color: #fecdd3;
+  border-color: rgba(248, 113, 113, 0.4);
 }
 
 .courses-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid #e3e7ee;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -143,23 +137,18 @@
   text-align: left;
   padding: 12px 14px;
   font-size: 14px;
-  color: #0f172a;
-  border-bottom: 1px solid #e9edf4;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .courses-table thead {
-  background: #f5f7fb;
-  color: #1f2937;
+  background: #0f172a;
+  color: #cbd5e1;
   font-weight: 700;
 }
 
 .courses-table tbody tr:hover {
-  background: #f9fafc;
-}
-
-.description-cell {
-  color: #4b5563;
-  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .badge-active,
@@ -174,15 +163,15 @@
 }
 
 .badge-active {
-  background: #e8f3ec;
-  color: #2f855a;
-  border-color: #c7dfd2;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.35);
 }
 
 .badge-inactive {
-  background: #f3f4f6;
-  color: #6b7280;
-  border-color: #e3e7ee;
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.35);
 }
 
 .actions-cell {
@@ -200,9 +189,4 @@
   display: inline-flex;
   gap: 6px;
   align-items: center;
-}
-
-.rating-count {
-  color: #6b7280;
-  font-size: 12px;
 }

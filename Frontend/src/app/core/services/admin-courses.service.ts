@@ -13,6 +13,7 @@ export interface AdminCourseDto {
   category: string;
   rating: number;
   ratingCount?: number;
+  discount?: number;
   thumbnailUrl?: string | null;
 
   pathIds: number[];

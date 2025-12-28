@@ -146,7 +146,7 @@
             <h4>Add Section</h4>
             <input type="text" [(ngModel)]="newSectionTitle" placeholder="Section title" />
             <input type="number" [(ngModel)]="newSectionOrder" min="1" placeholder="Order" />
-            <button (click)="addSection()">Add Section</button>
+            <button class="btn-primary" (click)="addSection()">Add Section</button>
           </div>
 
           <hr />
@@ -156,8 +156,8 @@
             <div class="section-header">
               <input [(ngModel)]="s.title" />
               <input type="number" [(ngModel)]="s.order" min="1" />
-              <button (click)="saveSection(s)">Save</button>
-              <button (click)="deleteSection(s.id)">Delete</button>
+              <button class="btn-secondary" (click)="saveSection(s)">Save</button>
+              <button class="btn-danger" (click)="deleteSection(s.id)">Delete</button>
             </div>
 
             <!-- ADD LESSON -->
@@ -165,7 +165,7 @@
               <h4>Add Lesson</h4>
               <input type="text" [(ngModel)]="newLessonTitle[s.id]" placeholder="Lesson title" />
               <input type="number" [(ngModel)]="newLessonOrder[s.id]" min="1" placeholder="Order" />
-              <button (click)="addLesson(s)">Add Lesson</button>
+              <button class="btn-primary" (click)="addLesson(s)">Add Lesson</button>
             </div>
 
             <!-- LESSONS -->

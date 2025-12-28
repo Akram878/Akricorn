@@ -22,12 +22,11 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th style="width: 16%">Title</th>
-          <th>Category</th>
-
-          <th>Hours</th>
+          <th style="width: 18%">Name</th>
           <th>Price</th>
+          <th>Discount</th>
           <th>Rating</th>
+          <th>Hours</th>
           <th>Path IDs</th>
           <th>Active</th>
 
@@ -39,17 +38,12 @@
         <tr *ngFor="let c of courses">
           <td>{{ c.id }}</td>
           <td>{{ c.title }}</td>
-          <td>{{ c.category }}</td>
 
-          <td>{{ c.hours }}</td>
           <td>{{ c.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
-          <td>
-            <div class="rating-chip">
-              <span>{{ (c.rating ?? 0) | number : '1.1-1' }}</span>
-              <span class="rating-count">({{ c.ratingCount ?? 0 }})</span>
-            </div>
-          </td>
-          <td>{{ c.pathIds?.length ? c.pathIds.join(', ') : '-' }}</td>
+          <td>{{ c.discount ?? 0 | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
+          <td>{{ c.rating | number : '1.1-1' }}</td>
+          <td>{{ c.hours }}</td>
+          <td>{{ c.pathIds.length ? c.pathIds.join(', ') : '-' }}</td>
 
           <td>
             <span [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">
