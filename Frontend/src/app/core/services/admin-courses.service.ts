@@ -24,6 +24,7 @@ export interface CreateCourseRequest {
   title: string;
   description: string;
   price: number;
+  discount: number;
   isActive: boolean;
   hours: number;
   category: string;

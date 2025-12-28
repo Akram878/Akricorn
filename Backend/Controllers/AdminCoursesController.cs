@@ -59,6 +59,7 @@ namespace Backend.Controllers
                         Title = c.Title,
                         Description = c.Description,
                         Price = c.Price,
+                        Discount = c.Discount,
                         IsActive = c.IsActive,
                         Hours = c.Hours,
                         Category = c.Category,
@@ -104,6 +105,7 @@ namespace Backend.Controllers
                 Title = course.Title,
                 Description = course.Description,
                 Price = course.Price,
+                Discount = course.Discount,
                 IsActive = course.IsActive,
                 Hours = course.Hours,
                 Category = course.Category,
@@ -135,6 +137,7 @@ namespace Backend.Controllers
                     Title = request.Title,
                     Description = request.Description,
                     Price = request.Price,
+                    Discount = request.Discount,
                     IsActive = request.IsActive,
                     Hours = request.Hours,
                     Category = request.Category,
@@ -207,6 +210,7 @@ namespace Backend.Controllers
                 course.Title = request.Title;
                 course.Description = request.Description;
                 course.Price = request.Price;
+                course.Discount = request.Discount;
                 course.IsActive = request.IsActive;
                 course.Hours = request.Hours;
                 course.Category = request.Category;
@@ -369,8 +373,9 @@ namespace Backend.Controllers
             public string Title { get; set; }
             public string Description { get; set; }
             public decimal Price { get; set; }
+            public decimal Discount { get; set; }
             public bool IsActive { get; set; }
-            public int Hours { get; set; }
+            public int Hours { get; set; } = 0;
             public string Category { get; set; }
             public double Rating { get; set; }
             public int RatingCount { get; set; }
@@ -384,6 +389,7 @@ namespace Backend.Controllers
             public string Title { get; set; }
             public string Description { get; set; }
             public decimal Price { get; set; }
+            public decimal Discount { get; set; }
             public bool IsActive { get; set; } = true;
             public int Hours { get; set; }
             public string Category { get; set; }
@@ -396,6 +402,7 @@ namespace Backend.Controllers
             public string Title { get; set; }
             public string Description { get; set; }
             public decimal Price { get; set; }
+            public decimal Discount { get; set; }
             public bool IsActive { get; set; } = true;
             public int Hours { get; set; }
             public string Category { get; set; }

@@ -11,6 +11,7 @@ namespace Backend.Models
         public string Title { get; set; }       // اسم الكورس
         public string Description { get; set; } // وصف مختصر
         public decimal Price { get; set; }      // السعر
+        public decimal Discount { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         // خصائص العرض

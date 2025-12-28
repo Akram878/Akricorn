@@ -2536,6 +2536,10 @@
             "type": "number",
             "format": "double"
           },
+          "discount": {
+            "type": "number",
+            "format": "double"
+          },
           "isActive": {
             "type": "boolean"
           },
@@ -2615,6 +2619,10 @@
             "nullable": true
           },
           "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "discount": {
             "type": "number",
             "format": "double"
           },
@@ -3029,6 +3037,10 @@
             "nullable": true
           },
           "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "discount": {
             "type": "number",
             "format": "double"
           },

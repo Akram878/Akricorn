@@ -261,8 +261,15 @@ namespace Backend.Controllers
             if (alreadyPurchased)
                 return Conflict(new { message = "You already own this learning path." });
 
-            var amount = learningPath.Price - learningPath.Discount;
-            if (amount < 0) amount = 0;
+            var discountPercent = learningPath.Discount;
+            if (discountPercent < 0)
+                discountPercent = 0;
+            if (discountPercent > 100)
+                discountPercent = 100;
+
+            var amount = learningPath.Price - (learningPath.Price * discountPercent / 100m);
+            if (amount < 0)
+                amount = 0;
 
             var payment = new Payment
             {

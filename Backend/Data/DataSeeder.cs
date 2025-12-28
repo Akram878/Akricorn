@@ -77,6 +77,7 @@ namespace Backend.Data
                 Title = "Getting Started with LMS",
                 Description = "Seed course for initial setup.",
                 Price = 0,
+                Discount = 0,
                 IsActive = true,
                 Hours = 1,
                 Category = "General",

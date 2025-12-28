@@ -64,6 +64,11 @@
           </div>
 
           <div class="overview-item">
+            <span class="label">Discount</span>
+            <span class="value">{{ form.get('discount')?.value || 0 }}%</span>
+          </div>
+
+          <div class="overview-item">
             <span class="label">Active</span>
             <span class="value">{{ form.get('isActive')?.value ? 'Yes' : 'No' }}</span>
           </div>
@@ -94,6 +99,17 @@
             <div class="form-field">
               <label>Price</label>
               <input type="number" step="0.01" min="0" [formControl]="form.get('price')" />
+            </div>
+
+            <div class="form-field">
+              <label>Discount (%)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                [formControl]="form.get('discount')"
+              />
             </div>
           </div>
 
@@ -180,7 +196,12 @@
               <!-- FILE UPLOAD -->
               <div class="file-upload">
                 <p>Upload Files for this lesson</p>
-                <input type="file" multiple (change)="onFilesSelected($event, l.id)" />
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,video/*,image/*"
+                  (change)="onFilesSelected($event, l.id)"
+                />
               </div>
 
               <!-- FILE LIST -->

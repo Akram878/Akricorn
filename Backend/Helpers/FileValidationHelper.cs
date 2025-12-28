@@ -10,7 +10,12 @@ namespace Backend.Helpers
     public static class FileValidationHelper
     {
         private static readonly string[] BookExtensions = { ".pdf" };
-        private static readonly string[] CourseExtensions = { ".pdf", ".mp4", ".mov", ".avi", ".mkv", ".webm", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg" };
+        private static readonly string[] CourseExtensions =
+           {
+            ".pdf",
+            ".mp4", ".m4v", ".mov", ".avi", ".mkv", ".webm", ".wmv", ".flv", ".mpg", ".mpeg", ".3gp", ".3gpp",
+            ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".tif", ".tiff", ".heic"
+        };
         private static readonly string[] ToolExtensions = { ".zip", ".exe" };
         private static readonly string[] IconExtensions = { ".png", ".svg", ".jpg", ".jpeg", ".gif", ".bmp" };
 

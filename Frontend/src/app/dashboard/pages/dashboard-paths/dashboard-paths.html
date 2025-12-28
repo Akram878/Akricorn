@@ -24,7 +24,7 @@
         <th style="width: 18%">Title</th>
         <th>Description</th>
         <th>Price</th>
-        <th>Discount</th>
+        <th>Discount (%)</th>
         <th>Rating</th>
         <th>Active</th>
         <th>Courses (ordered)</th>
@@ -39,11 +39,11 @@
         <td class="description-cell">
           {{ p.description }}
         </td>
-        <td>{{ (p.price ?? 0) | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
-        <td>{{ (p.discount ?? 0) | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
+        <td>{{ p.price ?? 0 | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
+        <td>{{ p.discount ?? 0 | number : '1.0-2' }}%</td>
         <td>
           <div class="rating-chip">
-            <span>{{ (p.rating ?? 0) | number : '1.1-1' }}</span>
+            <span>{{ p.rating ?? 0 | number : '1.1-1' }}</span>
             <span class="rating-count">({{ p.ratingCount ?? 0 }})</span>
           </div>
         </td>
@@ -115,8 +115,15 @@
           </div>
 
           <div class="form-field">
-            <label for="discount">Discount</label>
-            <input id="discount" type="number" min="0" step="0.01" formControlName="discount" />
+            <label for="discount">Discount (%)</label>
+            <input
+              id="discount"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              formControlName="discount"
+            />
           </div>
 
           <!-- الحالة -->

@@ -55,7 +55,7 @@ export class DashboardPaths implements OnInit {
       thumbnailUrl: ['', [Validators.maxLength(500)]],
 
       price: [0, [Validators.required, Validators.min(0)]],
-      discount: [0, [Validators.min(0)]],
+      discount: [0, [Validators.min(0), Validators.max(100)]],
       isActive: [true],
     });
   }
