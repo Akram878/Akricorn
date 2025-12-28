@@ -139,19 +139,19 @@ namespace Backend.Controllers
                 .Include(p => p.Book)
                 .Include(p => p.LearningPath)
                 .ToListAsync();
-            var paymentAmounts = await _context.Payments
+
+
+            var paymentHistory = await _context.Payments
                .Where(p => p.UserId == id && (p.TargetType == "Course" || p.TargetType == "LearningPath"))
-               .GroupBy(p => new { p.TargetType, p.TargetId })
-               .Select(g => new
+               .OrderBy(p => p.CreatedAt)
+               .Select(p => new
                {
-                   g.Key.TargetType,
-                   g.Key.TargetId,
-                   Amount = g.OrderByDescending(p => p.CreatedAt).Select(p => p.Amount).FirstOrDefault()
+                   p.TargetType,
+                   p.TargetId,
+                   p.Amount,
+                   p.CreatedAt
                })
                .ToListAsync();
-            var paymentLookup = paymentAmounts.ToDictionary(
-                x => (x.TargetType, x.TargetId),
-                x => x.Amount);
 
             var coursePurchaseIds = purchases
                 .Where(p => p.CourseId.HasValue)
@@ -246,15 +246,31 @@ namespace Backend.Controllers
                 }
             }
 
+
+            decimal GetPaidAmount(string targetType, int targetId, DateTime purchasedAt, decimal fallback)
+            {
+                var payments = paymentHistory
+                    .Where(p => p.TargetType == targetType && p.TargetId == targetId)
+                    .ToList();
+
+                if (payments.Count == 0)
+                    return fallback;
+
+                var payment = payments.LastOrDefault(p => p.CreatedAt <= purchasedAt) ?? payments.First();
+                return payment.Amount;
+            }
+
             var coursePurchases = purchases
                 .Where(p => p.CourseId.HasValue)
                 .Select(p => new
                 {
                     id = p.CourseId.Value,
                     title = p.Course?.Title ?? string.Empty,
-                    price = paymentLookup.TryGetValue(("Course", p.CourseId.Value), out var amount)
-                        ? amount
-                        : p.Course?.Price ?? 0,
+                    price = GetPaidAmount(
+                        "Course",
+                        p.CourseId.Value,
+                        p.PurchasedAt,
+                        p.Course?.Price ?? 0),
                     purchasedAt = p.PurchasedAt
                      
                 })
@@ -277,9 +293,11 @@ namespace Backend.Controllers
                 {
                     id = p.LearningPathId.Value,
                     title = p.LearningPath?.Title ?? string.Empty,
-                    price = paymentLookup.TryGetValue(("LearningPath", p.LearningPathId.Value), out var amount)
-                        ? amount
-                        : p.LearningPath?.Price ?? 0,
+                    price = GetPaidAmount(
+                        "LearningPath",
+                        p.LearningPathId.Value,
+                        p.PurchasedAt,
+                        p.LearningPath?.Price ?? 0),
                     purchasedAt = p.PurchasedAt
                 })
                 .ToList();
