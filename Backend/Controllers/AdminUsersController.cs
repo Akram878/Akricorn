@@ -176,6 +176,10 @@ namespace Backend.Controllers
                 .ToListAsync();
 
             var courseProgress = await BuildCourseProgressMap(id, courseIds);
+            var courseRatings = await _context.CourseRatings
+               .Where(r => r.UserId == id && courseIds.Contains(r.CourseId))
+               .Select(r => new { r.CourseId, r.Rating })
+               .ToDictionaryAsync(r => r.CourseId, r => r.Rating);
 
             var activeCourses = new List<AdminUserCourseProgressDto>();
             var completedCourses = new List<AdminUserCourseProgressDto>();
@@ -190,7 +194,8 @@ namespace Backend.Controllers
                     CourseId = course.Id,
                     CourseTitle = course.Title,
                     CompletionPercent = completionPercent,
-                    CompletedAt = progress.CompletedAt
+                    CompletedAt = progress.CompletedAt,
+                    Rating = courseRatings.TryGetValue(course.Id, out var rating) ? rating : null
                 };
 
                 if (progress.IsCompleted)
@@ -234,7 +239,9 @@ namespace Backend.Controllers
                 {
                     id = p.CourseId.Value,
                     title = p.Course?.Title ?? string.Empty,
+                    price = p.Course?.Price ?? 0,
                     purchasedAt = p.PurchasedAt
+                     
                 })
                 .ToList();
 
@@ -244,6 +251,7 @@ namespace Backend.Controllers
                 {
                     id = p.BookId.Value,
                     title = p.Book?.Title ?? string.Empty,
+                    price = p.Book?.Price ?? 0,
                     purchasedAt = p.PurchasedAt
                 })
                 .ToList();
@@ -254,6 +262,7 @@ namespace Backend.Controllers
                 {
                     id = p.LearningPathId.Value,
                     title = p.LearningPath?.Title ?? string.Empty,
+                    price = p.LearningPath?.Price ?? 0,
                     purchasedAt = p.PurchasedAt
                 })
                 .ToList();
@@ -407,6 +416,7 @@ namespace Backend.Controllers
         public DateTime? PurchasedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public double CompletionPercent { get; set; }
+        public int? Rating { get; set; }
     }
 
     public class AdminUserLearningPathProgressDto

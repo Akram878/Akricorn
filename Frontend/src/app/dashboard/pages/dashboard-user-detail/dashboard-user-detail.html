@@ -8,7 +8,9 @@
     </div>
     <div class="tags" *ngIf="user">
       <span class="tag">{{ user.role }}</span>
-      <span class="tag" [class.tag--status]="user.isActive">{{ user.isActive ? 'Active' : 'Disabled' }}</span>
+      <span class="tag" [class.tag--status]="user.isActive">{{
+        user.isActive ? 'Active' : 'Disabled'
+      }}</span>
     </div>
   </div>
 
@@ -53,30 +55,45 @@
       <div class="grid">
         <div>
           <h4>Courses</h4>
-          <table class="data-table" *ngIf="overview.purchases?.courses?.length; else noCoursePurchases">
+          <table
+            class="data-table"
+            *ngIf="overview.purchases?.courses?.length; else noCoursePurchases"
+          >
             <thead>
-              <tr><th>ID</th><th>Title</th></tr>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Price</th>
+              </tr>
             </thead>
             <tbody>
               <tr *ngFor="let c of overview.purchases.courses">
                 <td>{{ c.id ?? c.courseId ?? '-' }}</td>
                 <td>{{ c.title ?? c.name ?? 'Course' }}</td>
+                <td>{{ c.price ?? 0 }}</td>
               </tr>
             </tbody>
           </table>
-          <ng-template #noCoursePurchases><div class="empty">No course purchases.</div></ng-template>
+          <ng-template #noCoursePurchases
+            ><div class="empty">No course purchases.</div></ng-template
+          >
         </div>
 
         <div>
           <h4>Books</h4>
           <table class="data-table" *ngIf="overview.purchases?.books?.length; else noBookPurchases">
             <thead>
-              <tr><th>ID</th><th>Title</th></tr>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Price</th>
+              </tr>
             </thead>
             <tbody>
               <tr *ngFor="let b of overview.purchases.books">
                 <td>{{ b.id ?? b.bookId ?? '-' }}</td>
                 <td>{{ b.title ?? 'Book' }}</td>
+                <td>{{ b.price ?? 0 }}</td>
               </tr>
             </tbody>
           </table>
@@ -87,16 +104,23 @@
           <h4>Learning Paths</h4>
           <table class="data-table" *ngIf="overview.purchases?.paths?.length; else noPathPurchases">
             <thead>
-              <tr><th>ID</th><th>Title</th></tr>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Price</th>
+              </tr>
             </thead>
             <tbody>
               <tr *ngFor="let p of overview.purchases.paths">
                 <td>{{ p.id ?? p.learningPathId ?? '-' }}</td>
                 <td>{{ p.title ?? 'Path' }}</td>
+                <td>{{ p.price ?? 0 }}</td>
               </tr>
             </tbody>
           </table>
-          <ng-template #noPathPurchases><div class="empty">No learning path purchases.</div></ng-template>
+          <ng-template #noPathPurchases
+            ><div class="empty">No learning path purchases.</div></ng-template
+          >
         </div>
       </div>
     </section>
@@ -108,12 +132,17 @@
           <h4>Active</h4>
           <table class="data-table" *ngIf="overview.courses?.active?.length; else noActive">
             <thead>
-              <tr><th>Course</th><th>Progress</th></tr>
+              <tr>
+                <th>Course</th>
+                <th>Progress</th>
+                <th>Rating</th>
+              </tr>
             </thead>
             <tbody>
               <tr *ngFor="let c of overview.courses.active">
                 <td>{{ c.title ?? c.courseTitle ?? 'Course' }}</td>
                 <td>{{ c.completionPercent ?? c.progress ?? 0 }}%</td>
+                <td>{{ c.rating ?? '—' }}</td>
               </tr>
             </tbody>
           </table>
@@ -124,12 +153,17 @@
           <h4>Completed</h4>
           <table class="data-table" *ngIf="overview.courses?.completed?.length; else noCompleted">
             <thead>
-              <tr><th>Course</th><th>Completed At</th></tr>
+              <tr>
+                <th>Course</th>
+                <th>Completed At</th>
+                <th>Rating</th>
+              </tr>
             </thead>
             <tbody>
               <tr *ngFor="let c of overview.courses.completed">
                 <td>{{ c.title ?? c.courseTitle ?? 'Course' }}</td>
                 <td>{{ c.completedAt ?? 'Yes' }}</td>
+                <td>{{ c.rating ?? '—' }}</td>
               </tr>
             </tbody>
           </table>
@@ -142,7 +176,11 @@
       <h3>Learning Paths</h3>
       <table class="data-table" *ngIf="overview.learningPaths?.length; else noPaths">
         <thead>
-          <tr><th>ID</th><th>Title</th><th>Completion</th></tr>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Completion</th>
+          </tr>
         </thead>
         <tbody>
           <tr *ngFor="let p of overview.learningPaths">

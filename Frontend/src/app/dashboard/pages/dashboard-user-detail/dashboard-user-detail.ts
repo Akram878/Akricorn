@@ -7,13 +7,25 @@ import { AdminUsersService, AdminUserDto } from '../../../core/services/admin-us
 
 interface UserOverview {
   purchases: {
-    courses: any[];
-    books: any[];
-    paths: any[];
+    courses: Array<{ id: number; title: string; price?: number; purchasedAt?: string }>;
+    books: Array<{ id: number; title: string; price?: number; purchasedAt?: string }>;
+    paths: Array<{ id: number; title: string; price?: number; purchasedAt?: string }>;
   };
   courses: {
-    active: any[];
-    completed: any[];
+    active: Array<{
+      courseId?: number;
+      courseTitle?: string;
+      completionPercent?: number;
+      completedAt?: string;
+      rating?: number | null;
+    }>;
+    completed: Array<{
+      courseId?: number;
+      courseTitle?: string;
+      completionPercent?: number;
+      completedAt?: string;
+      rating?: number | null;
+    }>;
   };
   learningPaths: any[];
 }
