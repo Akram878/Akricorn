@@ -26,6 +26,7 @@
           <th>Price</th>
           <th>Discount</th>
           <th>Rating</th>
+          <th>Purchases</th>
           <th>Hours</th>
           <th>Path IDs</th>
           <th>Active</th>
@@ -42,6 +43,7 @@
           <td>{{ c.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
           <td>{{ c.discount ?? 0 | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
           <td>{{ c.rating | number : '1.1-1' }}</td>
+          <td>{{ c.purchaseCount ?? 0 }}</td>
           <td>{{ c.hours }}</td>
           <td>{{ c.pathIds.length ? c.pathIds.join(', ') : '-' }}</td>
 

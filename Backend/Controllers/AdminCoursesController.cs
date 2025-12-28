@@ -36,6 +36,12 @@ namespace Backend.Controllers
                 .Select(g => new { CourseId = g.Key, Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
                 .ToDictionaryAsync(x => x.CourseId, x => x);
 
+            var purchaseCounts = await _context.UserPurchases
+               .Where(p => p.PurchaseType == PurchaseType.Course && p.CourseId != null)
+               .GroupBy(p => p.CourseId!.Value)
+               .Select(g => new { CourseId = g.Key, Count = g.Count() })
+               .ToDictionaryAsync(x => x.CourseId, x => x.Count);
+
             var courses = await _context.Courses
                 .Include(c => c.LearningPathCourses)
                 .ToListAsync();
@@ -45,6 +51,7 @@ namespace Backend.Controllers
                 {
                     var hasStats = ratingStats.TryGetValue(c.Id, out var stats);
                     var hasStats2 = ratingStats.TryGetValue(c.Id, out var stats2);
+                    var purchaseCount = purchaseCounts.TryGetValue(c.Id, out var count) ? count : 0;
 
                     return new CourseDto
                     {
@@ -57,6 +64,7 @@ namespace Backend.Controllers
                         Category = c.Category,
                         Rating = hasStats ? stats.Average : c.Rating,
                         RatingCount = hasStats2 ? stats2.Count : 0,
+                        PurchaseCount = purchaseCount,
                         ThumbnailUrl = c.ThumbnailUrl,
                         PathIds = c.LearningPathCourses
                             .Select(lp => lp.LearningPathId)
@@ -86,6 +94,9 @@ namespace Backend.Controllers
                 .GroupBy(r => r.CourseId)
                 .Select(g => new { Count = g.Count(), Average = Math.Round(g.Average(x => x.Rating), 2) })
                 .FirstOrDefaultAsync();
+            var purchaseCount = await _context.UserPurchases
+               .Where(p => p.PurchaseType == PurchaseType.Course && p.CourseId == id)
+               .CountAsync();
 
             var dto = new CourseDto
             {
@@ -98,6 +109,7 @@ namespace Backend.Controllers
                 Category = course.Category,
                 Rating = ratingStats?.Average ?? course.Rating,
                 RatingCount = ratingStats?.Count ?? 0,
+                PurchaseCount = purchaseCount,
                 ThumbnailUrl = course.ThumbnailUrl,
                 PathIds = course.LearningPathCourses
                     .Select(lp => lp.LearningPathId)
@@ -362,6 +374,7 @@ namespace Backend.Controllers
             public string Category { get; set; }
             public double Rating { get; set; }
             public int RatingCount { get; set; }
+            public int PurchaseCount { get; set; }
             public string ThumbnailUrl { get; set; }
             public List<int> PathIds { get; set; } = new();
         }
