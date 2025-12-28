@@ -9,6 +9,8 @@ export interface PublicCourse {
   description: string;
 
   price: number;
+  discount?: number;
+  finalPrice?: number;
   thumbnailUrl?: string | null;
   createdAt?: string;
   // الحقول الإضافية (اختيارية حالياً)

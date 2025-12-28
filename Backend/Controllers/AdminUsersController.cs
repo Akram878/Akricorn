@@ -139,6 +139,19 @@ namespace Backend.Controllers
                 .Include(p => p.Book)
                 .Include(p => p.LearningPath)
                 .ToListAsync();
+            var paymentAmounts = await _context.Payments
+               .Where(p => p.UserId == id && (p.TargetType == "Course" || p.TargetType == "LearningPath"))
+               .GroupBy(p => new { p.TargetType, p.TargetId })
+               .Select(g => new
+               {
+                   g.Key.TargetType,
+                   g.Key.TargetId,
+                   Amount = g.OrderByDescending(p => p.CreatedAt).Select(p => p.Amount).FirstOrDefault()
+               })
+               .ToListAsync();
+            var paymentLookup = paymentAmounts.ToDictionary(
+                x => (x.TargetType, x.TargetId),
+                x => x.Amount);
 
             var coursePurchaseIds = purchases
                 .Where(p => p.CourseId.HasValue)
@@ -239,7 +252,9 @@ namespace Backend.Controllers
                 {
                     id = p.CourseId.Value,
                     title = p.Course?.Title ?? string.Empty,
-                    price = p.Course?.Price ?? 0,
+                    price = paymentLookup.TryGetValue(("Course", p.CourseId.Value), out var amount)
+                        ? amount
+                        : p.Course?.Price ?? 0,
                     purchasedAt = p.PurchasedAt
                      
                 })
@@ -262,7 +277,9 @@ namespace Backend.Controllers
                 {
                     id = p.LearningPathId.Value,
                     title = p.LearningPath?.Title ?? string.Empty,
-                    price = p.LearningPath?.Price ?? 0,
+                    price = paymentLookup.TryGetValue(("LearningPath", p.LearningPathId.Value), out var amount)
+                        ? amount
+                        : p.LearningPath?.Price ?? 0,
                     purchasedAt = p.PurchasedAt
                 })
                 .ToList();

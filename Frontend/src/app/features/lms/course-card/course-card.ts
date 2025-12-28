@@ -94,4 +94,30 @@ export class CourseCardComponent {
   getRating(): number {
     return this.course.rating ?? 0;
   }
+
+  getBasePrice(): number {
+    return this.course.price ?? 0;
+  }
+
+  getDiscountPercent(): number {
+    return this.course.discount ?? 0;
+  }
+
+  getFinalPrice(): number {
+    const basePrice = this.getBasePrice();
+    const discount = this.getDiscountPercent();
+    if (discount <= 0) {
+      return basePrice;
+    }
+
+    if (this.course.finalPrice !== undefined && this.course.finalPrice !== null) {
+      return this.course.finalPrice;
+    }
+
+    return basePrice - (basePrice * discount) / 100;
+  }
+
+  hasDiscount(): boolean {
+    return this.getDiscountPercent() > 0 && this.getFinalPrice() < this.getBasePrice();
+  }
 }

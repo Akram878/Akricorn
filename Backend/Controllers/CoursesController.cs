@@ -24,9 +24,39 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetCourses()
         {
             var courses = await BuildCoursesQuery()
+                  .Select(c => new
+                  {
+                      c.Id,
+                      c.Title,
+                      c.Description,
+                      c.ThumbnailUrl,
+                      c.Price,
+                      c.Discount,
+                      c.Hours,
+                      c.Category,
+                      c.Rating,
+                      pathTitle = c.LearningPathCourses
+                        .Select(lp => lp.LearningPath.Title)
+                        .FirstOrDefault()
+                  })
                 .ToListAsync();
 
-            return Ok(courses);
+            var result = courses.Select(c => new
+            {
+                c.Id,
+                c.Title,
+                c.Description,
+                c.ThumbnailUrl,
+                c.Price,
+                c.Discount,
+                finalPrice = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(c.Price, c.Discount),
+                c.Hours,
+                c.Category,
+                c.Rating,
+                c.pathTitle
+            });
+
+            return Ok(result);
         }
 
         [HttpGet("featured")]
@@ -35,18 +65,7 @@ namespace Backend.Controllers
         {
             var courses = await BuildCoursesQuery()
                          
-                          .ToListAsync();
-
-            return Ok(courses);
-        }
-
-        private IQueryable<object> BuildCoursesQuery()
-        {
-            return _context.Courses
-                .AsNoTracking()
-                .Where(c => c.IsActive)
-                .OrderByDescending(c => c.CreatedAt)
-            
+                         
                 .Select(c => new
                 {
                     c.Id,
@@ -54,13 +73,40 @@ namespace Backend.Controllers
                     c.Description,
                     c.ThumbnailUrl,
                     c.Price,
+                    c.Discount,
                     c.Hours,
                     c.Category,
                     c.Rating,
                     pathTitle = c.LearningPathCourses
                         .Select(lp => lp.LearningPath.Title)
                         .FirstOrDefault()
-                });
+                })
+                .ToListAsync();
+
+            var result = courses.Select(c => new
+            {
+                c.Id,
+                c.Title,
+                c.Description,
+                c.ThumbnailUrl,
+                c.Price,
+                c.Discount,
+                finalPrice = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(c.Price, c.Discount),
+                c.Hours,
+                c.Category,
+                c.Rating,
+                c.pathTitle
+            });
+
+            return Ok(result);
+        }
+
+        private IQueryable<Backend.Models.Course> BuildCoursesQuery()
+        {
+            return _context.Courses
+                .AsNoTracking()
+                .Where(c => c.IsActive)
+                .OrderByDescending(c => c.CreatedAt);
         }
     }
 }

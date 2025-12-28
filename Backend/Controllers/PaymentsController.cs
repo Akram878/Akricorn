@@ -57,16 +57,7 @@ namespace Backend.Controllers
 
             // 🔹 دفع افتراضي ناجح (بدون بوابة دفع حقيقية)
 
-            var discountPercent = course.Discount;
-            if (discountPercent < 0)
-                discountPercent = 0;
-            if (discountPercent > 100)
-                discountPercent = 100;
-
-            var amount = course.Price - (course.Price * discountPercent / 100m);
-            if (amount < 0)
-                amount = 0;
-
+            var amount = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(course.Price, course.Discount);
 
             var payment = new Payment
             {

@@ -182,6 +182,12 @@ $gold-500: #b9822f;
   gap: 0.12rem;
 }
 
+.lms-course-card__price-values {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
 .lms-course-card__price-label {
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -193,6 +199,20 @@ $gold-500: #b9822f;
   font-size: 1rem;
   font-weight: 700;
   color: $gold-100;
+}
+
+.lms-course-card__price-value--strikethrough {
+  text-decoration: line-through;
+  color: rgba($gold-200, 0.7);
+}
+
+.lms-course-card__price-value--final {
+  color: $gold-100;
+}
+
+.lms-course-card__price-discount {
+  font-size: 0.7rem;
+  color: rgba($gold-200, 0.85);
 }
 
 .lms-course-card .lms-primary-btn {

@@ -261,15 +261,9 @@ namespace Backend.Controllers
             if (alreadyPurchased)
                 return Conflict(new { message = "You already own this learning path." });
 
-            var discountPercent = learningPath.Discount;
-            if (discountPercent < 0)
-                discountPercent = 0;
-            if (discountPercent > 100)
-                discountPercent = 100;
 
-            var amount = learningPath.Price - (learningPath.Price * discountPercent / 100m);
-            if (amount < 0)
-                amount = 0;
+
+            var amount = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(learningPath.Price, learningPath.Discount);
 
             var payment = new Payment
             {
@@ -555,6 +549,15 @@ namespace Backend.Controllers
                 .ToListAsync();
 
             var courseIds = myCourseEntities.Select(uc => uc.CourseId).Distinct().ToList();
+            var paymentAmounts = await _context.Payments
+               .Where(p => p.UserId == userId.Value && p.TargetType == "Course" && courseIds.Contains(p.TargetId))
+               .GroupBy(p => p.TargetId)
+               .Select(g => new
+               {
+                   CourseId = g.Key,
+                   Amount = g.OrderByDescending(p => p.CreatedAt).Select(p => p.Amount).FirstOrDefault()
+               })
+               .ToDictionaryAsync(x => x.CourseId, x => x.Amount);
             var courseRatings = await _context.CourseRatings
                 .Where(r => courseIds.Contains(r.CourseId))
                 .GroupBy(r => r.CourseId)
@@ -564,12 +567,13 @@ namespace Backend.Controllers
             var myCourses = myCourseEntities.Select(uc =>
             {
                 var stats = courseRatings.TryGetValue(uc.CourseId, out var s) ? s : null;
+                var paidAmount = paymentAmounts.TryGetValue(uc.CourseId, out var amount) ? amount : uc.Course.Price;
                 return new
                 {
                     uc.Course.Id,
                     uc.Course.Title,
                     uc.Course.Description,
-                    uc.Course.Price,
+                    price = paidAmount,
                     uc.Course.Hours,
                     uc.Course.Category,
                     uc.Course.ThumbnailUrl,
@@ -609,8 +613,8 @@ namespace Backend.Controllers
             if (!hasAccess)
                 return StatusCode(403, new { message = "You are not enrolled in this course." });
 
-        var course = await _context.Courses
-            .Include(c => c.Sections)
+            var course = await _context.Courses
+             .Include(c => c.Sections)
                 .ThenInclude(s => s.Lessons)
                         .ThenInclude(l => l.Files)
                             .ThenInclude(f => f.FileMetadata)
@@ -716,13 +720,18 @@ namespace Backend.Controllers
                 ) ?? Enumerable.Empty<object>();
 
             var courseRatingStats = await GetCourseRatingStats(course.Id);
+            var paidAmount = await _context.Payments
+               .Where(p => p.UserId == userId.Value && p.TargetType == "Course" && p.TargetId == course.Id)
+               .OrderByDescending(p => p.CreatedAt)
+               .Select(p => (decimal?)p.Amount)
+               .FirstOrDefaultAsync();
 
             return Ok(new
             {
                 id = course.Id,
                 title = course.Title,
                 description = course.Description,
-                price = course.Price,
+                price = paidAmount ?? course.Price,
                 hours = course.Hours,
                 category = course.Category,
                 rating = courseRatingStats.Average,

@@ -51,7 +51,25 @@
         <div class="lms-course-card__price">
           <span class="lms-course-card__price-label">Price</span>
 
-          <span class="lms-course-card__price-value">{{ course.price | number : '1.2-2' }} $</span>
+          <div class="lms-course-card__price-values">
+            <span
+              class="lms-course-card__price-value"
+              [class.lms-course-card__price-value--strikethrough]="hasDiscount()"
+            >
+              {{ getBasePrice() | number : '1.2-2' }} $
+            </span>
+
+            <span
+              class="lms-course-card__price-value lms-course-card__price-value--final"
+              *ngIf="hasDiscount()"
+            >
+              {{ getFinalPrice() | number : '1.2-2' }} $
+            </span>
+          </div>
+
+          <span class="lms-course-card__price-discount" *ngIf="hasDiscount()">
+            Save {{ getDiscountPercent() | number : '1.0-0' }}%
+          </span>
         </div>
 
         <button

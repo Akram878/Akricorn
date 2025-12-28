@@ -354,7 +354,12 @@ public class AdminCourseContentController : ControllerBase
             var newFile = new CourseLessonFile
             {
                 LessonId = lessonId,
-                FileMetadata = metadata
+                FileMetadata = metadata,
+                FileName = originalName,
+                FileUrl = storedName,
+                SizeBytes = file.Length,
+                ContentType = ResolveMimeType(file),
+                UploadedAt = DateTime.UtcNow
             };
 
             _context.CourseLessonFiles.Add(newFile);
