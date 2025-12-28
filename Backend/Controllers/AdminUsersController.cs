@@ -142,7 +142,7 @@ namespace Backend.Controllers
 
 
             var paymentHistory = await _context.Payments
-               .Where(p => p.UserId == id && (p.TargetType == "Course" || p.TargetType == "LearningPath"))
+                             .Where(p => p.UserId == id)
                .OrderBy(p => p.CreatedAt)
                .Select(p => new
                {
@@ -250,7 +250,8 @@ namespace Backend.Controllers
             decimal GetPaidAmount(string targetType, int targetId, DateTime purchasedAt, decimal fallback)
             {
                 var payments = paymentHistory
-                    .Where(p => p.TargetType == targetType && p.TargetId == targetId)
+                     .Where(p => string.Equals(p.TargetType, targetType, StringComparison.OrdinalIgnoreCase)
+                        && p.TargetId == targetId)
                     .ToList();
 
                 if (payments.Count == 0)

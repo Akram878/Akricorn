@@ -48,7 +48,7 @@
       </div>
 
       <footer class="lms-course-card__footer">
-        <div class="lms-course-card__price">
+        <div class="lms-course-card__price" *ngIf="!owned">
           <span class="lms-course-card__price-label">Price</span>
 
           <div class="lms-course-card__price-values">
