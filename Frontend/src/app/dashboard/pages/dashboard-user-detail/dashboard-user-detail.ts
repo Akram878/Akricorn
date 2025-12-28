@@ -7,9 +7,31 @@ import { AdminUsersService, AdminUserDto } from '../../../core/services/admin-us
 
 interface UserOverview {
   purchases: {
-    courses: Array<{ id: number; title: string; price?: number; purchasedAt?: string }>;
-    books: Array<{ id: number; title: string; price?: number; purchasedAt?: string }>;
-    paths: Array<{ id: number; title: string; price?: number; purchasedAt?: string }>;
+    courses: Array<{
+      id?: number;
+      courseId?: number;
+      title?: string;
+      name?: string;
+      price?: number;
+      purchasedAt?: string;
+      rating?: number | null;
+    }>;
+    books: Array<{
+      id?: number;
+      bookId?: number;
+      title?: string;
+      price?: number;
+      purchasedAt?: string;
+      rating?: number | null;
+    }>;
+    paths: Array<{
+      id?: number;
+      learningPathId?: number;
+      title?: string;
+      price?: number;
+      purchasedAt?: string;
+      rating?: number | null;
+    }>;
   };
   courses: {
     active: Array<{
@@ -27,7 +49,6 @@ interface UserOverview {
       rating?: number | null;
     }>;
   };
-  learningPaths: any[];
 }
 
 @Component({
@@ -74,17 +95,7 @@ export class DashboardUserDetailComponent implements OnInit {
       })
       .subscribe({
         next: (data) => {
-          const mappedPaths =
-            data.learningPaths?.map((p: any) => ({
-              id: p.id ?? p.learningPathId ?? p.learningPath?.id,
-              title: p.title ?? p.learningPathTitle ?? p.learningPath?.title ?? 'Learning Path',
-              completionPercent: p.completionPercent ?? 0,
-            })) ?? [];
-
-          this.overview = {
-            ...data,
-            learningPaths: mappedPaths,
-          };
+          this.overview = data;
           this.isLoading = false;
         },
         error: () => {
@@ -92,5 +103,68 @@ export class DashboardUserDetailComponent implements OnInit {
           this.isLoading = false;
         },
       });
+  }
+
+  get purchaseRows(): Array<{
+    productType: string;
+    productId: number | string;
+    productName: string;
+    price: number | string;
+    rating: number | string;
+  }> {
+    if (!this.overview) return [];
+
+    const toRow = (
+      productType: string,
+      item: {
+        id?: number;
+        courseId?: number;
+        bookId?: number;
+        learningPathId?: number;
+        title?: string;
+        name?: string;
+        price?: number;
+        rating?: number | null;
+      }
+    ) => ({
+      productType,
+      productId: item.id ?? item.courseId ?? item.bookId ?? item.learningPathId ?? '—',
+      productName: item.title ?? item.name ?? '—',
+      price: item.price ?? '—',
+      rating: item.rating ?? '—',
+    });
+
+    return [
+      ...(this.overview.purchases?.courses ?? []).map((item) => toRow('كورس', item)),
+      ...(this.overview.purchases?.books ?? []).map((item) => toRow('كتاب', item)),
+      ...(this.overview.purchases?.paths ?? []).map((item) => toRow('مسار', item)),
+    ];
+  }
+
+  get courseStatusRows(): Array<{
+    courseId: number | string;
+    courseTitle: string;
+    status: string;
+  }> {
+    if (!this.overview) return [];
+
+    const toRow = (
+      status: string,
+      course: {
+        id?: number;
+        courseId?: number;
+        title?: string;
+        courseTitle?: string;
+      }
+    ) => ({
+      courseId: course.courseId ?? course.id ?? '—',
+      courseTitle: course.courseTitle ?? course.title ?? '—',
+      status,
+    });
+
+    return [
+      ...(this.overview.courses?.active ?? []).map((course) => toRow('نشط', course)),
+      ...(this.overview.courses?.completed ?? []).map((course) => toRow('مكتمل', course)),
+    ];
   }
 }
