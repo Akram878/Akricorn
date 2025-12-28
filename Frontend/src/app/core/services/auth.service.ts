@@ -38,7 +38,6 @@ export interface AuthResponse {
 
 // طلب تعديل المعلومات الشخصية
 export interface UpdateProfileRequest {
-  id: number;
   name: string;
   family: string;
   city: string;
@@ -48,7 +47,6 @@ export interface UpdateProfileRequest {
 
 // طلب إعدادات الحساب
 export interface UpdateAccountSettingsRequest {
-  id: number;
   email: string;
   countryCode: string;
   number: string;
@@ -208,8 +206,8 @@ export class AuthService {
   //        Delete account
   // ============================
 
-  deleteAccount(userId: number, currentPassword: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/delete`, { id: userId, currentPassword }).pipe(
+  deleteAccount(currentPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/delete`, { currentPassword }).pipe(
       tap(() => {
         this.logout({ redirectToLogin: true });
       })

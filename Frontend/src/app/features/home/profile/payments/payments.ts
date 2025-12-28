@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { PaymentsService, Payment } from '../../../../core/services/payments.service';
 
 @Component({
   selector: 'app-profile-payments',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, RouterModule],
   templateUrl: './payments.html',
+  styleUrls: ['./payments.scss'],
 })
 export class Payments implements OnInit {
   payments: Payment[] = [];

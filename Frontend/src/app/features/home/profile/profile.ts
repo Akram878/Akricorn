@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   AuthService,
   User,
@@ -14,7 +14,7 @@ import { CountrySelectComponent } from '../../../shared/components/country-selec
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet, RouterModule, CountrySelectComponent],
+  imports: [CommonModule, FormsModule, RouterModule, CountrySelectComponent],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss'],
 })
@@ -24,16 +24,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   editMode = false;
   accountSettingsMode = false;
-  settingsOpen = false;
+
   accountSubmitted = false;
   avatarUrl: string = '/assets/icons/user.png';
-  about = '';
 
   // city + birthDate + currentPassword
   editModel = {
     name: '',
     family: '',
-    about: '',
+
     city: '',
     birthDate: '',
     currentPassword: '',
@@ -48,9 +47,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     confirmNewPassword: '',
   };
 
-  // قفل تعديل تاريخ الميلاد (سنربطه بالباك إند)
-  birthDateLocked = false;
-
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
@@ -62,9 +58,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.editModel = {
           name: user.name || '',
           family: user.family || '',
-          about: this.about || '',
+
           city: user.city || '',
-          birthDate: user.birthDate || '',
+          birthDate: this.formatBirthDate(user.birthDate),
           currentPassword: '',
         };
 
@@ -136,15 +132,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     alert('Profile picture updated locally. It will be linked to the backend later.');
   }
 
-  // ============================
-  //  Settings menu
-  // ============================
-
-  toggleSettings() {
-    if (!this.user || this.user.isGuest) return;
-    this.settingsOpen = !this.settingsOpen;
-  }
-
   startEdit() {
     if (!this.user || this.user.isGuest) {
       alert('Guests cannot edit information. Please sign in first.');
@@ -154,15 +141,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.editModel = {
       name: this.user.name || '',
       family: this.user.family || '',
-      about: this.about || '',
+
       city: this.user.city || '',
-      birthDate: this.user.birthDate || '',
+      birthDate: this.formatBirthDate(this.user.birthDate),
       currentPassword: '', // كل مرة نفتح الفورم نفرّغ الباسورد
     };
 
     this.editMode = true;
     this.accountSettingsMode = false;
-    this.settingsOpen = false;
   }
 
   openAccountSettings() {
@@ -182,7 +168,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     this.accountSettingsMode = true;
     this.editMode = false;
-    this.settingsOpen = false;
+
     this.accountSubmitted = false;
   }
 
@@ -209,7 +195,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
 
     const payload: UpdateProfileRequest = {
-      id: this.user.id,
       name: this.editModel.name,
       family: this.editModel.family,
       city: this.editModel.city,
@@ -220,15 +205,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.authService.updateProfile(payload).subscribe({
       next: (updated: User) => {
         this.user = updated;
-        this.about = this.editModel.about;
-
-        // لو الباك إند يرسل canEditBirthDate:
-        // this.birthDateLocked = updated.canEditBirthDate === false;
 
         // نفرّغ الباسورد بعد الحفظ
         this.editModel.currentPassword = '';
 
-        console.log('Profile updated:', updated, 'about:', this.about);
+        console.log('Profile updated:', updated);
         this.editMode = false;
       },
       error: (err: any) => {
@@ -265,7 +246,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
 
     const payload: UpdateAccountSettingsRequest = {
-      id: this.user.id,
       email: this.accountSettingsModel.email,
       countryCode: this.accountSettingsModel.countryCode,
       number: this.accountSettingsModel.number,
@@ -302,8 +282,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.settingsOpen = false;
-
     const confirmed = confirm(
       'Are you sure you want to delete this account? This action cannot be undone.'
     );
@@ -312,7 +290,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const password = prompt('Please enter your password to confirm deletion:');
     if (!password) return;
 
-    this.authService.deleteAccount(this.user.id, password).subscribe({
+    this.authService.deleteAccount(password).subscribe({
       next: () => {
         alert('Your account has been deleted.');
         this.authService.logout();
@@ -330,5 +308,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // أو:
     // this.router.navigate(['/home']);
     console.log('closeProfile() clicked');
+  }
+
+  private formatBirthDate(value?: string): string {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+    return date.toISOString().split('T')[0];
   }
 }

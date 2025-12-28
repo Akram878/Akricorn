@@ -1,29 +1,49 @@
 <div class="profile-payments">
-  <h2>Payments</h2>
+  <div class="profile-payments__header">
+    <div>
+      <h2>Payments</h2>
+      <p>Review your recent course and book payments.</p>
+    </div>
+    <button type="button" class="chip-btn" [routerLink]="['/profile']">Back to profile</button>
+  </div>
 
-  <div *ngIf="isLoading">Loading payments...</div>
-  <div *ngIf="!isLoading && error" class="error">{{ error }}</div>
+  <div class="profile-payments__body">
+    <div *ngIf="isLoading" class="payments-state">Loading payments...</div>
+    <div *ngIf="!isLoading && error" class="payments-state payments-state--error">{{ error }}</div>
+    <div *ngIf="!isLoading && !error && payments.length > 0" class="payments-table-wrapper">
+      <table class="payments-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of payments">
+            <td>#{{ p.id }}</td>
+            <td class="payments-table__desc">{{ p.description }}</td>
+            <td class="payments-table__amount">
+              {{ p.amount | number : '1.2-2' }} {{ p.currency }}
+            </td>
+            <td>
+              <span
+                class="payments-table__status"
+                [ngClass]="'payments-table__status--' + (p.status || 'pending')"
+              >
+                {{ p.status }}
+              </span>
+            </td>
+            <td>{{ p.createdAt | date : 'short' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <table *ngIf="!isLoading && !error && payments.length > 0" class="payments-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Description</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Created</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of payments">
-        <td>#{{ p.id }}</td>
-        <td>{{ p.description }}</td>
-        <td>{{ p.amount | number : '1.2-2' }} {{ p.currency }}</td>
-        <td>{{ p.status }}</td>
-        <td>{{ p.createdAt | date : 'short' }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div *ngIf="!isLoading && !error && payments.length === 0">No payments yet.</div>
+    <div *ngIf="!isLoading && !error && payments.length === 0" class="payments-state">
+      No payments yet.
+    </div>
+  </div>
 </div>

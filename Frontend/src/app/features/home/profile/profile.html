@@ -1,24 +1,23 @@
 <div class="profile-root" *ngIf="user as u; else guestProfile">
   <div class="profile-card">
-    <!-- TOPBAR: Back + Logout -->
     <div class="profile-card__topbar">
-      <!-- زر الرجوع -->
       <button type="button" class="chip-btn" (click)="closeProfile()">← Back</button>
-      <div class="profile-card__section">
-        <h3>Payments</h3>
-        <p>View your course and book payments.</p>
+      <div class="profile-card__topbar-actions">
         <button type="button" class="chip-btn" [routerLink]="['/profile/payments']">
-          Open payments
+          Payments
+        </button>
+        <button
+          type="button"
+          class="chip-btn chip-btn--danger"
+          (click)="logout()"
+          *ngIf="!u.isGuest"
+        >
+          Log out
         </button>
       </div>
-      <!-- زر تسجيل الخروج (فقط للمستخدم المسجّل، ليس الضيف) -->
-      <button type="button" class="chip-btn chip-btn--danger" (click)="logout()" *ngIf="!u.isGuest">
-        Log out
-      </button>
     </div>
 
-    <!-- Header: avatar + name + settings icon -->
-    <div class="profile-card__header">
+    <div class="profile-card__identity">
       <div class="profile-card__avatar-block">
         <div class="avatar-wrapper">
           <img [src]="avatarUrl" alt="User avatar" />
@@ -35,7 +34,8 @@
 
       <div class="profile-card__main-info">
         <h3 class="name">{{ u.name || 'First name' }} {{ u.family || '' }}</h3>
-        <p class="email">
+        <p class="email">{{ u.email || 'Email not set' }}</p>
+        <p class="meta">
           ID:
           <span *ngIf="u.id !== undefined; else guestIdBlock">
             {{ u.id }}
@@ -45,233 +45,240 @@
           </ng-template>
         </p>
       </div>
-
-      <div class="profile-card__actions" *ngIf="!u.isGuest">
-        <button
-          type="button"
-          class="icon-btn"
-          (click)="toggleSettings()"
-          aria-label="Open profile settings"
-        >
-          ⚙
-        </button>
-
-        <div class="settings-menu" *ngIf="settingsOpen">
-          <button type="button" (click)="startEdit()">Edit profile</button>
-          <button type="button" (click)="openAccountSettings()">Account settings</button>
-          <button type="button" class="danger" (click)="deleteAccount()">Delete account</button>
-        </div>
-      </div>
     </div>
 
-    <div class="profile-card__divider"></div>
+    <div
+      class="profile-card__header-actions"
+      *ngIf="!u.isGuest && !editMode && !accountSettingsMode"
+    >
+      <button type="button" class="btn-secondary" (click)="startEdit()">Edit profile</button>
+      <button type="button" class="btn-secondary" (click)="openAccountSettings()">
+        Account settings
+      </button>
 
-    <!-- 1) العرض العادي: معلومات سريعة ثم About -->
-    <ng-container *ngIf="!editMode && !accountSettingsMode">
-      <div class="profile-card__body">
-        <!-- المعلومات تحت الصورة وفوق About -->
-        <section class="section section--grid">
-          <div class="field">
-            <span class="label">Email</span>
-            <span class="value">{{ u.email || 'Not set' }}</span>
-          </div>
-          <div class="field">
-            <span class="label">Phone</span>
-            <span class="value">
-              {{ (u.countryCode || '') + ' ' + (u.number || 'Not set') }}
-            </span>
-          </div>
-          <div class="field">
-            <span class="label">City</span>
-            <span class="value">{{ u.city || 'Not set' }}</span>
-          </div>
-          <div class="field">
-            <span class="label">Birth date</span>
-            <span class="value">{{ u.birthDate || 'Not set' }}</span>
-          </div>
-        </section>
+      <button type="button" class="btn-danger" (click)="deleteAccount()">Delete account</button>
+    </div>
+  </div>
 
-        <!-- About me -->
-        <section class="section">
-          <h4>About</h4>
-          <p *ngIf="about; else emptyAbout">
-            {{ about }}
-          </p>
-          <ng-template #emptyAbout>
-            <p class="placeholder">You have not written anything about yourself yet.</p>
+  <div class="profile-card__divider"></div>
+
+  <ng-container *ngIf="!editMode && !accountSettingsMode">
+    <div class="profile-card__body">
+      <section class="section section--grid">
+        <div class="field">
+          <span class="label">Full name</span>
+          <span class="value">{{ u.name || 'Not set' }} {{ u.family || '' }}</span>
+        </div>
+        <div class="field">
+          <span class="label">Email</span>
+          <span class="value">{{ u.email || 'Not set' }}</span>
+        </div>
+        <div class="field">
+          <span class="label">Phone</span>
+          <span class="value" *ngIf="u.countryCode || u.number; else emptyPhone">
+            {{ (u.countryCode || '') + ' ' + (u.number || '') }}
+          </span>
+          <ng-template #emptyPhone>
+            <span class="value">Not set</span>
           </ng-template>
-        </section>
-      </div>
-    </ng-container>
+        </div>
+        <div class="field">
+          <span class="label">City</span>
+          <span class="value">{{ u.city || 'Not set' }}</span>
+        </div>
+        <div class="field">
+          <span class="label">Birth date</span>
+          <span class="value">
+            {{ u.birthDate ? (u.birthDate | date : 'mediumDate') : 'Not set' }}
+          </span>
+        </div>
+      </section>
 
-    <!-- 2) وضع تعديل البروفايل -->
-    <section class="profile-card__body" *ngIf="editMode && !accountSettingsMode">
-      <div class="section-header">
-        <h4>Edit profile</h4>
-        <button type="button" class="link-btn" (click)="cancelEdit()">Cancel</button>
-      </div>
+      <section class="section section--notice">
+        <h4>Birth date rules</h4>
+        <p *ngIf="u.canEditBirthDate === false; else birthEditable">
+          Your birth date has already been updated and is now locked.
+        </p>
+        <ng-template #birthEditable>
+          <p>Your birth date can be updated once. Please verify it carefully before saving.</p>
+        </ng-template>
+      </section>
+    </div>
+  </ng-container>
 
-      <form (ngSubmit)="saveProfile()" #profileForm="ngForm" class="profile-form">
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="firstName">First name</label>
-            <input
-              id="firstName"
-              type="text"
-              name="name"
-              [(ngModel)]="editModel.name"
-              placeholder="Enter first name"
-            />
-          </div>
+  <section class="profile-card__body" *ngIf="editMode && !accountSettingsMode">
+    <div class="section-header">
+      <h4>Edit profile</h4>
+      <button type="button" class="link-btn" (click)="cancelEdit()">Cancel</button>
+    </div>
 
-          <div class="form-field">
-            <label for="lastName">Last name</label>
-            <input
-              id="lastName"
-              type="text"
-              name="family"
-              [(ngModel)]="editModel.family"
-              placeholder="Enter last name"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="city">City</label>
-            <input
-              id="city"
-              type="text"
-              name="city"
-              [(ngModel)]="editModel.city"
-              placeholder="Enter city"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="birthDate">Birth date</label>
-            <input
-              id="birthDate"
-              type="date"
-              name="birthDate"
-              [(ngModel)]="editModel.birthDate"
-              [disabled]="user && user.canEditBirthDate === false"
-            />
-            <p class="field-hint" *ngIf="user && user.canEditBirthDate === false">
-              Birth date can no longer be changed.
-            </p>
-          </div>
+    <form (ngSubmit)="saveProfile()" #profileForm="ngForm" class="profile-form">
+      <div class="form-grid form-grid--three">
+        <div class="form-field">
+          <label for="firstName">First name</label>
+          <input
+            id="firstName"
+            type="text"
+            name="name"
+            [(ngModel)]="editModel.name"
+            placeholder="Enter first name"
+          />
         </div>
 
         <div class="form-field">
-          <label for="about">About</label>
-          <textarea
-            id="about"
-            name="about"
-            rows="3"
-            [(ngModel)]="editModel.about"
-            placeholder="Write a short description about yourself..."
-          ></textarea>
+          <label for="lastName">Last name</label>
+          <input
+            id="lastName"
+            type="text"
+            name="family"
+            [(ngModel)]="editModel.family"
+            placeholder="Enter last name"
+          />
         </div>
 
-        <div class="form-actions">
-          <button type="button" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
-          <button type="submit" class="btn-primary">Save changes</button>
+        <div class="form-field">
+          <label for="city">City</label>
+          <input
+            id="city"
+            type="text"
+            name="city"
+            [(ngModel)]="editModel.city"
+            placeholder="Enter city"
+          />
         </div>
-      </form>
-    </section>
 
-    <!-- 3) وضع إعدادات الحساب -->
-    <section class="profile-card__body" *ngIf="accountSettingsMode && !editMode">
-      <div class="section-header">
-        <h4>Account settings</h4>
-        <button type="button" class="link-btn" (click)="cancelEdit()">Cancel</button>
+        <div class="form-field">
+          <label for="birthDate">Birth date</label>
+          <input
+            id="birthDate"
+            type="date"
+            name="birthDate"
+            [(ngModel)]="editModel.birthDate"
+            [disabled]="user && user.canEditBirthDate === false"
+          />
+          <p class="field-hint" *ngIf="user && user.canEditBirthDate === false">
+            Birth date can no longer be changed.
+          </p>
+
+          <p class="field-hint" *ngIf="user && user.canEditBirthDate !== false">
+            You can update your birth date once.
+          </p>
+        </div>
       </div>
 
-      <form (ngSubmit)="saveAccountSettings()" #accountForm="ngForm" class="profile-form">
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              [(ngModel)]="accountSettingsModel.email"
-              placeholder="Enter email"
-            />
-          </div>
+      <div class="form-grid">
+        <div class="form-field form-field--full">
+          <label for="profileCurrentPassword">Current password</label>
+          <input
+            id="profileCurrentPassword"
+            type="password"
+            name="currentPassword"
+            [(ngModel)]="editModel.currentPassword"
+            placeholder="Enter your password to confirm"
+            required
+          />
+          <p class="field-hint">Required for every profile update.</p>
+        </div>
+      </div>
 
-          <div class="form-field phone-field">
-            <label for="phone">Phone number</label>
-            <div class="phone-input-row">
-              <div class="phone-input-country">
-                <app-country-select
-                  name="countryCode"
-                  [(ngModel)]="accountSettingsModel.countryCode"
-                  #countryCodeCtrl="ngModel"
-                  [required]="true"
-                  [invalid]="accountSubmitted && !!countryCodeCtrl?.invalid"
-                />
-              </div>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button type="submit" class="btn-primary">Save changes</button>
+      </div>
+    </form>
+  </section>
 
-              <div class="phone-input-number">
-                <input
-                  id="phone"
-                  type="text"
-                  name="number"
-                  [(ngModel)]="accountSettingsModel.number"
-                  placeholder="Enter phone number"
-                />
-              </div>
+  <section class="profile-card__body" *ngIf="accountSettingsMode && !editMode">
+    <div class="section-header">
+      <h4>Account settings</h4>
+      <button type="button" class="link-btn" (click)="cancelEdit()">Cancel</button>
+    </div>
+
+    <form (ngSubmit)="saveAccountSettings()" #accountForm="ngForm" class="profile-form">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="accountSettingsModel.email"
+            placeholder="Enter email"
+          />
+        </div>
+
+        <div class="form-field phone-field">
+          <label for="phone">Phone number</label>
+          <div class="phone-input-row">
+            <div class="phone-input-country">
+              <app-country-select
+                name="countryCode"
+                [(ngModel)]="accountSettingsModel.countryCode"
+                #countryCodeCtrl="ngModel"
+                [required]="true"
+                [invalid]="accountSubmitted && !!countryCodeCtrl?.invalid"
+              />
+            </div>
+
+            <div class="phone-input-number">
+              <input
+                id="phone"
+                type="text"
+                name="number"
+                [(ngModel)]="accountSettingsModel.number"
+                placeholder="Enter phone number"
+              />
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="currentPassword">Current password</label>
-            <input
-              id="currentPassword"
-              type="password"
-              name="currentPassword"
-              [(ngModel)]="accountSettingsModel.currentPassword"
-              placeholder="Enter current password"
-              required
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="newPassword">New password</label>
-            <input
-              id="newPassword"
-              type="password"
-              name="newPassword"
-              [(ngModel)]="accountSettingsModel.newPassword"
-              placeholder="Enter new password"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="confirmNewPassword">Confirm new password</label>
-            <input
-              id="confirmNewPassword"
-              type="password"
-              name="confirmNewPassword"
-              [(ngModel)]="accountSettingsModel.confirmNewPassword"
-              placeholder="Confirm new password"
-            />
-          </div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="currentPassword">Current password</label>
+          <input
+            id="currentPassword"
+            type="password"
+            name="currentPassword"
+            [(ngModel)]="accountSettingsModel.currentPassword"
+            placeholder="Enter current password"
+            required
+          />
         </div>
 
-        <p class="field-hint">
-          For any change in email, phone, or password, your current password is required.
-        </p>
-
-        <div class="form-actions">
-          <button type="button" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
-          <button type="submit" class="btn-primary">Save settings</button>
+        <div class="form-field">
+          <label for="newPassword">New password</label>
+          <input
+            id="newPassword"
+            type="password"
+            name="newPassword"
+            [(ngModel)]="accountSettingsModel.newPassword"
+            placeholder="Enter new password"
+          />
         </div>
-      </form>
-    </section>
-  </div>
+
+        <div class="form-field">
+          <label for="confirmNewPassword">Confirm new password</label>
+          <input
+            id="confirmNewPassword"
+            type="password"
+            name="confirmNewPassword"
+            [(ngModel)]="accountSettingsModel.confirmNewPassword"
+            placeholder="Confirm new password"
+          />
+        </div>
+      </div>
+
+      <p class="field-hint">
+        For any change in email, phone, or password, your current password is required.
+      </p>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button type="submit" class="btn-primary">Save settings</button>
+      </div>
+    </form>
+  </section>
 </div>
 
 <!-- Guest view -->

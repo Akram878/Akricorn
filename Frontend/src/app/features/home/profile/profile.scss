@@ -59,6 +59,14 @@ $gold-500: #b9822f;
   margin-bottom: 0.9rem;
 }
 
+.profile-card__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 /* زرّين على شكل chip */
 
 .chip-btn {
@@ -103,7 +111,16 @@ $gold-500: #b9822f;
 .profile-card__header {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 1.2rem;
+}
+
+.profile-card__identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .profile-card__avatar-block {
@@ -159,94 +176,28 @@ $gold-500: #b9822f;
   margin: 0;
   font-size: 0.83rem;
   color: rgba($gold-200, 0.9);
-
-  span {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-      'Courier New', monospace;
-    padding: 0.1rem 0.3rem;
-    border-radius: 0.3rem;
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(30, 64, 175, 0.75);
-  }
 }
 
-/* أزرار الإعدادات */
-
-.profile-card__actions {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
+.profile-card__main-info .meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba($gold-200, 0.75);
 }
 
-/* أيقونة ⚙ */
-
-.icon-btn {
-  padding: 0.25rem 0.45rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  background: rgba(15, 23, 42, 0.9);
-  color: $gold-100;
-  font-size: 1rem;
-  cursor: pointer;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  transition: background 0.14s ease-out, box-shadow 0.14s ease-out, border-color 0.14s ease-out,
-    transform 0.14s ease-out;
-
-  &:hover {
-    transform: translateY(-1px);
-    background: rgba(15, 23, 42, 1);
-    border-color: rgba($gold-400, 0.9);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-  }
+.profile-card__main-info .meta span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  padding: 0.08rem 0.3rem;
+  border-radius: 0.3rem;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(30, 64, 175, 0.75);
 }
 
-/* منيو الإعدادات المنسدلة */
-
-.settings-menu {
-  position: absolute;
-  top: 2.1rem;
-  right: 0;
-  min-width: 190px;
-  padding: 0.4rem 0.35rem;
-  border-radius: 0.7rem;
-
-  background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
-  border: 1px solid rgba(30, 64, 175, 0.9);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.95);
-
+.profile-card__header-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  z-index: 10;
-
-  button {
-    width: 100%;
-    padding: 0.45rem 0.7rem;
-    border-radius: 0.5rem;
-    border: none;
-    background: transparent;
-    color: #e5e7eb;
-    font-size: 0.8rem;
-    text-align: left;
-    cursor: pointer;
-    transition: background 0.13s ease-out, color 0.13s ease-out;
-
-    &:hover {
-      background: rgba(30, 64, 175, 0.55);
-    }
-
-    &.danger {
-      color: #fecaca;
-
-      &:hover {
-        background: rgba(127, 29, 29, 0.85);
-      }
-    }
-  }
+  gap: 0.5rem;
+  align-items: flex-end;
 }
 
 /* زر تغيير الصورة */
@@ -313,6 +264,19 @@ $gold-500: #b9822f;
   gap: 0.75rem 1.3rem;
 }
 
+.section--notice {
+  border-radius: 0.8rem;
+  padding: 0.9rem 1rem;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(30, 64, 175, 0.55);
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba($gold-100, 0.9);
+  }
+}
+
 /* المعلومات (Email, Phone, City, Birth date) */
 
 .field {
@@ -332,14 +296,6 @@ $gold-500: #b9822f;
   font-size: 0.87rem;
   color: rgba($gold-100, 0.98);
   word-break: break-word;
-}
-
-/* About placeholder */
-
-.placeholder {
-  font-size: 0.85rem;
-  color: rgba($gold-200, 0.7);
-  font-style: italic;
 }
 
 /* =================== EDIT / SETTINGS HEADER =================== */
@@ -383,12 +339,16 @@ $gold-500: #b9822f;
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8rem 1rem;
 
   &:first-of-type {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.form-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .form-field {
@@ -433,6 +393,11 @@ $gold-500: #b9822f;
     min-height: 90px;
   }
 }
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
 .phone-field {
   .phone-input-row {
     display: flex;
