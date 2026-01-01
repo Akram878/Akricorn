@@ -324,7 +324,7 @@ namespace Backend.Controllers
         [HttpPost("{courseId}/upload-thumbnail")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadThumbnail(int courseId, [FromForm] IFormFile file)
+        public async Task<IActionResult> UploadThumbnail(int courseId, IFormFile file)
         {
             var course = await _context.Courses.FindAsync(courseId);
             if (course == null)

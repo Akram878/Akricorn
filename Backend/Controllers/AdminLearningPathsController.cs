@@ -71,7 +71,7 @@ namespace Backend.Controllers
         [HttpPost("{id:int}/upload-thumbnail")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadThumbnail(int id, [FromForm] IFormFile file)
+        public async Task<IActionResult> UploadThumbnail(int id, IFormFile file)
         {
             var path = await _context.LearningPaths.FirstOrDefaultAsync(lp => lp.Id == id);
 

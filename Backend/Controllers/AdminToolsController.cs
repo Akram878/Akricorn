@@ -148,7 +148,7 @@ namespace Backend.Controllers
         [HttpPost("{id:int}/upload-avatar")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadAvatar(int id, [FromForm] IFormFile file)
+        public async Task<IActionResult> UploadAvatar(int id, IFormFile file)
         {
             var tool = await _context.Tools.FirstOrDefaultAsync(t => t.Id == id);
 
@@ -188,7 +188,7 @@ namespace Backend.Controllers
         [HttpPost("{id:int}/files/upload")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadFile(int id, [FromForm] IFormFile file)
+        public async Task<IActionResult> UploadFile(int id, IFormFile file)
         {
             var tool = await _context.Tools.Include(t => t.Files).ThenInclude(f => f.FileMetadata).FirstOrDefaultAsync(t => t.Id == id);
 

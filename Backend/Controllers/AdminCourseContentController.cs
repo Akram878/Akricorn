@@ -305,7 +305,7 @@ public class AdminCourseContentController : ControllerBase
     [HttpPost("lessons/{lessonId}/upload")]
     [DisableRequestSizeLimit]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> UploadLessonFile(int lessonId, [FromForm] IFormFile file)
+    public async Task<IActionResult> UploadLessonFile(int lessonId, IFormFile file)
 
 
     {
