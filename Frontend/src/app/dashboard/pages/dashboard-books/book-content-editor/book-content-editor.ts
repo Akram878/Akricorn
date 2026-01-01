@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from
 import { CommonModule, CurrencyPipe, NgIf, NgForOf } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AdminBooksService, BookFileDto } from '../../../../core/services/admin-books.service';
-
+import { getImageDimensions } from '../../../../shared/utils/image-dimensions';
 type BookFileView = BookFileDto & {
   originalName?: string;
   downloadUrl?: string;
@@ -52,13 +52,35 @@ export class BookEditorComponent implements OnChanges {
     if (!input.files?.length) return;
 
     const file = input.files[0];
-    const reader = new FileReader();
+    this.error = null;
 
-    reader.onload = () => this.form.patchValue({ thumbnailUrl: reader.result });
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Thumbnail must be an image file.';
+      input.value = '';
+      return;
+    }
 
-    this.thumbnailSelected.emit(file);
-    input.value = '';
+    this.error = null;
+
+    getImageDimensions(file)
+      .then(({ width, height }) => {
+        const isValid = width <= 50 && height <= 50;
+        if (!isValid) {
+          this.error = 'Thumbnail must be 50x50 or smaller.';
+          input.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => this.form.patchValue({ thumbnailUrl: reader.result });
+        reader.readAsDataURL(file);
+        this.thumbnailSelected.emit(file);
+        input.value = '';
+      })
+      .catch(() => {
+        this.error = 'Failed to load selected thumbnail.';
+        input.value = '';
+      });
   }
 
   onFilesSelected(event: Event): void {
@@ -67,22 +89,35 @@ export class BookEditorComponent implements OnChanges {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
+    this.error = null;
     const files = Array.from(input.files);
+    const validFiles = files.filter(
+      (file) => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    );
+
+    if (validFiles.length !== files.length) {
+      this.error = 'Only PDF files can be uploaded.';
+    }
+
+    if (validFiles.length === 0) {
+      input.value = '';
+      return;
+    }
     this.uploading = true;
 
     let completed = 0;
-    files.forEach((file) => {
+    validFiles.forEach((file) => {
       this.adminBooks.uploadFile(this.bookId, file).subscribe({
         next: (res) => {
           this.bookFiles = (res.book?.files as BookFileView[]) ?? this.bookFiles;
           this.filesUpdated.emit(this.bookFiles);
           completed++;
-          if (completed === files.length) this.uploading = false;
+          if (completed === validFiles.length) this.uploading = false;
         },
         error: () => {
           this.error = 'Failed to upload file';
           completed++;
-          if (completed === files.length) this.uploading = false;
+          if (completed === validFiles.length) this.uploading = false;
         },
       });
     });

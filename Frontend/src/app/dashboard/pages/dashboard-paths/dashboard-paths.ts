@@ -8,7 +8,7 @@ import {
 } from '../../../core/services/admin-paths.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminCoursesService, AdminCourseDto } from '../../../core/services/admin-courses.service';
-
+import { getImageDimensions } from '../../../shared/utils/image-dimensions';
 type PathView = AdminLearningPathDto & {
   price?: number;
   discount?: number;
@@ -43,6 +43,7 @@ export class DashboardPaths implements OnInit {
   editingPath: PathView | null = null;
   selectedThumbnailFile: File | null = null;
   thumbnailPreview: string | null = null;
+  thumbnailError: string | null = null;
   // هل مودال المسار مفتوح؟
   showForm = false;
 
@@ -121,8 +122,8 @@ export class DashboardPaths implements OnInit {
     this.editMode = false;
     this.editingPathId = null;
     this.editingPath = null;
-    this.selectedThumbnailFile = null;
-    this.thumbnailPreview = null;
+    this.resetThumbnailPreview(null);
+    this.thumbnailError = null;
     this.pathForm.reset({
       title: '',
       description: '',
@@ -142,8 +143,8 @@ export class DashboardPaths implements OnInit {
     this.editMode = true;
     this.editingPathId = path.id;
     this.editingPath = path;
-    this.selectedThumbnailFile = null;
-    this.thumbnailPreview = path.thumbnailUrl ?? null;
+    this.resetThumbnailPreview(path.thumbnailUrl ?? null);
+    this.thumbnailError = null;
 
     this.pathForm.setValue({
       title: path.title,
@@ -166,8 +167,8 @@ export class DashboardPaths implements OnInit {
     this.editMode = false;
     this.editingPathId = null;
     this.editingPath = null;
-    this.selectedThumbnailFile = null;
-    this.thumbnailPreview = null;
+    this.resetThumbnailPreview(null);
+    this.thumbnailError = null;
     this.pathForm.reset({
       title: '',
       description: '',
@@ -214,9 +215,39 @@ export class DashboardPaths implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
-    this.selectedThumbnailFile = input.files[0];
-    this.thumbnailPreview = URL.createObjectURL(this.selectedThumbnailFile);
-    input.value = '';
+    const file = input.files[0];
+    const previewUrl = URL.createObjectURL(file);
+    this.thumbnailError = null;
+
+    getImageDimensions(file)
+      .then(({ width, height }) => {
+        const isValid = width <= 50 && height <= 50;
+        if (!isValid) {
+          URL.revokeObjectURL(previewUrl);
+          this.thumbnailError = 'Thumbnail must be 50x50 or smaller.';
+          this.resetThumbnailPreview(this.editingPath?.thumbnailUrl ?? null);
+          input.value = '';
+          return;
+        }
+
+        this.resetThumbnailPreview(previewUrl);
+        this.selectedThumbnailFile = file;
+        input.value = '';
+      })
+      .catch(() => {
+        URL.revokeObjectURL(previewUrl);
+        this.thumbnailError = 'Failed to load selected thumbnail.';
+        this.resetThumbnailPreview(this.editingPath?.thumbnailUrl ?? null);
+        input.value = '';
+      });
+  }
+
+  private resetThumbnailPreview(previewFallback: string | null): void {
+    if (this.thumbnailPreview && this.thumbnailPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(this.thumbnailPreview);
+    }
+    this.thumbnailPreview = previewFallback;
+    this.selectedThumbnailFile = null;
   }
 
   // حفظ المسار (إنشاء / تعديل)

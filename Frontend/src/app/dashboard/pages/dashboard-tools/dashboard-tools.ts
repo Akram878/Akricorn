@@ -9,6 +9,7 @@ import {
 } from '../../../core/services/admin-tools.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { getImageDimensions } from '../../../shared/utils/image-dimensions';
 type ToolFileView = ToolFileDto & {
   originalName?: string;
   downloadUrl?: string;
@@ -140,33 +141,30 @@ export class DashboardTools implements OnInit {
     this.error = null;
     const file = input.files[0];
     const previewUrl = URL.createObjectURL(file);
-    const image = new Image();
 
-    image.onload = () => {
-      const isValid = image.width === 50 && image.height === 50;
-      if (!isValid) {
+    getImageDimensions(file)
+      .then(({ width, height }) => {
+        const isValid = width === 50 && height === 50;
+        if (!isValid) {
+          URL.revokeObjectURL(previewUrl);
+          this.error = 'Avatar image must be 50 x 50.';
+          this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
+          input.value = '';
+          return;
+        }
+
+        this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
+        this.avatarFile = file;
+        this.avatarPreview = previewUrl;
+        this.avatarPreviewObjectUrl = previewUrl;
+        input.value = '';
+      })
+      .catch(() => {
         URL.revokeObjectURL(previewUrl);
-        this.error = 'Avatar image must be 50 x 50.';
+        this.error = 'Failed to load selected avatar.';
         this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
         input.value = '';
-        return;
-      }
-
-      this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
-      this.avatarFile = file;
-      this.avatarPreview = previewUrl;
-      this.avatarPreviewObjectUrl = previewUrl;
-      input.value = '';
-    };
-
-    image.onerror = () => {
-      URL.revokeObjectURL(previewUrl);
-      this.error = 'Failed to load selected avatar.';
-      this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
-      input.value = '';
-    };
-
-    image.src = previewUrl;
+      });
   }
 
   onFilesSelected(event: Event): void {

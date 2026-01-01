@@ -307,11 +307,37 @@
 }
 
 .thumbnail-preview {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
   color: #94a3b8;
   font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.thumbnail-box {
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.thumbnail-box img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.thumbnail-box--empty {
+  background: transparent;
 }
 
 .price-chip {

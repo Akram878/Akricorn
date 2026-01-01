@@ -380,3 +380,12 @@
   justify-content: flex-end;
   gap: 10px;
 }
+.field-hint {
+  color: #94a3b8;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.field-hint.error {
+  color: #fecdd3;
+}

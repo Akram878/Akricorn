@@ -8,7 +8,7 @@ import {
   CourseContentResponse,
 } from '../../../../core/services/admin-course-content.service';
 import { ChangeDetectorRef } from '@angular/core';
-
+import { getImageDimensions } from '../../../../shared/utils/image-dimensions';
 @Component({
   selector: 'app-course-content-editor',
   standalone: true,
@@ -213,16 +213,29 @@ export class CourseContentEditor implements OnChanges {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
-    const reader = new FileReader();
-
     const file = input.files[0];
+    this.error = null;
 
-    reader.onload = () => {
-      this.thumbnailPreview = typeof reader.result === 'string' ? reader.result : null;
-    };
-    reader.readAsDataURL(file);
-    this.thumbnailSelected.emit(file);
-    input.value = '';
+    getImageDimensions(file)
+      .then(({ width, height }) => {
+        const isValid = width <= 50 && height <= 50;
+        if (!isValid) {
+          this.error = 'Thumbnail must be 50x50 or smaller.';
+          input.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.thumbnailPreview = typeof reader.result === 'string' ? reader.result : null;
+        };
+        reader.readAsDataURL(file);
+        this.thumbnailSelected.emit(file);
+        input.value = '';
+      })
+      .catch(() => {
+        this.error = 'Failed to load selected thumbnail.';
+        input.value = '';
+      });
   }
 
   private applyContent(res?: CourseContentDto | CourseContentResponse | null): void {
