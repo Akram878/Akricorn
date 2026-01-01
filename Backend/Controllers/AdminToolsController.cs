@@ -231,7 +231,11 @@ namespace Backend.Controllers
             var newFile = new ToolFile
             {
                 ToolId = id,
-                FileMetadata = metadata
+                FileMetadata = metadata,
+                FileName = originalName,
+                FileUrl = storedName,
+                SizeBytes = file.Length,
+                ContentType = GetMime(file)
             };
 
             _context.ToolFiles.Add(newFile);

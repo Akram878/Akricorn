@@ -93,18 +93,20 @@
               placeholder="Summarize the learning path"
             ></textarea>
           </label>
-          <label class="form-field">
-            <span>Thumbnail URL (50x50)</span>
-            <input type="text" formControlName="thumbnailUrl" placeholder="https://..." />
-          </label>
           <div class="thumbnail-preview">
             <img
               class="avatar"
-              [src]="pathForm.get('thumbnailUrl')?.value || 'assets/icons/path.png'"
+              [src]="
+                thumbnailPreview || pathForm.get('thumbnailUrl')?.value || 'assets/icons/path.png'
+              "
               alt="Thumbnail preview"
             />
             <span>Preview</span>
           </div>
+          <label class="form-field">
+            <span>Thumbnail (max 50x50)</span>
+            <input type="file" accept="image/*" (change)="onThumbnailSelected($event)" />
+          </label>
           <label class="form-field">
             <span>Discount (%)</span>
             <input type="number" formControlName="discount" min="0" max="100" />

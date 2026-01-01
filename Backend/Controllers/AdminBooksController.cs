@@ -463,7 +463,11 @@ namespace Backend.Controllers
                     var newFile = new BookFile
                     {
                         BookId = id,
-                        FileMetadata = metadata
+                        FileMetadata = metadata,
+                        FileName = originalName,
+                        FileUrl = storedName,
+                        SizeBytes = file.Length,
+                        ContentType = ResolveMimeType(file)
                     };
 
                     await ExecuteWithMigrationRetry(async () =>
