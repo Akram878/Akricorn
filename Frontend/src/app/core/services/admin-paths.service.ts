@@ -59,4 +59,11 @@ export class AdminPathsService {
   toggleActive(id: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}/toggle`, {});
   }
+
+  uploadThumbnail(pathId: number, file: File): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ url: string }>(`${this.apiUrl}/${pathId}/upload-thumbnail`, formData);
+  }
 }

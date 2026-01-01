@@ -1,11 +1,16 @@
 ﻿using Backend.Data;
 using Backend.Models;
+using Backend.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System;
 using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
+
 
 namespace Backend.Controllers
 {
@@ -58,6 +63,52 @@ namespace Backend.Controllers
 
             return Ok(result);
         }
+
+        // =========================
+        // POST: /api/admin/paths/{id}/upload-thumbnail
+        // رفع صورة المسار
+        // =========================
+        [HttpPost("{id:int}/upload-thumbnail")]
+        [DisableRequestSizeLimit]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadThumbnail(int id, [FromForm] IFormFile file)
+        {
+            var path = await _context.LearningPaths.FirstOrDefaultAsync(lp => lp.Id == id);
+
+            if (path == null)
+                return NotFound(new { message = "Learning path not found." });
+
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file uploaded." });
+
+            if (!FileValidationHelper.ValidateIconFile(file, out var validationError))
+                return BadRequest(new { message = validationError });
+
+            var folder = LearningPathStorageHelper.GetThumbnailFolder(id);
+            Directory.CreateDirectory(folder);
+
+            foreach (var existing in Directory.GetFiles(folder))
+                System.IO.File.Delete(existing);
+
+            var originalName = file.FileName ?? "thumbnail";
+            var storedName = $"{Guid.NewGuid()}{Path.GetExtension(originalName)}";
+            var physicalPath = Path.Combine(folder, storedName);
+
+            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativePath = Path.Combine("paths", $"path-{id}", "thumbnail", storedName)
+                .Replace("\\", "/");
+            var url = $"{Request.Scheme}://{Request.Host}/{relativePath}";
+
+            path.ThumbnailUrl = url;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { url });
+        }
+
 
         // =========================
         // GET: /api/admin/paths/{id}

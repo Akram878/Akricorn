@@ -344,7 +344,7 @@ namespace Backend.Controllers
         [HttpPost("{id:int}/upload-thumbnail")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadThumbnail(int id, IFormFile file)
+        public async Task<IActionResult> UploadThumbnail(int id, [FromForm] IFormFile file)
         {
             try
             {
@@ -413,7 +413,7 @@ namespace Backend.Controllers
         [HttpPost("{id:int}/files/upload")]
         [DisableRequestSizeLimit]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadFile(int id, IFormFile file)
+        public async Task<IActionResult> UploadFile(int id, [FromForm] IFormFile file)
         {
             
 

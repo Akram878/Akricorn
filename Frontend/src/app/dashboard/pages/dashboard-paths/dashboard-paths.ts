@@ -40,7 +40,9 @@ export class DashboardPaths implements OnInit {
   isSaving = false;
   editMode = false;
   editingPathId: number | null = null;
-
+  editingPath: PathView | null = null;
+  selectedThumbnailFile: File | null = null;
+  thumbnailPreview: string | null = null;
   // هل مودال المسار مفتوح؟
   showForm = false;
 
@@ -52,7 +54,7 @@ export class DashboardPaths implements OnInit {
     this.pathForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.required, Validators.maxLength(2000)]],
-      thumbnailUrl: ['', [Validators.maxLength(500)]],
+      thumbnailUrl: [''],
 
       discount: [0, [Validators.min(0), Validators.max(100)]],
       isActive: [true],
@@ -118,6 +120,9 @@ export class DashboardPaths implements OnInit {
   openCreateForm(): void {
     this.editMode = false;
     this.editingPathId = null;
+    this.editingPath = null;
+    this.selectedThumbnailFile = null;
+    this.thumbnailPreview = null;
     this.pathForm.reset({
       title: '',
       description: '',
@@ -136,6 +141,9 @@ export class DashboardPaths implements OnInit {
   onEdit(path: PathView): void {
     this.editMode = true;
     this.editingPathId = path.id;
+    this.editingPath = path;
+    this.selectedThumbnailFile = null;
+    this.thumbnailPreview = path.thumbnailUrl ?? null;
 
     this.pathForm.setValue({
       title: path.title,
@@ -157,6 +165,9 @@ export class DashboardPaths implements OnInit {
   resetForm(): void {
     this.editMode = false;
     this.editingPathId = null;
+    this.editingPath = null;
+    this.selectedThumbnailFile = null;
+    this.thumbnailPreview = null;
     this.pathForm.reset({
       title: '',
       description: '',
@@ -199,6 +210,14 @@ export class DashboardPaths implements OnInit {
     this.selectedCourseIds[index + 1] = this.selectedCourseIds[index];
     this.selectedCourseIds[index] = tmp;
   }
+  onThumbnailSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    this.selectedThumbnailFile = input.files[0];
+    this.thumbnailPreview = URL.createObjectURL(this.selectedThumbnailFile);
+    input.value = '';
+  }
 
   // حفظ المسار (إنشاء / تعديل)
   onSubmit(): void {
@@ -213,7 +232,9 @@ export class DashboardPaths implements OnInit {
     const payload: any = {
       title: value.title,
       description: value.description,
-      thumbnailUrl: value.thumbnailUrl,
+      thumbnailUrl: this.selectedThumbnailFile
+        ? this.editingPath?.thumbnailUrl ?? ''
+        : value.thumbnailUrl,
 
       price: totalPrice,
       discount: value.discount,
@@ -225,6 +246,7 @@ export class DashboardPaths implements OnInit {
       this.adminPaths.update(this.editingPathId, payload).subscribe({
         next: () => {
           this.isSaving = false;
+          this.uploadThumbnailIfNeeded(this.editingPathId!);
           this.resetForm();
           this.loadPaths();
         },
@@ -235,8 +257,9 @@ export class DashboardPaths implements OnInit {
       });
     } else {
       this.adminPaths.create(payload).subscribe({
-        next: () => {
+        next: (res) => {
           this.isSaving = false;
+          this.uploadThumbnailIfNeeded(res?.pathId);
           this.resetForm();
           this.loadPaths();
         },
@@ -256,6 +279,26 @@ export class DashboardPaths implements OnInit {
       },
       error: () => {
         this.error = 'Failed to change status.';
+      },
+    });
+  }
+
+  private uploadThumbnailIfNeeded(pathId: number | null | undefined): void {
+    if (!pathId || !this.selectedThumbnailFile) return;
+
+    const file = this.selectedThumbnailFile;
+    this.selectedThumbnailFile = null;
+
+    this.adminPaths.uploadThumbnail(pathId, file).subscribe({
+      next: (res) => {
+        this.pathForm.patchValue({ thumbnailUrl: res.url });
+        const updated = this.paths.find((p) => p.id === pathId);
+        if (updated) {
+          updated.thumbnailUrl = res.url;
+        }
+      },
+      error: () => {
+        this.error = 'Failed to upload thumbnail.';
       },
     });
   }

@@ -32,11 +32,8 @@
           <td>{{ tool.id }}</td>
           <td>
             <div class="title-cell">
-              <img
-                class="avatar"
-                [src]="tool.avatarUrl || 'assets/icons/edit-tool.png'"
-                alt="Tool avatar"
-              />
+              <img *ngIf="tool.avatarUrl" class="avatar" [src]="tool.avatarUrl" alt="Tool avatar" />
+              <div *ngIf="!tool.avatarUrl" class="avatar-placeholder">No image</div>
               <div>
                 <div class="title-text">{{ tool.name }}</div>
                 <div class="subtitle-text">{{ tool.description }}</div>
@@ -118,11 +115,15 @@
         <div class="form-card">
           <h4>Avatar (50x50)</h4>
           <div class="thumbnail-preview">
-            <img
-              class="avatar"
-              [src]="avatarPreview || 'assets/icons/edit-tool.png'"
-              alt="Tool avatar preview"
-            />
+            <div class="avatar-preview">
+              <img
+                *ngIf="avatarPreview"
+                class="avatar"
+                [src]="avatarPreview"
+                alt="Tool avatar preview"
+              />
+              <span *ngIf="!avatarPreview">No image</span>
+            </div>
             <label class="file-button">
               <input type="file" accept="image/*" (change)="onAvatarSelected($event)" />
               Upload avatar
