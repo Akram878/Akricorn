@@ -142,70 +142,142 @@
           </ng-template>
         </div>
 
-        <aside class="course-viewer__viewer">
-          <div class="course-viewer__viewer-header">
-            <div>
-              <span class="course-viewer__viewer-title">عارض الملفات</span>
-              <p *ngIf="selectedFile">
-                {{ selectedFile.sectionTitle }} · {{ selectedFile.lessonTitle }}
-              </p>
+        <aside class="course-viewer__progress">
+          <div class="course-viewer__progress-card">
+            <div class="course-viewer__progress-header">
+              <h4>تقدم الكورس</h4>
+              <span class="course-viewer__progress-value">{{ courseProgressPercent }}%</span>
             </div>
-            <button
-              type="button"
-              class="course-viewer__close"
-              *ngIf="selectedFile"
-              (click)="closeViewer()"
-            >
-              إغلاق
-            </button>
+            <div class="course-viewer__progress-bar" role="progressbar">
+              <span [style.width.%]="courseProgressPercent"></span>
+            </div>
+            <p class="course-viewer__progress-note">
+              {{ course?.completedAt ? 'تم إنهاء الكورس بنجاح.' : 'لم يتم إنهاء الكورس بعد.' }}
+            </p>
           </div>
 
-          <div class="course-viewer__viewer-body">
-            <ng-container *ngIf="selectedFile; else viewerEmpty">
-              <div class="course-viewer__viewer-file">
-                <div class="course-viewer__viewer-label">
-                  <span>{{ selectedFile.name }}</span>
-                  <a [href]="selectedFile.url" target="_blank" rel="noopener">تحميل الملف</a>
-                </div>
+          <div class="course-viewer__progress-card">
+            <div class="course-viewer__progress-header">
+              <h4>تقدم المسار التعليمي</h4>
+              <span class="course-viewer__progress-value">
+                {{ hasLearningPaths ? 'متابع' : 'غير متصل بمسار' }}
+              </span>
+            </div>
 
-                <div class="course-viewer__viewer-content">
-                  <div class="lms-section__state" *ngIf="isMediaLoading">جارِ تحميل الملف...</div>
-
-                  <ng-container [ngSwitch]="selectedFile.type">
-                    <video *ngSwitchCase="'video'" [src]="selectedFile.displayUrl" controls></video>
-                    <audio *ngSwitchCase="'audio'" [src]="selectedFile.displayUrl" controls></audio>
-                    <img
-                      *ngSwitchCase="'image'"
-                      [src]="selectedFile.displayUrl"
-                      [alt]="selectedFile.name"
-                    />
-                    <iframe
-                      *ngSwitchCase="'pdf'"
-                      [src]="selectedFile.safeUrl"
-                      title="PDF Viewer"
-                    ></iframe>
-                    <iframe
-                      *ngSwitchCase="'embed'"
-                      [src]="selectedFile.safeUrl"
-                      title="Embedded Content"
-                    ></iframe>
-                    <div *ngSwitchCase="'download'" class="course-viewer__download">
-                      هذا النوع من الملفات يتطلب التحميل.
-                      <a [href]="selectedFile.url" target="_blank" rel="noopener">تحميل الملف</a>
-                    </div>
-                  </ng-container>
+            <ng-container *ngIf="hasLearningPaths; else noLearningPath">
+              <div class="course-viewer__path-progress-list">
+                <div
+                  class="course-viewer__path-progress-item"
+                  *ngFor="let path of course.learningPaths"
+                >
+                  <div class="course-viewer__path-progress-info">
+                    <span>{{ path.learningPathTitle }}</span>
+                    <strong>{{ path.completionPercent }}%</strong>
+                  </div>
+                  <div class="course-viewer__progress-bar">
+                    <span [style.width.%]="path.completionPercent"></span>
+                  </div>
+                  <small>{{ formatPathProgress(path) }}</small>
                 </div>
               </div>
             </ng-container>
 
-            <ng-template #viewerEmpty>
-              <div class="course-viewer__viewer-empty">
-                <span>اختر ملفاً من الدروس لعرضه هنا.</span>
-              </div>
+            <ng-template #noLearningPath>
+              <p class="course-viewer__progress-note">لا يوجد مسار مرتبط بهذا الكورس.</p>
             </ng-template>
           </div>
         </aside>
       </div>
+
+      <section class="course-viewer__file-panel" *ngIf="selectedFile">
+        <div class="course-viewer__file-panel-header">
+          <div>
+            <span class="course-viewer__viewer-title">عارض الملفات</span>
+            <p>{{ selectedFile.sectionTitle }} · {{ selectedFile.lessonTitle }}</p>
+          </div>
+          <div class="course-viewer__file-panel-actions">
+            <button type="button" class="course-viewer__toggle" (click)="toggleSidebar()">
+              {{ isSidebarOpen ? 'إخفاء القائمة' : 'إظهار القائمة' }}
+            </button>
+            <button type="button" class="course-viewer__close" (click)="closeViewer()">
+              إغلاق
+            </button>
+          </div>
+        </div>
+
+        <div class="course-viewer__file-panel-body" [class.is-collapsed]="!isSidebarOpen">
+          <aside class="course-viewer__file-sidebar">
+            <h4>ملفات الكورس</h4>
+            <ng-container *ngIf="hasSections; else emptySidebarFiles">
+              <div
+                class="course-viewer__file-sidebar-section"
+                *ngFor="let section of course.sections"
+              >
+                <strong>{{ section.title }}</strong>
+                <div class="course-viewer__file-sidebar-lessons">
+                  <div
+                    class="course-viewer__file-sidebar-lesson"
+                    *ngFor="let lesson of section.lessons"
+                  >
+                    <span>{{ lesson.title }}</span>
+                    <div class="course-viewer__file-sidebar-files">
+                      <button
+                        type="button"
+                        class="course-viewer__file-sidebar-file"
+                        *ngFor="let file of lesson.files"
+                        (click)="selectFile(file, lesson.title, section.title)"
+                        [class.is-active]="selectedFile?.id === file.id"
+                      >
+                        {{ file.name }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #emptySidebarFiles>
+              <div class="lms-section__state lms-section__state--empty">لا توجد ملفات.</div>
+            </ng-template>
+          </aside>
+
+          <div class="course-viewer__file-panel-viewer">
+            <div class="course-viewer__viewer-file">
+              <div class="course-viewer__viewer-label">
+                <span>{{ selectedFile.name }}</span>
+                <a [href]="selectedFile.url" target="_blank" rel="noopener">تحميل الملف</a>
+              </div>
+
+              <div class="course-viewer__viewer-content">
+                <div class="lms-section__state" *ngIf="isMediaLoading">جارِ تحميل الملف...</div>
+
+                <ng-container [ngSwitch]="selectedFile.type">
+                  <video *ngSwitchCase="'video'" [src]="selectedFile.displayUrl" controls></video>
+                  <audio *ngSwitchCase="'audio'" [src]="selectedFile.displayUrl" controls></audio>
+                  <img
+                    *ngSwitchCase="'image'"
+                    [src]="selectedFile.displayUrl"
+                    [alt]="selectedFile.name"
+                  />
+                  <iframe
+                    *ngSwitchCase="'pdf'"
+                    [src]="selectedFile.safeUrl"
+                    title="PDF Viewer"
+                  ></iframe>
+                  <iframe
+                    *ngSwitchCase="'embed'"
+                    [src]="selectedFile.safeUrl"
+                    title="Embedded Content"
+                  ></iframe>
+                  <div *ngSwitchCase="'download'" class="course-viewer__download">
+                    هذا النوع من الملفات يتطلب التحميل.
+                    <a [href]="selectedFile.url" target="_blank" rel="noopener">تحميل الملف</a>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </ng-container>
   </div>
 </section>

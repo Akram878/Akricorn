@@ -43,7 +43,7 @@ export class CourseViewer implements OnInit, OnDestroy {
   isCompleting = false;
   error: string | null = null;
   isMediaLoading = false;
-
+  isSidebarOpen = true;
   private activeObjectUrl: string | null = null;
   private courseThumbnailObjectUrl: string | null = null;
   private mediaSubscription?: Subscription;
@@ -162,6 +162,9 @@ export class CourseViewer implements OnInit, OnDestroy {
     this.cleanupMediaUrl();
     this.selectedFile = null;
   }
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
   finishCourse(): void {
     if (this.isCompleting) {
       return;
@@ -194,6 +197,10 @@ export class CourseViewer implements OnInit, OnDestroy {
 
   get hasLearningPaths(): boolean {
     return (this.course?.learningPaths?.length ?? 0) > 0;
+  }
+
+  get courseProgressPercent(): number {
+    return this.course?.completedAt ? 100 : 0;
   }
 
   private detectFileType(file: Pick<CourseLessonFile, 'name' | 'url'>): ViewerType {
