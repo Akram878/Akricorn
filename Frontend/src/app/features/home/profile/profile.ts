@@ -198,7 +198,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       name: this.editModel.name,
       family: this.editModel.family,
       city: this.editModel.city,
-      birthDate: this.editModel.birthDate,
+      birthDate: this.getBirthDateForPayload(),
       currentPassword: this.editModel.currentPassword,
     };
 
@@ -317,5 +317,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return value;
     }
     return date.toISOString().split('T')[0];
+  }
+
+  get canEditBirthDate(): boolean {
+    return this.user?.canEditBirthDate !== false;
+  }
+
+  private getBirthDateForPayload(): string {
+    if (this.canEditBirthDate) {
+      return this.editModel.birthDate;
+    }
+    return this.formatBirthDate(this.user?.birthDate);
   }
 }

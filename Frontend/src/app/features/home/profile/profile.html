@@ -1,0 +1,210 @@
+<div class="profile">
+  <div class="profile__header" *ngIf="user as currentUser">
+    <div class="profile__identity">
+      <div class="profile__avatar">
+        <img [src]="avatarUrl" alt="User avatar" />
+        <button
+          type="button"
+          class="profile__avatar-btn"
+          (click)="changeAvatar()"
+          [disabled]="currentUser.isGuest"
+        >
+          Change photo
+        </button>
+      </div>
+      <div class="profile__meta">
+        <h2 class="profile__name">
+          {{ currentUser.name || 'Guest' }} {{ currentUser.family || '' }}
+        </h2>
+        <p class="profile__email">{{ currentUser.email || 'No email registered yet' }}</p>
+        <div class="profile__meta-grid">
+          <div>
+            <span>City</span>
+            <strong>{{ currentUser.city || '—' }}</strong>
+          </div>
+          <div>
+            <span>Phone</span>
+            <strong>{{ currentUser.countryCode || '' }} {{ currentUser.number || '—' }}</strong>
+          </div>
+          <div>
+            <span>Birth date</span>
+            <strong>{{ currentUser.birthDate || '—' }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile__actions">
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="startEdit()"
+        [disabled]="currentUser.isGuest"
+      >
+        Edit profile
+      </button>
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="openAccountSettings()"
+        [disabled]="currentUser.isGuest"
+      >
+        Account settings
+      </button>
+      <button type="button" class="btn-ghost" [routerLink]="['/profile/payments']">Payments</button>
+      <button type="button" class="btn-ghost" (click)="logout()">Log out</button>
+    </div>
+  </div>
+
+  <div class="profile__alert" *ngIf="user?.isGuest">
+    You are browsing as a guest. Sign in to update your profile details.
+  </div>
+
+  <div class="profile__grid">
+    <div class="profile__card" *ngIf="!editMode && !accountSettingsMode">
+      <h3>Profile overview</h3>
+      <p class="profile__muted">
+        View your details and use the buttons above to update your information or access your
+        payment history.
+      </p>
+      <div class="profile__list" *ngIf="user as currentUser">
+        <div class="profile__list-item">
+          <span>Full name</span>
+          <strong>{{ currentUser.name || '—' }} {{ currentUser.family || '' }}</strong>
+        </div>
+        <div class="profile__list-item">
+          <span>Email</span>
+          <strong>{{ currentUser.email || '—' }}</strong>
+        </div>
+        <div class="profile__list-item">
+          <span>Phone</span>
+          <strong>{{ currentUser.countryCode || '' }} {{ currentUser.number || '—' }}</strong>
+        </div>
+        <div class="profile__list-item">
+          <span>City</span>
+          <strong>{{ currentUser.city || '—' }}</strong>
+        </div>
+        <div class="profile__list-item">
+          <span>Birth date</span>
+          <strong>{{ currentUser.birthDate || '—' }}</strong>
+        </div>
+      </div>
+      <div class="profile__hint" *ngIf="!user">Loading profile information...</div>
+    </div>
+
+    <form class="profile__card profile-form" *ngIf="editMode" (ngSubmit)="saveProfile()">
+      <div class="profile-form__header">
+        <h3>Edit personal information</h3>
+        <p>All changes require your current password.</p>
+      </div>
+
+      <div class="profile-form__grid">
+        <label class="profile-form__field">
+          <span>First name</span>
+          <input type="text" name="name" [(ngModel)]="editModel.name" maxlength="30" />
+        </label>
+        <label class="profile-form__field">
+          <span>Family name</span>
+          <input type="text" name="family" [(ngModel)]="editModel.family" maxlength="30" />
+        </label>
+        <label class="profile-form__field">
+          <span>City</span>
+          <input type="text" name="city" [(ngModel)]="editModel.city" maxlength="50" />
+        </label>
+        <label class="profile-form__field">
+          <span>Birth date</span>
+          <input
+            type="date"
+            name="birthDate"
+            [(ngModel)]="editModel.birthDate"
+            [disabled]="!canEditBirthDate"
+          />
+          <small class="profile-form__note" *ngIf="!canEditBirthDate">
+            Birth date can only be updated once. Contact support if you need more changes.
+          </small>
+        </label>
+        <label class="profile-form__field profile-form__field--full">
+          <span>Current password</span>
+          <input
+            type="password"
+            name="currentPassword"
+            [(ngModel)]="editModel.currentPassword"
+            placeholder="Enter password to confirm"
+          />
+        </label>
+      </div>
+
+      <div class="profile-form__actions">
+        <button type="submit" class="btn-primary">Save changes</button>
+        <button type="button" class="btn-ghost" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+
+    <form
+      class="profile__card profile-form"
+      *ngIf="accountSettingsMode"
+      (ngSubmit)="saveAccountSettings()"
+    >
+      <div class="profile-form__header">
+        <h3>Account settings</h3>
+        <p>Update your contact details or password. Current password is required.</p>
+      </div>
+
+      <div class="profile-form__grid">
+        <label class="profile-form__field">
+          <span>Email</span>
+          <input type="email" name="email" [(ngModel)]="accountSettingsModel.email" />
+        </label>
+        <div class="profile-form__field">
+          <span>Country code</span>
+          <app-country-select
+            name="countryCode"
+            [(ngModel)]="accountSettingsModel.countryCode"
+            [required]="true"
+          ></app-country-select>
+        </div>
+        <label class="profile-form__field">
+          <span>Phone number</span>
+          <input type="text" name="number" [(ngModel)]="accountSettingsModel.number" />
+        </label>
+        <label class="profile-form__field profile-form__field--full">
+          <span>Current password</span>
+          <input
+            type="password"
+            name="currentPassword"
+            [(ngModel)]="accountSettingsModel.currentPassword"
+            placeholder="Required to save"
+          />
+          <small
+            class="profile-form__note"
+            *ngIf="accountSubmitted && !accountSettingsModel.currentPassword"
+          >
+            Please enter your current password.
+          </small>
+        </label>
+        <label class="profile-form__field">
+          <span>New password</span>
+          <input
+            type="password"
+            name="newPassword"
+            [(ngModel)]="accountSettingsModel.newPassword"
+          />
+        </label>
+        <label class="profile-form__field">
+          <span>Confirm new password</span>
+          <input
+            type="password"
+            name="confirmNewPassword"
+            [(ngModel)]="accountSettingsModel.confirmNewPassword"
+          />
+        </label>
+      </div>
+
+      <div class="profile-form__actions">
+        <button type="submit" class="btn-primary">Save settings</button>
+        <button type="button" class="btn-ghost" (click)="cancelEdit()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="deleteAccount()">Delete account</button>
+      </div>
+    </form>
+  </div>
+</div>
