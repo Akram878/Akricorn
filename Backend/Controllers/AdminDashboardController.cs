@@ -28,16 +28,21 @@ namespace Backend.Controllers
         {
             try
             {
-                // أرقام بسيطة كفكرة أولى - نقدر نطوّرها لاحقاً
-                var usersCount = await _context.Users.CountAsync();
-                var coursesCount = await _context.Courses.CountAsync();
-                var booksCount = await _context.Books.CountAsync();
+                var totalUsers = await _context.Users.CountAsync();
+                var activeUsers = await _context.Users.CountAsync(user => user.IsActive);
+                var courses = await _context.Courses.CountAsync();
+                var books = await _context.Books.CountAsync();
+                var learningPaths = await _context.LearningPaths.CountAsync();
+                var tools = await _context.Tools.CountAsync();
 
                 return Ok(new
                 {
-                    usersCount,
-                    coursesCount,
-                    booksCount
+                    totalUsers,
+                    activeUsers,
+                    courses,
+                    books,
+                    learningPaths,
+                    tools
                 });
             }
             catch (SqlException ex)

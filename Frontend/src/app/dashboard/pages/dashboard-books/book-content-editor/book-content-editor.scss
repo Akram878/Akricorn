@@ -6,14 +6,13 @@
 
 .book-editor {
   background: #0b1220;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
+
   padding: 20px;
 }
 
 .book-editor__header {
   display: flex;
-  justify-content: space-between;
+  // justify-content: space-between;
   align-items: center;
   gap: 12px;
   padding-bottom: 12px;
@@ -35,15 +34,14 @@
 }
 
 .icon-btn {
-  width: 36px;
-  height: 36px;
+  padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #111827;
   color: #e2e8f0;
-  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .icon-btn:hover {

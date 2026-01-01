@@ -1,13 +1,12 @@
 <div class="book-editor">
   <div class="book-editor__header">
+    <button type="button" class="icon-btn" (click)="closeEditor.emit()" aria-label="Close">
+      ← Back
+    </button>
     <div>
       <h2>{{ isCreateMode ? 'Create Book' : 'Edit Book' }}</h2>
       <p>Manage title, category, price, cover, and files.</p>
     </div>
-
-    <button type="button" class="icon-btn" (click)="closeEditor.emit()" aria-label="Close">
-      ×
-    </button>
   </div>
 
   <div class="status" *ngIf="isLoadingDetails">Loading book details...</div>

@@ -56,7 +56,6 @@
         border-radius: 0.3rem;
         cursor: pointer;
         transition: background-color 0.2s ease;
-        padding: 1rem;
 
         &:hover:not(:disabled) {
           transform: translateY(-1px);
