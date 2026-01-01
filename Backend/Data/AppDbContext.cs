@@ -58,6 +58,11 @@ namespace Backend.Data
               .Property(c => c.CreatedAt)
               .HasDefaultValueSql("GETUTCDATE()");
 
+            modelBuilder.Entity<User>()
+               .Property(u => u.CreatedAt)
+               .HasDefaultValueSql("GETUTCDATE()");
+
+
             modelBuilder.Entity<UserCourse>()
                 .HasKey(uc => new { uc.UserId, uc.CourseId });
 

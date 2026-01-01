@@ -2321,6 +2321,10 @@
           "isActive": {
             "type": "boolean"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "purchases": {
             "type": "array",
             "items": {
@@ -2385,6 +2389,10 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -2608,21 +2616,29 @@
         "additionalProperties": false
       },
       "CreateCourseRequest": {
+        "required": [
+          "category",
+          "description",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "title": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "description": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "price": {
+            "minimum": 0,
             "type": "number",
             "format": "double"
           },
           "discount": {
+            "maximum": 100,
+            "minimum": 0,
             "type": "number",
             "format": "double"
           },
@@ -2630,12 +2646,14 @@
             "type": "boolean"
           },
           "hours": {
+            "maximum": 2147483647,
+            "minimum": 0,
             "type": "integer",
             "format": "int32"
           },
           "category": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "thumbnailUrl": {
             "type": "string",
@@ -3026,21 +3044,29 @@
         "additionalProperties": false
       },
       "UpdateCourseRequest": {
+        "required": [
+          "category",
+          "description",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "title": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "description": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "price": {
+            "minimum": 0,
             "type": "number",
             "format": "double"
           },
           "discount": {
+            "maximum": 100,
+            "minimum": 0,
             "type": "number",
             "format": "double"
           },
@@ -3048,12 +3074,14 @@
             "type": "boolean"
           },
           "hours": {
+            "maximum": 2147483647,
+            "minimum": 0,
             "type": "integer",
             "format": "int32"
           },
           "category": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "thumbnailUrl": {
             "type": "string",
