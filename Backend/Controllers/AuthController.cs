@@ -239,6 +239,56 @@ namespace Backend.Controllers
             if (request == null)
                 return BadRequest(new { message = "Invalid request payload." });
 
+            var errors = new System.Collections.Generic.Dictionary<string, string>();
+
+            var name = request.Name?.Trim() ?? string.Empty;
+            var family = request.Family?.Trim() ?? string.Empty;
+            var city = request.City?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(name))
+                errors["name"] = "Name is required.";
+            else if (name.Length < 3)
+                errors["name"] = "Name must be at least 3 letters.";
+            else if (name.Length > 30)
+                errors["name"] = "Name must be at most 30 letters.";
+            else if (!Regex.IsMatch(name, "^[A-Za-z]+$"))
+                errors["name"] = "Name must use A–Z letters only.";
+
+            if (string.IsNullOrWhiteSpace(family))
+                errors["family"] = "Family name is required.";
+            else if (family.Length < 3)
+                errors["family"] = "Family name must be at least 3 letters.";
+            else if (family.Length > 30)
+                errors["family"] = "Family name must be at most 30 letters.";
+            else if (!Regex.IsMatch(family, "^[A-Za-z]+$"))
+                errors["family"] = "Family name must use A–Z letters only.";
+
+            if (string.IsNullOrWhiteSpace(city))
+                errors["city"] = "City is required.";
+            else if (city.Length < 2)
+                errors["city"] = "City name is too short.";
+            else if (city.Length > 50)
+                errors["city"] = "City name is too long.";
+
+            if (!request.BirthDate.HasValue)
+            {
+                errors["birthDate"] = "Date of birth is required.";
+            }
+            else
+            {
+                var today = DateTime.UtcNow.Date;
+                var birthDate = request.BirthDate.Value.Date;
+                var age = today.Year - birthDate.Year;
+                if (birthDate > today.AddYears(-age))
+                    age--;
+
+                if (age < 12 || age > 100)
+                    errors["birthDate"] = "Age must be between 12 and 100.";
+            }
+
+            if (errors.Any())
+                return BadRequest(new { message = "Validation failed.", errors });
+
             var userId = GetUserIdFromJwt();
             if (userId == null)
                 return Unauthorized(new { message = "Unauthorized." });
@@ -259,9 +309,9 @@ namespace Backend.Controllers
             if (verifyResult == PasswordVerificationResult.Failed)
                 return BadRequest(new { message = "Current password is incorrect." });
 
-            user.Name = request.Name;
-            user.Family = request.Family;
-            user.City = request.City;
+            user.Name = name;
+            user.Family = family;
+            user.City = city;
 
             // Handle BirthDate update logic
             if (request.BirthDate != user.BirthDate)
@@ -294,6 +344,46 @@ namespace Backend.Controllers
             if (request == null)
                 return BadRequest(new { message = "Invalid request payload." });
 
+            var errors = new System.Collections.Generic.Dictionary<string, string>();
+
+            var email = request.Email?.Trim() ?? string.Empty;
+            var requestedCountryCode = request.CountryCode?.Trim() ?? string.Empty;
+            var number = request.Number?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(email))
+                errors["email"] = "Email is required.";
+            else if (!EmailRegex.IsMatch(email))
+                errors["email"] = "Please enter a valid email address.";
+
+            if (string.IsNullOrWhiteSpace(number))
+                errors["number"] = "Phone number is required.";
+            else if (!Regex.IsMatch(number, "^[0-9]{7,15}$"))
+                errors["number"] = "Only digits allowed (7–15 characters).";
+
+            if (string.IsNullOrWhiteSpace(requestedCountryCode) || requestedCountryCode == "+")
+                errors["countryCode"] = "Country code is required.";
+            else if (!CountryCatalog.IsValidDialCode(requestedCountryCode))
+                errors["countryCode"] = "Country code is invalid.";
+
+            if (!string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                if (request.NewPassword.Length > 50)
+                    errors["newPassword"] = "Password must be at most 50 characters.";
+                else
+                {
+                    var passwordPattern = new Regex(
+                        @"^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':""\\|,.<>\/?`~]{6,}$"
+                    );
+
+                    if (!passwordPattern.IsMatch(request.NewPassword))
+                        errors["newPassword"] =
+                            "Password must be at least 6 characters and include 1 uppercase letter, 1 number, and 1 symbol (A–Z only).";
+                }
+            }
+
+            if (errors.Any())
+                return BadRequest(new { message = "Validation failed.", errors });
+
             var userId = GetUserIdFromJwt();
             if (userId == null)
                 return Unauthorized(new { message = "Unauthorized." });
@@ -315,24 +405,19 @@ namespace Backend.Controllers
                 return BadRequest(new { message = "Current password is incorrect." });
 
             // Handle Email update with duplication check
-            if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase))
             {
-                var emailExists = await _context.Users.AnyAsync(u => u.Email == request.Email && u.Id != user.Id);
+                var emailExists = await _context.Users.AnyAsync(u => u.Email == email && u.Id != user.Id);
                 if (emailExists)
                     return BadRequest(new { message = "Email is already in use." });
 
-                user.Email = request.Email;
+                user.Email = email;
             }
 
-            var requestedCountryCode = request.CountryCode?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(requestedCountryCode) || requestedCountryCode == "+")
-                return BadRequest(new { message = "Country code is required." });
-
-            if (!CountryCatalog.IsValidDialCode(requestedCountryCode))
-                return BadRequest(new { message = "Country code is invalid." });
+           
 
             user.CountryCode = requestedCountryCode;
-            user.Number = request.Number;
+            user.Number = number;
 
             if (!string.IsNullOrWhiteSpace(request.NewPassword))
             {

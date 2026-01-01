@@ -47,6 +47,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     confirmNewPassword: '',
   };
 
+  private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  private readonly latinNameRegex = /^[A-Za-z]+$/;
+  private readonly passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{6,}$/;
+
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
@@ -194,11 +199,52 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const name = this.editModel.name.trim();
+    const family = this.editModel.family.trim();
+    const city = this.editModel.city.trim();
+    const birthDate = this.getBirthDateForPayload();
+
+    if (!name) {
+      alert('Name is required.');
+      return;
+    }
+    if (name.length < 3 || name.length > 30 || !this.latinNameRegex.test(name)) {
+      alert('Name must be 3–30 letters using A–Z only.');
+      return;
+    }
+
+    if (!family) {
+      alert('Family name is required.');
+      return;
+    }
+    if (family.length < 3 || family.length > 30 || !this.latinNameRegex.test(family)) {
+      alert('Family name must be 3–30 letters using A–Z only.');
+      return;
+    }
+
+    if (!city) {
+      alert('City is required.');
+      return;
+    }
+    if (city.length < 2 || city.length > 50) {
+      alert('City name must be between 2 and 50 characters.');
+      return;
+    }
+
+    if (!birthDate) {
+      alert('Date of birth is required.');
+      return;
+    }
+    if (!this.isValidAgeRange(birthDate)) {
+      alert('Age must be between 12 and 100.');
+      return;
+    }
+
     const payload: UpdateProfileRequest = {
-      name: this.editModel.name,
-      family: this.editModel.family,
-      city: this.editModel.city,
-      birthDate: this.getBirthDateForPayload(),
+      name,
+      family,
+      city,
+      birthDate,
       currentPassword: this.editModel.currentPassword,
     };
 
@@ -237,6 +283,33 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const email = this.accountSettingsModel.email.trim();
+    const countryCode = this.accountSettingsModel.countryCode.trim();
+    const number = this.accountSettingsModel.number.trim();
+
+    if (!email) {
+      alert('Email is required.');
+      return;
+    }
+    if (!this.emailRegex.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    if (!number) {
+      alert('Phone number is required.');
+      return;
+    }
+    if (!/^[0-9]{7,15}$/.test(number)) {
+      alert('Only digits allowed (7–15 characters).');
+      return;
+    }
+
+    if (!countryCode || countryCode === '+') {
+      alert('Country code is required.');
+      return;
+    }
+
     if (
       this.accountSettingsModel.newPassword &&
       this.accountSettingsModel.newPassword !== this.accountSettingsModel.confirmNewPassword
@@ -245,10 +318,23 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.accountSettingsModel.newPassword) {
+      if (this.accountSettingsModel.newPassword.length > 50) {
+        alert('Password must be at most 50 characters.');
+        return;
+      }
+      if (!this.passwordRegex.test(this.accountSettingsModel.newPassword)) {
+        alert(
+          'Password must be at least 6 characters and include 1 uppercase letter, 1 number, and 1 symbol (A–Z only).'
+        );
+        return;
+      }
+    }
+
     const payload: UpdateAccountSettingsRequest = {
-      email: this.accountSettingsModel.email,
-      countryCode: this.accountSettingsModel.countryCode,
-      number: this.accountSettingsModel.number,
+      email,
+      countryCode,
+      number,
       currentPassword: this.accountSettingsModel.currentPassword,
       newPassword: this.accountSettingsModel.newPassword,
     };
@@ -328,5 +414,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return this.editModel.birthDate;
     }
     return this.formatBirthDate(this.user?.birthDate);
+  }
+
+  private isValidAgeRange(value: string): boolean {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return false;
+    }
+    const todayUtc = new Date();
+    const todayYear = todayUtc.getUTCFullYear();
+    const todayMonth = todayUtc.getUTCMonth();
+    const todayDay = todayUtc.getUTCDate();
+    const birthYear = date.getUTCFullYear();
+    const birthMonth = date.getUTCMonth();
+    const birthDay = date.getUTCDate();
+    let age = todayYear - birthYear;
+    const monthDiff = todayMonth - birthMonth;
+    if (monthDiff < 0 || (monthDiff === 0 && todayDay < birthDay)) {
+      age -= 1;
+    }
+    return age >= 12 && age <= 100;
   }
 }
