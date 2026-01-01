@@ -41,6 +41,7 @@ export class DashboardTools implements OnInit {
   pendingFiles: File[] = [];
   avatarFile: File | null = null;
   avatarPreview: string | null = null;
+  private avatarPreviewObjectUrl: string | null = null;
 
   constructor(private adminTools: AdminToolsService, private fb: FormBuilder) {
     this.toolForm = this.fb.group({
@@ -79,8 +80,7 @@ export class DashboardTools implements OnInit {
     this.editingTool = null;
     this.toolFiles = [];
     this.pendingFiles = [];
-    this.avatarFile = null;
-    this.avatarPreview = null;
+    this.resetAvatarSelection(null);
     this.toolForm.reset({
       name: '',
       description: '',
@@ -99,8 +99,7 @@ export class DashboardTools implements OnInit {
     this.editingTool = tool;
     this.toolFiles = [...((tool.files as ToolFileView[]) || [])];
     this.pendingFiles = [];
-    this.avatarFile = null;
-    this.avatarPreview = tool.avatarUrl ?? null;
+    this.resetAvatarSelection(tool.avatarUrl ?? null);
 
     this.toolForm.setValue({
       name: tool.name,
@@ -131,16 +130,43 @@ export class DashboardTools implements OnInit {
     });
     this.toolFiles = [];
     this.pendingFiles = [];
-    this.avatarFile = null;
-    this.avatarPreview = null;
+    this.resetAvatarSelection(null);
   }
 
   onAvatarSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
-    this.avatarFile = input.files[0];
-    this.avatarPreview = URL.createObjectURL(this.avatarFile);
+    this.error = null;
+    const file = input.files[0];
+    const previewUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      const isValid = image.width === 50 && image.height === 50;
+      if (!isValid) {
+        URL.revokeObjectURL(previewUrl);
+        this.error = 'Avatar image must be 50 x 50.';
+        this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
+        input.value = '';
+        return;
+      }
+
+      this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
+      this.avatarFile = file;
+      this.avatarPreview = previewUrl;
+      this.avatarPreviewObjectUrl = previewUrl;
+      input.value = '';
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(previewUrl);
+      this.error = 'Failed to load selected avatar.';
+      this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
+      input.value = '';
+    };
+
+    image.src = previewUrl;
   }
 
   onFilesSelected(event: Event): void {
@@ -208,6 +234,9 @@ export class DashboardTools implements OnInit {
       this.loadTools();
     } catch (err) {
       this.isSaving = false;
+      if (this.avatarFile) {
+        this.resetAvatarSelection(this.editingTool?.avatarUrl ?? null);
+      }
       this.error = 'Failed to save tool.';
     }
   }
@@ -235,5 +264,14 @@ export class DashboardTools implements OnInit {
         this.error = 'Failed to delete tool.';
       },
     });
+  }
+
+  private resetAvatarSelection(previewFallback: string | null): void {
+    if (this.avatarPreviewObjectUrl) {
+      URL.revokeObjectURL(this.avatarPreviewObjectUrl);
+    }
+    this.avatarPreviewObjectUrl = null;
+    this.avatarFile = null;
+    this.avatarPreview = previewFallback;
   }
 }
