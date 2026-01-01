@@ -78,11 +78,13 @@ export class DashboardUserDetailComponent implements OnInit {
   }
 
   private loadUser(): void {
-    this.adminUsers.getAll().subscribe({
-      next: (users) => {
-        this.user = users.find((u) => u.id === this.userId) ?? null;
+    this.adminUsers.getById(this.userId).subscribe({
+      next: (user) => {
+        this.user = user;
       },
-      error: () => {},
+      error: () => {
+        this.user = null;
+      },
     });
   }
 

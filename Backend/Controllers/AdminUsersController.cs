@@ -16,7 +16,15 @@ namespace Backend.Controllers
     public class AdminUsersController : ControllerBase
     {
         private readonly AppDbContext _context;
-
+        private static readonly HashSet<string> AllowedRoles =
+           new(StringComparer.OrdinalIgnoreCase)
+           {
+                "Admin",
+                "User",
+                "Student",
+                "Premium",
+                "Moderator"
+           };
         public AdminUsersController(AppDbContext context)
         {
             _context = context;
@@ -40,7 +48,8 @@ namespace Backend.Controllers
                 City = u.City,
                 Role = u.Role,
                 IsActive = u.IsActive,
-                CanEditBirthDate = u.CanEditBirthDate
+                CanEditBirthDate = u.CanEditBirthDate,
+                CreatedAt = u.CreatedAt
             }).ToList();
 
             return Ok(result);
@@ -109,6 +118,7 @@ namespace Backend.Controllers
                 Role = u.Role,
                 IsActive = u.IsActive,
                 CanEditBirthDate = u.CanEditBirthDate,
+                CreatedAt = u.CreatedAt,
                 Purchases = u.Purchases.Select(p => new AdminUserPurchaseDto
                 {
                     Id = p.Id,
@@ -344,6 +354,9 @@ namespace Backend.Controllers
             if (string.IsNullOrWhiteSpace(request.Role))
                 return BadRequest(new { message = "Role is required." });
 
+            if (!AllowedRoles.Contains(request.Role))
+                return BadRequest(new { message = "Invalid role." });
+
             var u = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
 
             if (u == null)
@@ -421,6 +434,7 @@ namespace Backend.Controllers
 
         public string Role { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class AdminUpdateUserRoleRequest

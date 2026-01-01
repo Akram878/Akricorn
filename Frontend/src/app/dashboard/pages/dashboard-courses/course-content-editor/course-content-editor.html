@@ -23,8 +23,8 @@
         <div class="thumbnail-block">
           <div class="thumbnail-preview">
             <img
-              *ngIf="form.get('thumbnailUrl')?.value; else noThumb"
-              [src]="form.get('thumbnailUrl')?.value"
+              *ngIf="thumbnailPreview || form.get('thumbnailUrl')?.value; else noThumb"
+              [src]="thumbnailPreview || form.get('thumbnailUrl')?.value"
               alt="Course thumbnail"
             />
             <ng-template #noThumb>

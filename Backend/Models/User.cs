@@ -22,7 +22,7 @@ namespace Backend.Models
         // Profile
         public string City { get; set; }
         public DateTime? BirthDate { get; set; }
-
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         // منطق "يمكن تعديل تاريخ الميلاد مرة واحدة فقط"
         public bool CanEditBirthDate { get; set; } = true;
 

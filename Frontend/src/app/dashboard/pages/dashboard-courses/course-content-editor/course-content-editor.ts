@@ -31,7 +31,7 @@ export class CourseContentEditor implements OnChanges {
   loading = false;
   error: string | null = null;
   content: CourseContentDto | null = null;
-
+  thumbnailPreview: string | null = null;
   newSectionTitle = '';
   newSectionOrder = 1;
 
@@ -41,6 +41,10 @@ export class CourseContentEditor implements OnChanges {
   constructor(private api: AdminCourseContentService, private cdr: ChangeDetectorRef) {}
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['courseId'] || changes['isCreateMode']) {
+      this.thumbnailPreview = null;
+    }
+
     if (!this.isCreateMode && changes['courseId']) this.loadContent();
   }
 
@@ -213,8 +217,9 @@ export class CourseContentEditor implements OnChanges {
 
     const file = input.files[0];
 
-    reader.onload = () => this.form.patchValue({ thumbnailUrl: reader.result });
-
+    reader.onload = () => {
+      this.thumbnailPreview = typeof reader.result === 'string' ? reader.result : null;
+    };
     reader.readAsDataURL(file);
     this.thumbnailSelected.emit(file);
     input.value = '';

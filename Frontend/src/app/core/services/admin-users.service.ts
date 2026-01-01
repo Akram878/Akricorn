@@ -32,6 +32,10 @@ export class AdminUsersService {
     return this.http.get<AdminUserDto[]>(this.apiUrl);
   }
 
+  getById(id: number): Observable<AdminUserDto> {
+    return this.http.get<AdminUserDto>(`${this.apiUrl}/${id}`);
+  }
+
   toggleActive(id: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}/toggle`, {});
   }

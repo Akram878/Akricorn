@@ -131,7 +131,7 @@ export class DashboardCourses implements OnInit {
     this.isSaving = true;
 
     const v = this.courseForm.value;
-
+    const isDataUrl = typeof v.thumbnailUrl === 'string' && v.thumbnailUrl.startsWith('data:');
     const payload: CreateCourseRequest = {
       title: v.title,
       description: v.description,
@@ -142,6 +142,8 @@ export class DashboardCourses implements OnInit {
       category: v.category,
       rating: 0,
       thumbnailUrl: this.selectedThumbnailFile
+        ? this.selectedCourse?.thumbnailUrl ?? ''
+        : isDataUrl
         ? this.selectedCourse?.thumbnailUrl ?? ''
         : v.thumbnailUrl,
 
