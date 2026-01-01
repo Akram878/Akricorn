@@ -1,0 +1,211 @@
+<section class="lms-section course-viewer">
+  <header class="lms-section__header">
+    <div class="lms-section__breadcrumb">
+      <a routerLink="/lms/my-courses">كورساتي</a>
+      <span>/</span>
+      <span class="active">عارض الكورس</span>
+    </div>
+    <h2>{{ course?.title || 'تفاصيل الكورس' }}</h2>
+    <p>تابع الدروس والملفات الخاصة بالكورس من مكان واحد.</p>
+  </header>
+
+  <div class="lms-section__body">
+    <div class="lms-section__state" *ngIf="isLoading">جارِ تحميل بيانات الكورس...</div>
+    <div class="lms-section__state lms-section__state--error" *ngIf="error">{{ error }}</div>
+
+    <ng-container *ngIf="!isLoading && !error && course">
+      <div class="course-viewer__hero">
+        <div class="course-viewer__thumb" aria-hidden="true">
+          <img
+            *ngIf="courseThumbnailUrl"
+            [src]="courseThumbnailUrl"
+            [alt]="course.title"
+            loading="lazy"
+          />
+          <div class="course-viewer__thumb-placeholder" *ngIf="!courseThumbnailUrl">🎓</div>
+        </div>
+
+        <div class="course-viewer__info">
+          <div class="course-viewer__info-header">
+            <div>
+              <span class="course-viewer__badge" *ngIf="course.completedAt">مكتمل</span>
+              <span
+                class="course-viewer__badge course-viewer__badge--active"
+                *ngIf="!course.completedAt"
+              >
+                قيد الدراسة
+              </span>
+              <h3>{{ course.title }}</h3>
+            </div>
+            <button
+              type="button"
+              class="course-viewer__action"
+              (click)="finishCourse()"
+              [disabled]="isCompleting || !!course.completedAt"
+            >
+              {{ course.completedAt ? 'تم إنهاء الكورس' : 'إنهاء الكورس' }}
+            </button>
+          </div>
+
+          <p class="course-viewer__description">{{ course.description }}</p>
+
+          <div class="course-viewer__meta">
+            <div class="course-viewer__meta-item" *ngIf="course.category">
+              <span>المستوى</span>
+              <strong>{{ course.category }}</strong>
+            </div>
+            <div
+              class="course-viewer__meta-item"
+              *ngIf="course.hours !== null && course.hours !== undefined"
+            >
+              <span>المدة</span>
+              <strong>{{ course.hours }} ساعة</strong>
+            </div>
+            <div class="course-viewer__meta-item" *ngIf="course.pathTitle">
+              <span>المسار</span>
+              <strong>{{ course.pathTitle }}</strong>
+            </div>
+            <div class="course-viewer__meta-item">
+              <span>الأقسام</span>
+              <strong>{{ course.sections?.length || 0 }}</strong>
+            </div>
+          </div>
+
+          <div class="course-viewer__paths" *ngIf="hasLearningPaths">
+            <h4>تقدم المسارات</h4>
+            <div class="course-viewer__path" *ngFor="let path of course.learningPaths">
+              <span>{{ path.learningPathTitle }}</span>
+              <span class="course-viewer__path-progress">{{ formatPathProgress(path) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="course-viewer__layout">
+        <div class="course-viewer__content">
+          <div class="course-viewer__sections" *ngIf="hasSections; else emptySections">
+            <div
+              class="course-viewer__section"
+              *ngFor="let section of course.sections; let sIndex = index"
+            >
+              <div class="course-viewer__section-header">
+                <div>
+                  <span class="course-viewer__section-index">قسم {{ sIndex + 1 }}</span>
+                  <h3>{{ section.title }}</h3>
+                </div>
+                <span class="course-viewer__section-count">{{ section.lessons.length }} دروس</span>
+              </div>
+
+              <div class="course-viewer__lessons">
+                <div
+                  class="course-viewer__lesson"
+                  *ngFor="let lesson of section.lessons; let lIndex = index"
+                >
+                  <div class="course-viewer__lesson-header">
+                    <div class="course-viewer__lesson-title">
+                      <span class="course-viewer__lesson-index">{{ lIndex + 1 }}</span>
+                      <h4>{{ lesson.title }}</h4>
+                    </div>
+                    <span class="course-viewer__lesson-count">{{ lesson.files.length }} ملفات</span>
+                  </div>
+
+                  <div
+                    class="course-viewer__files"
+                    *ngIf="lesson.files.length > 0; else emptyFiles"
+                  >
+                    <button
+                      type="button"
+                      class="course-viewer__file"
+                      *ngFor="let file of lesson.files"
+                      (click)="selectFile(file, lesson.title, section.title)"
+                      [class.is-active]="selectedFile?.id === file.id"
+                    >
+                      <span class="course-viewer__file-name">{{ file.name }}</span>
+                      <span class="course-viewer__file-action">عرض</span>
+                    </button>
+                  </div>
+
+                  <ng-template #emptyFiles>
+                    <div class="lms-section__state lms-section__state--empty">
+                      لا توجد ملفات لهذا الدرس.
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #emptySections>
+            <div class="lms-section__state lms-section__state--empty">
+              لا توجد أقسام متاحة لهذا الكورس.
+            </div>
+          </ng-template>
+        </div>
+
+        <aside class="course-viewer__viewer">
+          <div class="course-viewer__viewer-header">
+            <div>
+              <span class="course-viewer__viewer-title">عارض الملفات</span>
+              <p *ngIf="selectedFile">
+                {{ selectedFile.sectionTitle }} · {{ selectedFile.lessonTitle }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="course-viewer__close"
+              *ngIf="selectedFile"
+              (click)="closeViewer()"
+            >
+              إغلاق
+            </button>
+          </div>
+
+          <div class="course-viewer__viewer-body">
+            <ng-container *ngIf="selectedFile; else viewerEmpty">
+              <div class="course-viewer__viewer-file">
+                <div class="course-viewer__viewer-label">
+                  <span>{{ selectedFile.name }}</span>
+                  <a [href]="selectedFile.url" target="_blank" rel="noopener">تحميل الملف</a>
+                </div>
+
+                <div class="course-viewer__viewer-content">
+                  <div class="lms-section__state" *ngIf="isMediaLoading">جارِ تحميل الملف...</div>
+
+                  <ng-container [ngSwitch]="selectedFile.type">
+                    <video *ngSwitchCase="'video'" [src]="selectedFile.displayUrl" controls></video>
+                    <audio *ngSwitchCase="'audio'" [src]="selectedFile.displayUrl" controls></audio>
+                    <img
+                      *ngSwitchCase="'image'"
+                      [src]="selectedFile.displayUrl"
+                      [alt]="selectedFile.name"
+                    />
+                    <iframe
+                      *ngSwitchCase="'pdf'"
+                      [src]="selectedFile.safeUrl"
+                      title="PDF Viewer"
+                    ></iframe>
+                    <iframe
+                      *ngSwitchCase="'embed'"
+                      [src]="selectedFile.safeUrl"
+                      title="Embedded Content"
+                    ></iframe>
+                    <div *ngSwitchCase="'download'" class="course-viewer__download">
+                      هذا النوع من الملفات يتطلب التحميل.
+                      <a [href]="selectedFile.url" target="_blank" rel="noopener">تحميل الملف</a>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #viewerEmpty>
+              <div class="course-viewer__viewer-empty">
+                <span>اختر ملفاً من الدروس لعرضه هنا.</span>
+              </div>
+            </ng-template>
+          </div>
+        </aside>
+      </div>
+    </ng-container>
+  </div>
+</section>

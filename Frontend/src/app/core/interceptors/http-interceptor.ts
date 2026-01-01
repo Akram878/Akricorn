@@ -83,6 +83,8 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         if (error.status === 401) {
           if (isAdminRequest) {
             message = 'Admin session has expired. Please log in again.';
+          } else if (isAuthRequest) {
+            message = error.error?.message || 'Invalid email or password.';
           } else {
             message = 'Your session has expired. Please log in again.';
             authService.handleAuthFailure();

@@ -3044,29 +3044,21 @@
         "additionalProperties": false
       },
       "UpdateCourseRequest": {
-        "required": [
-          "category",
-          "description",
-          "title"
-        ],
         "type": "object",
         "properties": {
           "title": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "description": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "price": {
-            "minimum": 0,
             "type": "number",
             "format": "double"
           },
           "discount": {
-            "maximum": 100,
-            "minimum": 0,
             "type": "number",
             "format": "double"
           },
@@ -3074,14 +3066,12 @@
             "type": "boolean"
           },
           "hours": {
-            "maximum": 2147483647,
-            "minimum": 0,
             "type": "integer",
             "format": "int32"
           },
           "category": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "thumbnailUrl": {
             "type": "string",

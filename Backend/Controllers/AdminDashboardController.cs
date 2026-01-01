@@ -37,7 +37,7 @@ namespace Backend.Controllers
 
                 return Ok(new
                 {
-                    totalUsers,
+                  totalUsers,
                     activeUsers,
                     courses,
                     books,

@@ -405,18 +405,12 @@ namespace Backend.Controllers
 
         public class UpdateCourseRequest
         {
-            [Required]
             public string Title { get; set; }
-            [Required]
             public string Description { get; set; }
-            [Range(0, double.MaxValue)]
             public decimal Price { get; set; }
-            [Range(0, 100)]
             public decimal Discount { get; set; }
             public bool IsActive { get; set; } = true;
-            [Range(0, int.MaxValue)]
             public int Hours { get; set; }
-            [Required]
             public string Category { get; set; }
             public string ThumbnailUrl { get; set; }
             public List<int> PathIds { get; set; } = new();
