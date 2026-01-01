@@ -8,15 +8,28 @@ import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { BookCardComponent } from '../book-card/book-card';
+import { LmsFiltersComponent } from '../../../shared/components/lms-filters/lms-filters';
+import {
+  applyFilters as applyFilterSet,
+  buildFilterState,
+} from '../../../shared/components/lms-filters/lms-filters.utils';
+import {
+  FilterDefinition,
+  FilterState,
+} from '../../../shared/components/lms-filters/lms-filters.types';
+import { buildBookFilters } from '../filters/lms-filter-config';
 @Component({
   selector: 'app-lms-my-books',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, BookCardComponent],
+  imports: [CommonModule, NgIf, NgForOf, BookCardComponent, LmsFiltersComponent],
   templateUrl: './my-books.html',
   styleUrls: ['./my-books.scss'],
 })
 export class MyBooks implements OnInit, OnDestroy {
   myBooks: MyBook[] = [];
+  filteredBooks: MyBook[] = [];
+  filters: FilterDefinition<MyBook>[] = [];
+  filterState: FilterState = {};
   isLoading = false;
   error: string | null = null;
   private activeObjectUrl: string | null = null;
@@ -51,6 +64,9 @@ export class MyBooks implements OnInit, OnDestroy {
     this.booksService.getMyBooks().subscribe({
       next: (books) => {
         this.myBooks = books;
+        this.filters = buildBookFilters(books);
+        this.filterState = buildFilterState(this.filters);
+        this.applyFilters(this.filterState);
         this.isLoading = false;
       },
       error: (err) => {
@@ -89,6 +105,20 @@ export class MyBooks implements OnInit, OnDestroy {
     });
   }
 
+  trackByBookId(index: number, book: MyBook): number {
+    return book.id;
+  }
+
+  applyFilters(state: FilterState): void {
+    this.filterState = state;
+    this.filteredBooks = applyFilterSet(this.myBooks, this.filters, state);
+  }
+
+  resetFilters(): void {
+    this.filterState = buildFilterState(this.filters);
+    this.filteredBooks = applyFilterSet(this.myBooks, this.filters, this.filterState);
+  }
+
   ngOnDestroy(): void {
     this.cleanupObjectUrl();
     this.authSubscription?.unsubscribe();
@@ -106,6 +136,9 @@ export class MyBooks implements OnInit, OnDestroy {
   private resetState(): void {
     this.cleanupObjectUrl();
     this.myBooks = [];
+    this.filteredBooks = [];
+    this.filters = [];
+    this.filterState = {};
     this.isLoading = false;
     this.error = null;
   }

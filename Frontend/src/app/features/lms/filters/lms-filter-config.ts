@@ -6,7 +6,7 @@ import {
   createSelectFilter,
 } from '../../../shared/components/lms-filters/lms-filters.utils';
 import { FilterDefinition } from '../../../shared/components/lms-filters/lms-filters.types';
-import { PublicBook } from '../../../core/services/public-books.service';
+
 import { PublicTool } from '../../../core/services/public-tools.service';
 
 interface CourseFilterData {
@@ -39,7 +39,14 @@ export const buildCourseFilters = <T extends CourseFilterData>(
   ];
 };
 
-export const buildBookFilters = (books: PublicBook[]): FilterDefinition<PublicBook>[] => {
+interface BookFilterData {
+  title: string;
+  description: string;
+  price: number;
+  category?: string | null;
+}
+
+export const buildBookFilters = <T extends BookFilterData>(books: T[]): FilterDefinition<T>[] => {
   return [
     createSearchFilter(
       'search',

@@ -10,31 +10,47 @@
     <p>All books you own, either purchased directly or unlocked from your courses.</p>
   </div>
 
-  <div class="lms-section__content">
-    <ng-container *ngIf="!isLoading; else loadingTpl">
-      <div
-        class="lms-section__state lms-section__state--empty"
-        *ngIf="!error && myBooks.length === 0"
-      >
-        Your library is empty.
-      </div>
-      <div class="lms-section__state lms-section__state--error" *ngIf="!isLoading && error">
-        {{ error }}
-      </div>
+  <div class="lms-section__body">
+    <app-lms-filters
+      [filters]="filters"
+      [state]="filterState"
+      [resultCount]="filteredBooks.length"
+      (stateChange)="applyFilters($event)"
+      (reset)="resetFilters()"
+    ></app-lms-filters>
 
-      <div class="lms-library-grid" *ngIf="!error && myBooks.length > 0">
-        <app-book-card
-          *ngFor="let b of myBooks"
-          [book]="b"
-          [owned]="true"
-          [showBuy]="false"
-          (view)="openFile(b)"
-        ></app-book-card>
-      </div>
-    </ng-container>
+    <div class="lms-section__content">
+      <ng-container *ngIf="!isLoading; else loadingTpl">
+        <div
+          class="lms-section__state lms-section__state--empty"
+          *ngIf="!error && myBooks.length === 0"
+        >
+          Your library is empty.
+        </div>
+        <div
+          class="lms-section__state lms-section__state--empty"
+          *ngIf="!error && myBooks.length > 0 && filteredBooks.length === 0"
+        >
+          No books match the selected filters yet.
+        </div>
+        <div class="lms-section__state lms-section__state--error" *ngIf="!isLoading && error">
+          {{ error }}
+        </div>
 
-    <ng-template #loadingTpl>
-      <div class="lms-section__state">Loading your books...</div>
-    </ng-template>
+        <div class="lms-library-grid" *ngIf="!error && filteredBooks.length > 0">
+          <app-book-card
+            *ngFor="let b of filteredBooks; trackBy: trackByBookId"
+            [book]="b"
+            [owned]="true"
+            [showBuy]="false"
+            (view)="openFile(b)"
+          ></app-book-card>
+        </div>
+      </ng-container>
+
+      <ng-template #loadingTpl>
+        <div class="lms-section__state">Loading your books...</div>
+      </ng-template>
+    </div>
   </div>
 </div>

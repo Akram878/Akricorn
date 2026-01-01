@@ -158,17 +158,22 @@
             <input type="email" name="email" [(ngModel)]="accountSettingsModel.email" />
           </label>
           <div class="profile-form__field">
-            <span>Country code</span>
-            <app-country-select
-              name="countryCode"
-              [(ngModel)]="accountSettingsModel.countryCode"
-              [required]="true"
-            ></app-country-select>
+            <span>Phone number</span>
+            <div class="profile-form__field2">
+              <app-country-select
+                name="countryCode"
+                [(ngModel)]="accountSettingsModel.countryCode"
+                [required]="true"
+              ></app-country-select>
+
+              <input type="text" name="number" [(ngModel)]="accountSettingsModel.number" />
+            </div>
           </div>
-          <label class="profile-form__field">
+
+          <!-- <label class="profile-form__field">
             <span>Phone number</span>
             <input type="text" name="number" [(ngModel)]="accountSettingsModel.number" />
-          </label>
+          </label> -->
           <label class="profile-form__field profile-form__field--full">
             <span>Current password</span>
             <input
