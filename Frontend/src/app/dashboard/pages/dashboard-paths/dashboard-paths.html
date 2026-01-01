@@ -1,0 +1,183 @@
+<div class="dashboard-paths">
+  <ng-container *ngIf="!showForm">
+    <div class="header-row">
+      <div class="header-row__title">
+        <h2>Learning Paths</h2>
+        <span class="header-row__subtitle">Manage curated learning paths across courses.</span>
+      </div>
+
+      <div class="header-row__actions">
+        <button type="button" class="btn-primary btn-round" (click)="openCreateForm()">+</button>
+        <button type="button" class="btn-secondary" (click)="loadPaths()">Reload</button>
+      </div>
+    </div>
+
+    <div class="status error" *ngIf="error">{{ error }}</div>
+    <div class="status" *ngIf="isLoading">Loading...</div>
+
+    <table *ngIf="!isLoading && paths.length > 0" class="paths-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Courses</th>
+          <th>Price</th>
+          <th>Discount (%)</th>
+          <th>Rating</th>
+          <th>Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let path of paths">
+          <td>{{ path.id }}</td>
+          <td>
+            <div class="title-cell">
+              <img
+                class="avatar"
+                [src]="path.thumbnailUrl || 'assets/icons/path.png'"
+                alt="Path avatar"
+              />
+              <div>
+                <div class="title-text">{{ path.title }}</div>
+                <div class="subtitle-text">{{ path.description }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="course-list">{{ getPathCourseTitles(path.courseIds || []) }}</td>
+          <td>{{ path.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
+          <td>{{ path.discount ?? 0 | number : '1.0-2' }}%</td>
+          <td>
+            <div class="rating-chip">
+              <span>{{ path.rating ?? 0 | number : '1.1-1' }}</span>
+              <span class="rating-count">({{ path.ratingCount ?? 0 }})</span>
+            </div>
+          </td>
+          <td>
+            <span [class.badge-active]="path.isActive" [class.badge-inactive]="!path.isActive">
+              {{ path.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-small" (click)="onEdit(path)">Edit</button>
+            <button class="btn-secondary" (click)="onToggle(path)">
+              {{ path.isActive ? 'Disable' : 'Enable' }}
+            </button>
+            <button class="btn-danger" (click)="onDelete(path)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!isLoading && paths.length === 0" class="status">No learning paths found yet.</div>
+  </ng-container>
+
+  <div *ngIf="showForm" class="editor-wrapper">
+    <div class="editor-header">
+      <div>
+        <h3>{{ editMode ? 'Edit learning path' : 'Create new learning path' }}</h3>
+        <p>Configure the path details and attach courses in order.</p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="resetForm()">Back to list</button>
+    </div>
+
+    <div class="status error" *ngIf="error">{{ error }}</div>
+
+    <form [formGroup]="pathForm" (ngSubmit)="onSubmit()" class="path-form">
+      <div class="form-grid">
+        <div class="form-card">
+          <h4>Path details</h4>
+          <label class="form-field">
+            <span>Title</span>
+            <input type="text" formControlName="title" placeholder="Learning path title" />
+          </label>
+          <label class="form-field">
+            <span>Description</span>
+            <textarea
+              formControlName="description"
+              rows="4"
+              placeholder="Summarize the learning path"
+            ></textarea>
+          </label>
+          <label class="form-field">
+            <span>Thumbnail URL (50x50)</span>
+            <input type="text" formControlName="thumbnailUrl" placeholder="https://..." />
+          </label>
+          <div class="thumbnail-preview">
+            <img
+              class="avatar"
+              [src]="pathForm.get('thumbnailUrl')?.value || 'assets/icons/path.png'"
+              alt="Thumbnail preview"
+            />
+            <span>Preview</span>
+          </div>
+          <label class="form-field">
+            <span>Discount (%)</span>
+            <input type="number" formControlName="discount" min="0" max="100" />
+          </label>
+          <div class="form-field">
+            <span>Total price (auto from courses)</span>
+            <div class="price-chip">
+              {{ getSelectedCoursesTotal() | currency : 'USD' : 'symbol' : '1.0-2' }}
+            </div>
+          </div>
+          <label class="form-field checkbox">
+            <input type="checkbox" formControlName="isActive" />
+            <span>Active</span>
+          </label>
+        </div>
+
+        <div class="form-card">
+          <h4>Courses in this path</h4>
+          <div class="course-picker">
+            <select #courseSelect [disabled]="isLoadingCourses">
+              <option value="">Select a course</option>
+              <option *ngFor="let course of courses" [value]="course.id">
+                {{ course.title }} - {{ course.price | currency : 'USD' : 'symbol' : '1.0-2' }}
+              </option>
+            </select>
+            <button
+              type="button"
+              class="btn-primary"
+              (click)="onAddCourse(courseSelect.value); courseSelect.value = ''"
+              [disabled]="isLoadingCourses"
+            >
+              Add course
+            </button>
+          </div>
+
+          <div class="status" *ngIf="isLoadingCourses">Loading courses...</div>
+
+          <div class="course-order" *ngIf="selectedCourseIds.length > 0">
+            <div class="course-item" *ngFor="let courseId of selectedCourseIds; let i = index">
+              <div class="course-info">
+                <span class="course-title">{{ getCourseTitle(courseId) }}</span>
+                <span class="course-meta">
+                  {{ getCoursePrice(courseId) | currency : 'USD' : 'symbol' : '1.0-2' }}
+                </span>
+              </div>
+              <div class="course-actions">
+                <button type="button" class="btn-small" (click)="moveCourseUp(i)">↑</button>
+                <button type="button" class="btn-small" (click)="moveCourseDown(i)">↓</button>
+                <button type="button" class="btn-danger btn-small" (click)="removeCourse(i)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="selectedCourseIds.length === 0">
+            No courses added yet.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="resetForm()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="pathForm.invalid || isSaving">
+          {{ isSaving ? 'Saving...' : editMode ? 'Update path' : 'Create path' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

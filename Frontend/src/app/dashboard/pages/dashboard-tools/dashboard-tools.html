@@ -1,0 +1,181 @@
+<div class="dashboard-tools">
+  <ng-container *ngIf="!showForm">
+    <div class="header-row">
+      <div class="header-row__title">
+        <h2>Tools</h2>
+        <span class="header-row__subtitle">Manage tool resources and downloads.</span>
+      </div>
+
+      <div class="header-row__actions">
+        <button type="button" class="btn-primary btn-round" (click)="openCreate()">+</button>
+        <button type="button" class="btn-secondary" (click)="loadTools()">Reload</button>
+      </div>
+    </div>
+
+    <div class="status error" *ngIf="error">{{ error }}</div>
+    <div class="status" *ngIf="isLoading">Loading...</div>
+
+    <table *ngIf="!isLoading && tools.length > 0" class="tools-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tool</th>
+          <th>URL</th>
+          <th>Category</th>
+          <th>Files</th>
+          <th>Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tool of tools">
+          <td>{{ tool.id }}</td>
+          <td>
+            <div class="title-cell">
+              <img
+                class="avatar"
+                [src]="tool.avatarUrl || 'assets/icons/edit-tool.png'"
+                alt="Tool avatar"
+              />
+              <div>
+                <div class="title-text">{{ tool.name }}</div>
+                <div class="subtitle-text">{{ tool.description }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <a class="link" *ngIf="tool.url" [href]="tool.url" target="_blank" rel="noreferrer">
+              {{ tool.url }}
+            </a>
+            <span *ngIf="!tool.url">—</span>
+          </td>
+          <td>{{ tool.category || 'General' }}</td>
+          <td>{{ tool.files?.length ?? 0 }}</td>
+          <td>
+            <span [class.badge-active]="tool.isActive" [class.badge-inactive]="!tool.isActive">
+              {{ tool.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-small" (click)="onEdit(tool)">Edit</button>
+            <button class="btn-secondary" (click)="onToggle(tool)">
+              {{ tool.isActive ? 'Disable' : 'Enable' }}
+            </button>
+            <button class="btn-danger" (click)="onDelete(tool)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!isLoading && tools.length === 0" class="status">No tools found yet.</div>
+  </ng-container>
+
+  <div *ngIf="showForm" class="editor-wrapper">
+    <div class="editor-header">
+      <div>
+        <h3>{{ isEditMode ? 'Edit tool' : 'Create new tool' }}</h3>
+        <p>Provide tool details, upload an avatar, and attach files.</p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="closeForm()">Back to list</button>
+    </div>
+
+    <div class="status error" *ngIf="error">{{ error }}</div>
+
+    <form [formGroup]="toolForm" (ngSubmit)="onSubmit()" class="tool-form">
+      <div class="form-grid">
+        <div class="form-card">
+          <h4>Tool details</h4>
+          <label class="form-field">
+            <span>Name</span>
+            <input type="text" formControlName="name" placeholder="Tool name" />
+          </label>
+          <label class="form-field">
+            <span>Description</span>
+            <textarea
+              formControlName="description"
+              rows="4"
+              placeholder="Describe what the tool does"
+            ></textarea>
+          </label>
+          <label class="form-field">
+            <span>URL</span>
+            <input type="text" formControlName="url" placeholder="https://..." />
+          </label>
+          <label class="form-field">
+            <span>Category</span>
+            <input type="text" formControlName="category" placeholder="General" />
+          </label>
+          <label class="form-field">
+            <span>Display order</span>
+            <input type="number" formControlName="displayOrder" min="1" />
+          </label>
+          <label class="form-field checkbox">
+            <input type="checkbox" formControlName="isActive" />
+            <span>Active</span>
+          </label>
+        </div>
+
+        <div class="form-card">
+          <h4>Avatar (50x50)</h4>
+          <div class="thumbnail-preview">
+            <img
+              class="avatar"
+              [src]="avatarPreview || 'assets/icons/edit-tool.png'"
+              alt="Tool avatar preview"
+            />
+            <label class="file-button">
+              <input type="file" accept="image/*" (change)="onAvatarSelected($event)" />
+              Upload avatar
+            </label>
+          </div>
+
+          <h4>Tool files (.zip or .exe)</h4>
+          <label class="file-button">
+            <input type="file" accept=".zip,.exe" multiple (change)="onFilesSelected($event)" />
+            Upload files
+          </label>
+          <p class="hint">Only .zip or .exe files are accepted.</p>
+
+          <div class="file-list" *ngIf="toolFiles.length > 0">
+            <h5>Existing files</h5>
+            <div class="file-item" *ngFor="let file of toolFiles; let i = index">
+              <div>
+                <a class="link" [href]="file.fileUrl" target="_blank" rel="noreferrer">
+                  {{ file.originalName || file.fileName }}
+                </a>
+                <div class="file-meta">{{ file.contentType }} · {{ file.sizeBytes }} bytes</div>
+              </div>
+              <button
+                type="button"
+                class="btn-danger btn-small"
+                (click)="removeExistingFile(file.id ?? 0, i)"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <div class="file-list" *ngIf="pendingFiles.length > 0">
+            <h5>Pending uploads</h5>
+            <div class="file-item" *ngFor="let file of pendingFiles; let i = index">
+              <div>
+                <span class="file-name">{{ file.name }}</span>
+                <div class="file-meta">{{ file.type || 'file' }} · {{ file.size }} bytes</div>
+              </div>
+              <button type="button" class="btn-secondary btn-small" (click)="removePendingFile(i)">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="toolForm.invalid || isSaving">
+          {{ isSaving ? 'Saving...' : isEditMode ? 'Update tool' : 'Create tool' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

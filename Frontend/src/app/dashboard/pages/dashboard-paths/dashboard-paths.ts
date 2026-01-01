@@ -54,7 +54,6 @@ export class DashboardPaths implements OnInit {
       description: ['', [Validators.required, Validators.maxLength(2000)]],
       thumbnailUrl: ['', [Validators.maxLength(500)]],
 
-      price: [0, [Validators.required, Validators.min(0)]],
       discount: [0, [Validators.min(0), Validators.max(100)]],
       isActive: [true],
     });
@@ -101,6 +100,20 @@ export class DashboardPaths implements OnInit {
     return c ? c.title : `Course #${id}`;
   }
 
+  getPathCourseTitles(courseIds: number[] = []): string {
+    if (!courseIds.length) return '-';
+    return courseIds.map((id) => this.getCourseTitle(id)).join(', ');
+  }
+
+  getCoursePrice(id: number): number {
+    const c = this.courses.find((x) => x.id === id);
+    return c ? c.price : 0;
+  }
+
+  getSelectedCoursesTotal(): number {
+    return this.selectedCourseIds.reduce((sum, id) => sum + this.getCoursePrice(id), 0);
+  }
+
   // فتح مودال إنشاء مسار جديد
   openCreateForm(): void {
     this.editMode = false;
@@ -110,7 +123,6 @@ export class DashboardPaths implements OnInit {
       description: '',
       thumbnailUrl: '',
 
-      price: 0,
       discount: 0,
       isActive: true,
     });
@@ -130,7 +142,6 @@ export class DashboardPaths implements OnInit {
       description: path.description,
       thumbnailUrl: path.thumbnailUrl ?? '',
 
-      price: path.price ?? 0,
       discount: path.discount ?? 0,
       isActive: path.isActive,
     });
@@ -151,7 +162,6 @@ export class DashboardPaths implements OnInit {
       description: '',
       thumbnailUrl: '',
 
-      price: 0,
       discount: 0,
       isActive: true,
     });
@@ -195,15 +205,17 @@ export class DashboardPaths implements OnInit {
     if (this.pathForm.invalid || this.isSaving) return;
 
     this.isSaving = true;
+
     this.error = null;
 
     const value = this.pathForm.value;
+    const totalPrice = this.getSelectedCoursesTotal();
     const payload: any = {
       title: value.title,
       description: value.description,
       thumbnailUrl: value.thumbnailUrl,
 
-      price: value.price,
+      price: totalPrice,
       discount: value.discount,
       isActive: value.isActive,
       courseIds: [...this.selectedCourseIds], // الترتيب مهم هنا
