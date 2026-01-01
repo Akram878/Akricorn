@@ -59,6 +59,7 @@
           Change image
           <input type="file" accept="image/*" hidden (change)="onThumbnailSelected($event)" />
         </label>
+        <p class="field-hint">Any image format is allowed. Image size must not be 50 × 50.</p>
       </div>
 
       <div class="book-editor__panel">
@@ -68,6 +69,7 @@
             Upload
             <input
               type="file"
+              accept="application/pdf"
               multiple
               hidden
               (change)="onFilesSelected($event)"
@@ -75,7 +77,7 @@
             />
           </label>
         </div>
-
+        <p class="field-hint">Only PDF files can be uploaded.</p>
         <p class="field-hint" *ngIf="isCreateMode">Save the book first to upload files.</p>
         <p class="field-hint" *ngIf="uploading">Uploading...</p>
 
@@ -84,7 +86,7 @@
             <div>
               <div class="file-name">{{ f.originalName ?? f.fileName }}</div>
               <div class="file-meta">
-                {{ ((f.size ?? f.sizeBytes ?? 0) / 1024) | number : '1.0-1' }} KB •
+                {{ (f.size ?? f.sizeBytes ?? 0) / 1024 | number : '1.0-1' }} KB •
                 {{ f.mimeType ?? f.contentType }}
               </div>
               <a

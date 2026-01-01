@@ -45,7 +45,7 @@
           <td>{{ c.rating | number : '1.1-1' }}</td>
           <td>{{ c.purchaseCount ?? 0 }}</td>
           <td>{{ c.hours }}</td>
-          <td>{{ c.pathIds.length ? c.pathIds.join(', ') : '-' }}</td>
+          <td>{{ c.pathIds?.length ? c.pathIds.join(', ') : '-' }}</td>
 
           <td>
             <span [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">
