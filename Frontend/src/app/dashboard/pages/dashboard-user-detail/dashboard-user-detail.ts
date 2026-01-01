@@ -63,6 +63,7 @@ export class DashboardUserDetailComponent implements OnInit {
   user: AdminUserDto | null = null;
   overview: UserOverview | null = null;
   isLoading = false;
+  userError: string | null = null;
   error: string | null = null;
 
   constructor(
@@ -78,12 +79,14 @@ export class DashboardUserDetailComponent implements OnInit {
   }
 
   private loadUser(): void {
+    this.userError = null;
     this.adminUsers.getById(this.userId).subscribe({
       next: (user) => {
         this.user = user;
       },
       error: () => {
         this.user = null;
+        this.userError = 'Failed to load user profile.';
       },
     });
   }

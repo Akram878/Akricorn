@@ -229,8 +229,9 @@ $gold-500: #b9822f;
   border: none;
   border: 1px solid #023629;
 
-  &:hover {
-    background-color: #023629;
+  &:hover:not(:disabled) {
+    border-color: rgba($gold-400, 0.9);
+    transform: translateY(-1px);
   }
 }
 

@@ -47,6 +47,7 @@ $gold-500: #b9822f;
         }
         .Brochure_Links {
           a {
+            font-weight: 600;
             display: inline-block;
             margin: 1rem 0;
             border-radius: 0.3rem;
@@ -58,6 +59,11 @@ $gold-500: #b9822f;
               hsl(43.33deg 46.96% 54.9%) 40%,
               #c89445 100%
             );
+
+            &:hover:not(:disabled) {
+              border-color: rgba($gold-400, 0.9);
+              transform: translateY(-1px);
+            }
           }
         }
       }
@@ -85,6 +91,7 @@ $gold-500: #b9822f;
         }
         .Brochure_Links {
           a {
+            font-weight: 600;
             display: inline-block;
             margin: 1rem 0;
             border-radius: 0.3rem;
@@ -96,6 +103,10 @@ $gold-500: #b9822f;
               hsl(43.33deg 46.96% 54.9%) 40%,
               #c89445 100%
             );
+            &:hover:not(:disabled) {
+              border-color: rgba($gold-400, 0.9);
+              transform: translateY(-1px);
+            }
           }
         }
       }

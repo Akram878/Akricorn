@@ -45,15 +45,21 @@
       .btn-h {
         padding: 0.5rem 1.5rem;
         border: 0.1rem solid hsl(165, 93%, 11%);
-        background-color: transparent;
-        color: hsl(42.67deg 88.24% 80%);
+        background: linear-gradient(
+          180deg,
+          hsl(45, 48.78%, 67.84%) 0%,
+          hsl(43.33, 46.96%, 54.9%) 40%,
+          #c89445 100%
+        );
+        font-weight: 600;
+        color: #031712;
         border-radius: 0.3rem;
         cursor: pointer;
         transition: background-color 0.2s ease;
         padding: 1rem;
 
-        &:hover {
-          background-color: hsl(165, 93%, 11%);
+        &:hover:not(:disabled) {
+          transform: translateY(-1px);
         }
       }
     }

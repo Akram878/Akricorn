@@ -263,10 +263,14 @@ $gold-500: #b9822f;
 }
 
 .btn-primary {
-  background: linear-gradient(120deg, rgba(217, 167, 74, 0.95), rgba(185, 130, 47, 0.95));
-  color: #1f1405;
+  background: linear-gradient(
+    180deg,
+    hsl(45, 48.78%, 67.84%) 0%,
+    hsl(43.33, 46.96%, 54.9%) 40%,
+    #c89445 100%
+  );
+  color: #031712;
   font-weight: 600;
-
   &:hover:not(:disabled) {
     transform: translateY(-1px);
   }

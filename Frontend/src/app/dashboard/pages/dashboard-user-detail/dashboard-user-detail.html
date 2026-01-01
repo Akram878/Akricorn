@@ -7,6 +7,7 @@
   </div>
 
   <div class="status" *ngIf="isLoading">Loading...</div>
+  <div class="status error" *ngIf="userError">{{ userError }}</div>
   <div class="status error" *ngIf="error">{{ error }}</div>
 
   <ng-container *ngIf="overview && !isLoading">
