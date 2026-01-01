@@ -19,22 +19,20 @@ $gold-500: #b9822f;
 }
 
 .profile__header {
-  display: flex;
+  //   display: flex;
   justify-content: space-between;
   gap: 2rem;
-  flex-wrap: wrap;
+  //   flex-wrap: wrap;
   padding: 1.5rem;
-  border-radius: 0.3rem;
-
-  border: 1px solid hsl(165, 93%, 11%);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
 }
 
 .profile__identity {
   display: flex;
+  flex-direction: column;
   gap: 1.4rem;
   flex: 1 1 420px;
   align-items: center;
+  justify-content: space-between;
 }
 
 .profile__avatar {
@@ -109,11 +107,11 @@ $gold-500: #b9822f;
 }
 
 .profile__actions {
+  justify-content: center;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.65rem;
-  align-items: flex-start;
-  flex: 0 0 220px;
+  align-items: center;
 }
 
 .profile__alert {
@@ -133,11 +131,7 @@ $gold-500: #b9822f;
 }
 
 .profile__card {
-  padding: 1.6rem;
-  border-radius: 0.3rem;
-
-  border: 1px solid hsl(165, 93%, 11%);
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.5);
+  flex-grow: 1;
 
   h3 {
     margin: 0 0 0.5rem;
@@ -322,7 +316,6 @@ $gold-500: #b9822f;
 
   .profile__identity {
     flex-direction: column;
-    align-items: flex-start;
   }
 
   .profile__actions {
