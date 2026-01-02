@@ -17,6 +17,7 @@ export interface PublicCourse {
   hours?: number; // عدد الساعات
   category?: string; // Beginner / Intermediate / ...
   rating?: number; // من 0 إلى 5
+  ratingCount?: number;
   pathTitle?: string | null; // اسم الـ Path إن وجد
 }
 
@@ -35,6 +36,8 @@ export interface MyCourse {
   category?: string; // Beginner / Intermediate / Advanced / ... (اختياري)
   hours?: number; // عدد الساعات (اختياري)
   pathTitle?: string | null; // اسم الـ learning path إن وجد (اختياري)
+  rating?: number;
+  ratingCount?: number;
 }
 
 export interface CourseLessonFile {
@@ -69,6 +72,8 @@ export interface CourseLearningPathProgress {
 
 export interface MyCourseDetail extends MyCourse {
   rating?: number;
+  ratingCount?: number;
+  userRating?: number | null;
   sections: CourseSectionView[];
   learningPaths: CourseLearningPathProgress[];
 }
@@ -82,6 +87,12 @@ export interface CourseCompletionResponse {
 export interface LessonCompletionResponse {
   message: string;
   courseCompleted: boolean;
+}
+
+export interface CourseRatingResponse {
+  message: string;
+  averageRating: number;
+  ratingCount: number;
 }
 // رد الـ API عند شراء كورس عبر نظام الدفع
 export interface CoursePaymentResponse {
@@ -144,5 +155,11 @@ export class PublicCoursesService {
       `${this.baseUrl}/my-courses/${courseId}/lessons/${lessonId}/complete`,
       {}
     );
+  }
+  rateCourse(courseId: number, rating: number, comment?: string): Observable<CourseRatingResponse> {
+    return this.http.post<CourseRatingResponse>(`${API_BASE_URL}/api/ratings/course/${courseId}`, {
+      rating,
+      comment,
+    });
   }
 }

@@ -41,6 +41,16 @@ namespace Backend.Controllers
                   })
                 .ToListAsync();
 
+            var ratingStats = await _context.CourseRatings
+               .GroupBy(r => r.CourseId)
+               .Select(g => new
+               {
+                   CourseId = g.Key,
+                   Count = g.Count(),
+                   Average = Math.Round(g.Average(x => x.Rating), 2)
+               })
+               .ToDictionaryAsync(x => x.CourseId, x => x);
+
             var result = courses.Select(c => new
             {
                 c.Id,
@@ -52,7 +62,8 @@ namespace Backend.Controllers
                 finalPrice = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(c.Price, c.Discount),
                 c.Hours,
                 c.Category,
-                c.Rating,
+                rating = ratingStats.TryGetValue(c.Id, out var stats) ? stats.Average : c.Rating,
+                ratingCount = ratingStats.TryGetValue(c.Id, out var stats2) ? stats2.Count : 0,
                 c.pathTitle
             });
 
@@ -83,6 +94,16 @@ namespace Backend.Controllers
                 })
                 .ToListAsync();
 
+            var ratingStats = await _context.CourseRatings
+              .GroupBy(r => r.CourseId)
+              .Select(g => new
+              {
+                  CourseId = g.Key,
+                  Count = g.Count(),
+                  Average = Math.Round(g.Average(x => x.Rating), 2)
+              })
+              .ToDictionaryAsync(x => x.CourseId, x => x);
+
             var result = courses.Select(c => new
             {
                 c.Id,
@@ -94,7 +115,8 @@ namespace Backend.Controllers
                 finalPrice = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(c.Price, c.Discount),
                 c.Hours,
                 c.Category,
-                c.Rating,
+                rating = ratingStats.TryGetValue(c.Id, out var stats) ? stats.Average : c.Rating,
+                ratingCount = ratingStats.TryGetValue(c.Id, out var stats2) ? stats2.Count : 0,
                 c.pathTitle
             });
 

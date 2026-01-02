@@ -727,6 +727,10 @@ namespace Backend.Controllers
                 ) ?? Enumerable.Empty<object>();
 
             var courseRatingStats = await GetCourseRatingStats(course.Id);
+            var userRating = await _context.CourseRatings
+              .Where(r => r.CourseId == course.Id && r.UserId == userId.Value)
+              .Select(r => (int?)r.Rating)
+              .FirstOrDefaultAsync();
             var paidAmount = await _context.Payments
                .Where(p => p.UserId == userId.Value && p.TargetType == "Course" && p.TargetId == course.Id)
                .OrderByDescending(p => p.CreatedAt)
@@ -743,6 +747,7 @@ namespace Backend.Controllers
                 category = course.Category,
                 rating = courseRatingStats.Average,
                 ratingCount = courseRatingStats.Count,
+                userRating,
                 thumbnailUrl = course.ThumbnailUrl,
                 purchasedAt = userCourse?.PurchasedAt,
                 completedAt = userCourse?.CompletedAt,
@@ -1102,6 +1107,13 @@ namespace Backend.Controllers
                 .OrderBy(p => p.Title)
                 .ToListAsync();
 
+            var pathCourseIds = paths
+                .SelectMany(p => p.LearningPathCourses)
+                .Where(lpc => lpc.Course != null && lpc.Course.IsActive)
+                .Select(lpc => lpc.CourseId)
+                .Distinct()
+                .ToList();
+
             var pathRatingStats = await _context.LearningPathRatings
                 .GroupBy(r => r.LearningPathId)
                 .Select(g => new
@@ -1111,18 +1123,21 @@ namespace Backend.Controllers
                     Average = Math.Round(g.Average(x => x.Rating), 2)
                 })
                 .ToDictionaryAsync(x => x.LearningPathId, x => x);
+            var courseRatingStats = await _context.CourseRatings
+               .Where(r => pathCourseIds.Contains(r.CourseId))
+               .GroupBy(r => r.CourseId)
+               .Select(g => new
+               {
+                   CourseId = g.Key,
+                   Count = g.Count(),
+                   Average = Math.Round(g.Average(x => x.Rating), 2)
+               })
+               .ToDictionaryAsync(x => x.CourseId, x => x);
 
             var courseProgress = new Dictionary<int, CourseProgressInfo>();
             if (userId.HasValue)
             {
-                var courseIds = paths
-                    .SelectMany(p => p.LearningPathCourses)
-                    .Where(lpc => lpc.Course != null && lpc.Course.IsActive)
-                    .Select(lpc => lpc.CourseId)
-                    .Distinct()
-                    .ToList();
-
-                courseProgress = await BuildCourseProgressMap(userId.Value, courseIds);
+                courseProgress = await BuildCourseProgressMap(userId.Value, pathCourseIds);
             }
 
             var result = paths.Select(p =>
@@ -1145,7 +1160,9 @@ namespace Backend.Controllers
                         price = lpc.Course.Price,
                         category = lpc.Course.Category,
                         hours = lpc.Course.Hours,
-                        rating = lpc.Course.Rating,
+                        rating = courseRatingStats.TryGetValue(lpc.CourseId, out var courseStats)
+                            ? courseStats.Average
+                            : lpc.Course.Rating,
                         thumbnailUrl = lpc.Course.ThumbnailUrl,
                         isCompleted,
                         isInProgress

@@ -44,6 +44,9 @@ export class CourseViewer implements OnInit, OnDestroy {
   isMediaLoading = false;
   isSidebarOpen = true;
   completingLessons = new Set<number>();
+  ratingValue = 0;
+  ratingStars = [1, 2, 3, 4, 5];
+  isSubmittingRating = false;
   private activeObjectUrl: string | null = null;
   private courseThumbnailObjectUrl: string | null = null;
   private mediaSubscription?: Subscription;
@@ -90,6 +93,7 @@ export class CourseViewer implements OnInit, OnDestroy {
     this.coursesService.getMyCourse(this.courseId).subscribe({
       next: (course) => {
         this.course = course;
+        this.ratingValue = course.userRating ?? 0;
         this.loadCourseThumbnail(course.thumbnailUrl);
         this.isLoading = false;
       },
@@ -191,6 +195,43 @@ export class CourseViewer implements OnInit, OnDestroy {
     });
   }
 
+  selectRating(value: number): void {
+    if (!this.canRateCourse) {
+      return;
+    }
+    this.ratingValue = value;
+  }
+
+  submitRating(): void {
+    if (!this.canRateCourse || !this.course) {
+      return;
+    }
+    const course = this.course;
+    if (this.ratingValue < 1 || this.ratingValue > 5) {
+      this.notifications.showError('يرجى اختيار تقييم من 1 إلى 5.');
+      return;
+    }
+
+    this.isSubmittingRating = true;
+    this.coursesService.rateCourse(this.courseId, this.ratingValue).subscribe({
+      next: (res) => {
+        this.course = {
+          ...course,
+          rating: res.averageRating,
+          ratingCount: res.ratingCount,
+          userRating: this.ratingValue,
+        };
+        this.notifications.showSuccess(res.message || 'تم إرسال تقييمك بنجاح.');
+        this.isSubmittingRating = false;
+      },
+      error: (err) => {
+        const message = err?.error?.message || 'تعذر إرسال التقييم.';
+        this.notifications.showError(message);
+        this.isSubmittingRating = false;
+      },
+    });
+  }
+
   isLessonCompleting(lessonId: number): boolean {
     return this.completingLessons.has(lessonId);
   }
@@ -215,6 +256,10 @@ export class CourseViewer implements OnInit, OnDestroy {
       return 100;
     }
     return Math.round((this.completedLessonsCount / total) * 100);
+  }
+
+  get canRateCourse(): boolean {
+    return !!this.course?.completedAt && !this.course?.userRating;
   }
 
   get completedLessonsCount(): number {
