@@ -94,10 +94,7 @@ export class CourseViewer implements OnInit, OnDestroy {
     }
     const token = this.authService.getAccessToken();
     const resolvedUrl = appendAuthToken(resolveMediaUrl(file.url), token);
-    const opened = window.open(resolvedUrl, '_blank', 'noopener');
-    if (!opened) {
-      this.notifications.showError('تعذر فتح الملف في تبويب جديد.');
-    }
+    window.open(resolvedUrl, '_blank', 'noopener');
   }
 
   completeLesson(lessonId: number): void {

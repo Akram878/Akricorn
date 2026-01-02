@@ -102,11 +102,7 @@ export class MyBooks implements OnInit, OnDestroy {
 
     const token = this.authService.getAccessToken();
     const url = appendAuthToken(resolveMediaUrl(fileUrl), token);
-    const opened = window.open(url, '_blank', 'noopener');
-    if (!opened) {
-      this.notification.showError('تعذر فتح الملف في تبويب جديد.');
-      return;
-    }
+    window.open(url, '_blank', 'noopener');
     this.viewedBookIds.add(book.id);
     this.persistViewedBooks();
   }
