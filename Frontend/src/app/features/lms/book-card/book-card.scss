@@ -27,6 +27,7 @@ $gold-400: #d9a74a;
   height: 35px;
 }
 .lms-book-card__cover {
+  align-self: flex-start;
   width: 50px;
   height: 50px;
   border-radius: 0.8rem;
@@ -55,7 +56,7 @@ $gold-400: #d9a74a;
 
 .lms-book-card__header {
   display: flex;
-  align-items: flex-start;
+
   justify-content: flex-start;
   gap: 0.8rem;
 }
@@ -76,23 +77,16 @@ $gold-400: #d9a74a;
 }
 
 .lms-book-card__description {
-  margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: rgba($gold-200, 0.85);
-  max-height: 3.4rem;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 20rem;
+  max-height: 3em;
   overflow: hidden;
-  position: relative;
   transition: max-height 0.25s ease;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .lms-book-card__description--expanded {
-  max-height: 12rem;
-  display: block;
-  -webkit-line-clamp: unset;
+  max-height: 100vh;
 }
 
 .lms-book-card__toggle {
@@ -107,6 +101,7 @@ $gold-400: #d9a74a;
 
 .lms-book-card__meta {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 0.4rem;
   font-size: 0.75rem;
@@ -116,19 +111,18 @@ $gold-400: #d9a74a;
 .lms-book-card__meta-tag,
 .lms-book-card__meta-owned {
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  background: rgba($emerald-700, 0.8);
+
   color: $gold-200;
 }
 
 .lms-book-card__meta-owned {
-  background: rgba($gold-400, 0.2);
-  color: $gold-100;
+  font-size: 0.75rem;
+  color: rgba(249, 224, 162, 0.7);
 }
 
 .lms-book-card__footer {
   margin-left: auto;
-
+  align-self: flex-end;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -156,9 +150,13 @@ $gold-400: #d9a74a;
 
 .lms-primary-btn,
 .lms-secondary-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 0.3rem;
+  width: 3rem;
   color: hsl(42.67, 88.24%, 80%);
-  padding: 0.75rem;
+  padding: 0.5rem;
   background: #041e16;
   cursor: pointer;
   white-space: nowrap;
@@ -171,11 +169,28 @@ $gold-400: #d9a74a;
 
 @media (max-width: 768px) {
   .lms-book-card {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     padding: 0.85rem;
   }
 
   .lms-book-card__footer {
     flex-direction: column;
-    align-items: flex-start;
+
+    margin-left: 0;
+  }
+  .lms-book-card__header {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .lms-book-card__cover,
+  .lms-book-card__toggle,
+  .lms-book-card__footer {
+    align-self: center;
+  }
+  .lms-book-card__description {
+    text-align: center;
   }
 }
