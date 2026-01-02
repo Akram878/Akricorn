@@ -136,6 +136,42 @@ $gold-400: #d9a74a;
 }
 .lms-path-card__footer {
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lms-path-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: #ffffff;
+  font-size: 0.75rem;
+}
+
+.lms-path-card__price-values {
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+}
+
+.lms-path-card__price-value {
+  font-weight: 600;
+}
+
+.lms-path-card__price-value--strikethrough {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.lms-path-card__price-value--final {
+  color: $gold-100;
+}
+
+.lms-path-card__price-discount {
+  font-size: 0.7rem;
+  color: $gold-200;
 }
 
 .lms-path-card .lms-primary-btn.is-disabled {
@@ -149,6 +185,10 @@ $gold-400: #d9a74a;
   }
 
   .lms-path-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .lms-path-card__footer {
     flex-direction: column;
     align-items: flex-start;
   }

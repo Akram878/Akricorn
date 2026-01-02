@@ -6,6 +6,8 @@ import {
   LearningPathCourseSummary,
 } from '../../../core/services/public-learning-paths.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LmsFiltersComponent } from '../../../shared/components/lms-filters/lms-filters';
 import {
@@ -22,6 +24,11 @@ interface UiLearningPath {
   id: number;
   title: string;
   description: string;
+  price: number;
+  finalPrice?: number | null;
+  discount?: number | null;
+  isOwned: boolean;
+  isPurchasing: boolean;
   coursesCount: number;
   completedCourses: number;
   completionPercent: number;
@@ -52,8 +59,12 @@ export class LearningPath implements OnInit, OnDestroy {
   filterState: FilterState = {};
   private authSubscription?: Subscription;
 
-  constructor(private pathsService: PublicLearningPathsService, private authService: AuthService) {}
-
+  constructor(
+    private pathsService: PublicLearningPathsService,
+    private authService: AuthService,
+    private notification: NotificationService,
+    private router: Router
+  ) {}
   ngOnInit(): void {
     this.loadPaths();
     this.authSubscription = this.authService.isAuthenticated$.subscribe(() => {
@@ -106,6 +117,70 @@ export class LearningPath implements OnInit, OnDestroy {
     return course.id;
   }
 
+  onPurchase(path: UiLearningPath): void {
+    if (path.isOwned) {
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/sign'], {
+        queryParams: { returnUrl: this.router.url },
+      });
+      return;
+    }
+
+    if (path.isPurchasing) {
+      return;
+    }
+
+    path.isPurchasing = true;
+
+    this.pathsService.purchasePath(path.id).subscribe({
+      next: () => {
+        this.notification.showSuccess('Learning path purchased successfully.');
+        path.isOwned = true;
+        path.isPurchasing = false;
+      },
+      error: (err) => {
+        if (err?.status === 401) {
+          this.router.navigate(['/auth/login']);
+        } else if (err?.error?.message) {
+          this.notification.showError(err.error.message);
+        } else {
+          this.notification.showError('Failed to purchase learning path.');
+        }
+
+        path.isPurchasing = false;
+      },
+    });
+  }
+
+  getBasePrice(path: UiLearningPath): number {
+    return path.price ?? 0;
+  }
+
+  getDiscountPercent(path: UiLearningPath): number {
+    return path.discount ?? 0;
+  }
+
+  getFinalPrice(path: UiLearningPath): number {
+    const basePrice = this.getBasePrice(path);
+    const discount = this.getDiscountPercent(path);
+    if (discount <= 0) {
+      return basePrice;
+    }
+
+    if (path.finalPrice !== undefined && path.finalPrice !== null) {
+      return path.finalPrice;
+    }
+
+    return basePrice - (basePrice * discount) / 100;
+  }
+
+  hasDiscount(path: UiLearningPath): boolean {
+    return this.getDiscountPercent(path) > 0 && this.getFinalPrice(path) < this.getBasePrice(path);
+  }
+
   private mapPath(path: PublicLearningPath): UiLearningPath {
     const courses = (path.courses ?? [])
       .map((course: LearningPathCourseSummary) => ({
@@ -120,6 +195,11 @@ export class LearningPath implements OnInit, OnDestroy {
       id: path.id,
       title: path.title,
       description: path.description,
+      price: path.price ?? 0,
+      finalPrice: path.finalPrice ?? null,
+      discount: path.discount ?? 0,
+      isOwned: path.isOwned ?? false,
+      isPurchasing: false,
       coursesCount: path.coursesCount,
       completedCourses: path.completedCourses,
       completionPercent: path.completionPercent,

@@ -248,6 +248,7 @@ namespace Backend.Controllers
 
             var learningPath = await _context.LearningPaths
                 .Include(lp => lp.LearningPathCourses)
+                   .ThenInclude(lpc => lpc.Course)
                 .FirstOrDefaultAsync(lp => lp.Id == pathId && lp.IsActive);
 
             if (learningPath == null)
@@ -291,6 +292,31 @@ namespace Backend.Controllers
             };
 
             _context.UserPurchases.Add(userPurchase);
+
+            var pathCourseIds = learningPath.LearningPathCourses?
+          .Where(lpc => lpc.Course != null && lpc.Course.IsActive)
+          .Select(lpc => lpc.CourseId)
+          .Distinct()
+          .ToList() ?? new List<int>();
+
+            if (pathCourseIds.Count > 0)
+            {
+                var ownedCourseIds = await _context.UserCourses
+                    .Where(uc => uc.UserId == userId.Value && pathCourseIds.Contains(uc.CourseId))
+                    .Select(uc => uc.CourseId)
+                    .ToListAsync();
+
+                var missingCourseIds = pathCourseIds.Except(ownedCourseIds).ToList();
+                foreach (var courseId in missingCourseIds)
+                {
+                    _context.UserCourses.Add(new UserCourse
+                    {
+                        UserId = userId.Value,
+                        CourseId = courseId,
+                        PurchasedAt = DateTime.UtcNow
+                    });
+                }
+            }
 
             await _context.SaveChangesAsync();
 
@@ -1170,6 +1196,17 @@ namespace Backend.Controllers
                 courseProgress = await BuildCourseProgressMap(userId.Value, pathCourseIds);
             }
 
+            var ownedPathIds = new HashSet<int>();
+            if (userId.HasValue)
+            {
+                ownedPathIds = await _context.UserPurchases
+                    .Where(up => up.UserId == userId.Value &&
+                                 up.PurchaseType == PurchaseType.LearningPath &&
+                                 up.LearningPathId != null)
+                    .Select(up => up.LearningPathId.Value)
+                    .ToHashSetAsync();
+            }
+
             var result = paths.Select(p =>
             {
             var courses = p.LearningPathCourses
@@ -1223,9 +1260,11 @@ namespace Backend.Controllers
                     p.Title,
                     p.Description,
                     p.Price,
-                    rating = pathRatingStats.TryGetValue(p.Id, out var pathRatings) ? pathRatings.Average : p.Rating,
+                finalPrice = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(p.Price, p.Discount),
+                rating = pathRatingStats.TryGetValue(p.Id, out var pathRatings) ? pathRatings.Average : p.Rating,
                     ratingCount = pathRatingStats.TryGetValue(p.Id, out var pathRatings2) ? pathRatings2.Count : 0,
                     p.Discount,
+                isOwned = ownedPathIds.Contains(p.Id),
                 coursesCount = totalCourses,
                 completedCourses = completedCount,
                 completionPercent,

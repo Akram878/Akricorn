@@ -6,6 +6,10 @@ export interface PublicLearningPath {
   id: number;
   title: string;
   description: string;
+  price: number;
+  finalPrice?: number | null;
+  discount?: number | null;
+  isOwned?: boolean;
   coursesCount: number;
   completedCourses: number;
   completionPercent: number;
@@ -35,5 +39,9 @@ export class PublicLearningPathsService {
 
   getPaths(): Observable<PublicLearningPath[]> {
     return this.http.get<PublicLearningPath[]>(`${this.baseUrl}/paths`);
+  }
+
+  purchasePath(pathId: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/learning-paths/${pathId}/purchase`, {});
   }
 }

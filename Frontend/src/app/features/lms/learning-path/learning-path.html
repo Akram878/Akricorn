@@ -56,7 +56,36 @@
           </div>
 
           <footer class="lms-path-card__footer">
-            <button type="button" class="lms-primary-btn is-disabled" disabled>Buy Path</button>
+            <div class="lms-path-card__price" *ngIf="!p.isOwned">
+              <span class="lms-path-card__price-label">Price</span>
+              <div class="lms-path-card__price-values">
+                <span
+                  class="lms-path-card__price-value"
+                  [class.lms-path-card__price-value--strikethrough]="hasDiscount(p)"
+                >
+                  {{ getBasePrice(p) | number : '1.2-2' }} $
+                </span>
+                <span
+                  class="lms-path-card__price-value lms-path-card__price-value--final"
+                  *ngIf="hasDiscount(p)"
+                >
+                  {{ getFinalPrice(p) | number : '1.2-2' }} $
+                </span>
+              </div>
+              <span class="lms-path-card__price-discount" *ngIf="hasDiscount(p)">
+                Save {{ getDiscountPercent(p) | number : '1.0-0' }}%
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="lms-primary-btn"
+              [class.is-disabled]="p.isOwned"
+              [disabled]="p.isPurchasing || p.isOwned"
+              (click)="onPurchase(p)"
+            >
+              {{ p.isOwned ? 'Owned' : p.isPurchasing ? 'Processing...' : 'Buy Path' }}
+            </button>
           </footer>
         </article>
       </div>
