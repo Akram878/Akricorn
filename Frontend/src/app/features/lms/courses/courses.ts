@@ -60,6 +60,7 @@ export class Courses implements OnInit, OnDestroy {
         this.loadMyCourses();
       } else {
         this.ownedCourseIds.clear();
+        this.applyFilters(this.filterState);
       }
     });
   }
@@ -99,6 +100,7 @@ export class Courses implements OnInit, OnDestroy {
     this.publicCoursesService.getMyCourses().subscribe({
       next: (data: MyCourse[]) => {
         this.ownedCourseIds = new Set(data.map((c) => c.id));
+        this.applyFilters(this.filterState);
       },
       error: () => {
         // نطنش الخطأ هنا، لأن الفلاتر والكورسات تعمل حتى بدون MyCourses
@@ -111,13 +113,17 @@ export class Courses implements OnInit, OnDestroy {
   // ============================
   applyFilters(state: FilterState): void {
     this.filterState = state;
-    this.filteredCourses = applyFilterSet(this.courses, this.filters, state);
+    this.filteredCourses = applyFilterSet(this.getAvailableCourses(), this.filters, state);
   }
 
   // Reset all filters at once
   resetFilters(): void {
     this.filterState = buildFilterState(this.filters);
-    this.filteredCourses = applyFilterSet(this.courses, this.filters, this.filterState);
+    this.filteredCourses = applyFilterSet(
+      this.getAvailableCourses(),
+      this.filters,
+      this.filterState
+    );
   }
 
   // ============================
@@ -133,5 +139,10 @@ export class Courses implements OnInit, OnDestroy {
 
   onCoursePurchased(courseId: number): void {
     this.ownedCourseIds.add(courseId);
+    this.applyFilters(this.filterState);
+  }
+
+  private getAvailableCourses(): PublicCourse[] {
+    return this.courses.filter((course) => !this.ownedCourseIds.has(course.id));
   }
 }
