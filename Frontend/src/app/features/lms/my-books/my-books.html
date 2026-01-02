@@ -54,3 +54,66 @@
     </div>
   </div>
 </div>
+<section class="book-viewer" *ngIf="selectedBook">
+  <div class="book-viewer__backdrop" (click)="closeViewer()"></div>
+  <div class="book-viewer__panel" role="dialog" aria-modal="true">
+    <header class="book-viewer__header">
+      <div>
+        <h3>{{ selectedBook.title }}</h3>
+        <p>عارض الكتاب</p>
+      </div>
+      <div class="book-viewer__actions">
+        <button
+          type="button"
+          class="lms-secondary-btn"
+          (click)="openRatingModal()"
+          [disabled]="!canRateSelectedBook()"
+        >
+          تقييم الكتاب
+        </button>
+        <button type="button" class="lms-secondary-btn" (click)="closeViewer()">إغلاق</button>
+      </div>
+    </header>
+
+    <div class="book-viewer__body">
+      <div class="lms-section__state" *ngIf="isViewerLoading">جارِ تحميل الملف...</div>
+      <iframe
+        *ngIf="!isViewerLoading && selectedBookSafeUrl"
+        [src]="selectedBookSafeUrl"
+        title="Book PDF Viewer"
+      ></iframe>
+    </div>
+  </div>
+</section>
+
+<section class="book-rating" *ngIf="isRatingModalOpen">
+  <div class="book-rating__backdrop" (click)="closeRatingModal()"></div>
+  <div class="book-rating__panel" role="dialog" aria-modal="true">
+    <header class="book-rating__header">
+      <h3>تقييم الكتاب</h3>
+      <p>{{ selectedBook?.title }}</p>
+    </header>
+    <div class="book-rating__stars">
+      <button
+        type="button"
+        class="book-rating__star"
+        *ngFor="let star of ratingStars"
+        (click)="selectRating(star)"
+        [class.is-selected]="star <= ratingValue"
+      >
+        ★
+      </button>
+    </div>
+    <div class="book-rating__actions">
+      <button
+        type="button"
+        class="lms-primary-btn"
+        (click)="submitRating()"
+        [disabled]="isSubmittingRating || ratingValue < 1"
+      >
+        {{ isSubmittingRating ? 'جارِ الإرسال...' : 'إرسال التقييم' }}
+      </button>
+      <button type="button" class="lms-secondary-btn" (click)="closeRatingModal()">إلغاء</button>
+    </div>
+  </div>
+</section>

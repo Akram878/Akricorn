@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
-
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -32,20 +32,32 @@ export class MyBooks implements OnInit, OnDestroy {
   filterState: FilterState = {};
   isLoading = false;
   error: string | null = null;
+  selectedBook: MyBook | null = null;
+  selectedBookSafeUrl: SafeResourceUrl | null = null;
+  isViewerLoading = false;
+  isRatingModalOpen = false;
+  ratingStars = [1, 2, 3, 4, 5];
+  ratingValue = 0;
+  isSubmittingRating = false;
   private activeObjectUrl: string | null = null;
   private downloadSubscription?: Subscription;
   private authSubscription?: Subscription;
+  private viewedBookIds = new Set<number>();
+  private ratedBookIds = new Set<number>();
+  private readonly viewedStorageKey = 'lms_viewed_books';
   constructor(
     private booksService: PublicBooksService,
     private notification: NotificationService,
 
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
     this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
       if (isAuthenticated) {
+        this.restoreViewedBooks();
         this.loadBooks();
       } else {
         this.resetState();
@@ -82,7 +94,8 @@ export class MyBooks implements OnInit, OnDestroy {
   }
 
   openFile(book: MyBook): void {
-    if (!book.fileUrl) {
+    const fileUrl = this.resolveBookFileUrl(book);
+    if (!fileUrl) {
       this.notification.showError('File is not available.');
       return;
     }
@@ -93,14 +106,25 @@ export class MyBooks implements OnInit, OnDestroy {
     }
 
     this.cleanupObjectUrl();
-    const url = resolveMediaUrl(book.fileUrl);
+    this.selectedBook = book;
+    this.selectedBookSafeUrl = null;
+    this.isViewerLoading = true;
+
+    const url = resolveMediaUrl(fileUrl);
     this.downloadSubscription = this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
         this.activeObjectUrl = URL.createObjectURL(blob);
-        window.open(this.activeObjectUrl, '_blank', 'noopener');
+        this.selectedBookSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+          this.activeObjectUrl
+        );
+        this.isViewerLoading = false;
+        this.viewedBookIds.add(book.id);
+        this.persistViewedBooks();
       },
       error: () => {
         this.notification.showError('Failed to load the file.');
+        this.isViewerLoading = false;
+        this.closeViewer();
       },
     });
   }
@@ -123,6 +147,68 @@ export class MyBooks implements OnInit, OnDestroy {
     this.cleanupObjectUrl();
     this.authSubscription?.unsubscribe();
   }
+
+  closeViewer(): void {
+    this.selectedBook = null;
+    this.selectedBookSafeUrl = null;
+    this.isViewerLoading = false;
+    this.isRatingModalOpen = false;
+    this.cleanupObjectUrl();
+  }
+
+  openRatingModal(): void {
+    if (!this.canRateSelectedBook()) {
+      return;
+    }
+
+    this.ratingValue = 0;
+    this.isRatingModalOpen = true;
+  }
+
+  closeRatingModal(): void {
+    this.isRatingModalOpen = false;
+  }
+
+  selectRating(value: number): void {
+    this.ratingValue = value;
+  }
+
+  submitRating(): void {
+    if (!this.selectedBook || this.ratingValue < 1 || this.ratingValue > 5) {
+      this.notification.showError('يرجى اختيار تقييم صالح.');
+      return;
+    }
+
+    if (this.isSubmittingRating) {
+      return;
+    }
+
+    this.isSubmittingRating = true;
+    this.booksService.rateBook(this.selectedBook.id, this.ratingValue).subscribe({
+      next: (response) => {
+        this.notification.showSuccess(response.message);
+        this.ratedBookIds.add(this.selectedBook!.id);
+        this.isSubmittingRating = false;
+        this.isRatingModalOpen = false;
+      },
+      error: (err) => {
+        if (err?.error?.message) {
+          this.notification.showError(err.error.message);
+        } else {
+          this.notification.showError('تعذر إرسال التقييم.');
+        }
+        this.isSubmittingRating = false;
+      },
+    });
+  }
+
+  canRateSelectedBook(): boolean {
+    return Boolean(
+      this.selectedBook &&
+        this.viewedBookIds.has(this.selectedBook.id) &&
+        !this.ratedBookIds.has(this.selectedBook.id)
+    );
+  }
   private cleanupObjectUrl(): void {
     if (this.downloadSubscription) {
       this.downloadSubscription.unsubscribe();
@@ -141,5 +227,44 @@ export class MyBooks implements OnInit, OnDestroy {
     this.filterState = {};
     this.isLoading = false;
     this.error = null;
+    this.selectedBook = null;
+    this.selectedBookSafeUrl = null;
+    this.isViewerLoading = false;
+    this.isRatingModalOpen = false;
+    this.ratingValue = 0;
+    this.isSubmittingRating = false;
+    this.viewedBookIds.clear();
+    this.ratedBookIds.clear();
+    localStorage.removeItem(this.viewedStorageKey);
+  }
+
+  private resolveBookFileUrl(book: MyBook): string | null {
+    if (book.downloadUrl && book.downloadUrl.trim()) {
+      return book.downloadUrl;
+    }
+    if (book.fileUrl && book.fileUrl.trim()) {
+      return book.fileUrl;
+    }
+    return null;
+  }
+
+  private restoreViewedBooks(): void {
+    try {
+      const stored = localStorage.getItem(this.viewedStorageKey);
+      if (!stored) {
+        this.viewedBookIds.clear();
+        return;
+      }
+      const ids = JSON.parse(stored);
+      if (Array.isArray(ids)) {
+        this.viewedBookIds = new Set(ids.filter((id) => typeof id === 'number'));
+      }
+    } catch {
+      this.viewedBookIds.clear();
+    }
+  }
+
+  private persistViewedBooks(): void {
+    localStorage.setItem(this.viewedStorageKey, JSON.stringify(Array.from(this.viewedBookIds)));
   }
 }

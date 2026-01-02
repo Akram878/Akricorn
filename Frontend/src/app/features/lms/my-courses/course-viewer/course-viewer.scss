@@ -441,7 +441,7 @@
   position: fixed;
   inset: 0;
   z-index: 30;
-  padding: 1.4rem;
+
   background: rgba($emerald-900, 0.96);
   border: 1px solid rgba($gold-200, 0.2);
   display: flex;
@@ -713,5 +713,20 @@
   .course-viewer__info-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .course-viewer__info {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .course-viewer__meta {
+    margin-left: 0;
+  }
+
+  .course-viewer__info-header h3 {
+    font-size: 1.4rem;
+    color: #fff4cf;
+    text-align: center;
+    width: 100%;
   }
 }

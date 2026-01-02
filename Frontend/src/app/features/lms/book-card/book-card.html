@@ -82,7 +82,7 @@
   </div>
 
   <footer class="lms-book-card__footer">
-    <div class="lms-book-card__price">
+    <div class="lms-book-card__price" *ngIf="!owned">
       <span class="label">Price</span>
       <span class="value">{{ book.price | number : '1.2-2' }} $</span>
     </div>
@@ -92,11 +92,11 @@
       <button
         type="button"
         class="lms-primary-btn"
-        *ngIf="showBuy"
+        *ngIf="showBuy && !owned"
         (click)="onBuy()"
-        [disabled]="isProcessing || owned"
+        [disabled]="isProcessing"
       >
-        {{ owned ? 'Owned' : isProcessing ? 'Processing...' : 'Buy' }}
+        {{ isProcessing ? 'Processing...' : 'Buy' }}
       </button>
     </div>
   </footer>

@@ -58,11 +58,17 @@ namespace Backend.Controllers
                 if (!user.IsActive)
                     return StatusCode(403, new { message = "Your account has been disabled." });
 
-                var ownsBook = await _context.UserBooks
-                    .AnyAsync(ub => ub.UserId == userContext.UserId && ub.BookId == file.BookId);
+                var userBook = await _context.UserBooks
+                      .FirstOrDefaultAsync(ub => ub.UserId == userContext.UserId && ub.BookId == file.BookId);
 
-                if (!ownsBook)
+                if (userBook == null)
                     return StatusCode(403, new { message = "You do not own this book." });
+
+                if (!userBook.CompletedAt.HasValue)
+                {
+                    userBook.CompletedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                }
             }
 
             var physicalPath = ResolvePhysicalPath(file);

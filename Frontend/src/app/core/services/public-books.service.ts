@@ -19,10 +19,17 @@ export interface MyBook {
   price: number;
   category?: string | null;
   thumbnailUrl?: string | null;
-  fileUrl: string;
+  downloadUrl?: string;
+  fileUrl?: string;
   rating?: number | null;
   grantedAt: string | null;
   isFromCourse: boolean | null;
+}
+
+export interface BookRatingResponse {
+  message: string;
+  averageRating: number;
+  ratingCount: number;
 }
 
 @Injectable({
@@ -46,5 +53,12 @@ export class PublicBooksService {
   // شراء كتاب واحد
   purchaseBook(bookId: number): Observable<any> {
     return this.http.post(`${this.baseUrl}/books/${bookId}/purchase`, {});
+  }
+
+  rateBook(bookId: number, rating: number, comment?: string): Observable<BookRatingResponse> {
+    return this.http.post<BookRatingResponse>(`${API_BASE_URL}/api/ratings/book/${bookId}`, {
+      rating,
+      comment,
+    });
   }
 }

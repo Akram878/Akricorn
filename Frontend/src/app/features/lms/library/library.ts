@@ -101,6 +101,7 @@ export class Library implements OnInit, OnDestroy {
     this.booksService.getMyBooks().subscribe({
       next: (data: MyBook[]) => {
         this.ownedBookIds = new Set(data.map((b) => b.id));
+        this.applyFilters(this.filterState);
       },
       error: () => {
         // في حال المستخدم غير مسجّل أو حصل خطأ 401، نتجاهله
@@ -119,7 +120,9 @@ export class Library implements OnInit, OnDestroy {
 
   applyFilters(state: FilterState): void {
     this.filterState = state;
-    this.filteredBooks = applyFilterSet(this.books, this.filters, state);
+    this.filteredBooks = applyFilterSet(this.books, this.filters, state).filter(
+      (book) => !this.isBookOwned(book)
+    );
   }
 
   // المنطق: شراء / عرض في My Books
@@ -156,6 +159,7 @@ export class Library implements OnInit, OnDestroy {
       next: () => {
         this.notification.showSuccess('Book purchased successfully.');
         this.ownedBookIds.add(book.id);
+        this.applyFilters(this.filterState);
         this.processingBookId = null;
       },
       error: (err) => {
