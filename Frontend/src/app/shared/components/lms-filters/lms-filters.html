@@ -12,7 +12,9 @@
         <h3>Filters</h3>
         <p *ngIf="resultCount !== null">{{ resultCount }} results</p>
       </div>
-      <button type="button" class="lms-filters__close" (click)="closePanel()">✕</button>
+      <button type="button" class="lms-filters__close" (click)="togglePanel()">
+        {{ isOpen ? '✕' : '▼' }}
+      </button>
     </div>
 
     <div class="lms-filters__fields">

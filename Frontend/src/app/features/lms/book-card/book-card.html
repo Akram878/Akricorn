@@ -7,38 +7,35 @@
       <div class="lms-book-card__cover-fallback" aria-hidden="true">
         <svg class="logo__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 134 155">
           <defs>
-            <!-- تدرج ذهبي -->
-            <linearGradient id="goldGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="50%" stop-color="#020f0c" />
-              <stop offset="100%" stop-color="#021813" />
-              <!-- <stop offset="75%" stop-color="#08342a" />
-                    <stop offset="100%" stop-color="rgb(12.08, 78.52, 63.42)" /> -->
+            <!-- تدرج قريب جدا من الخلفية -->
+            <linearGradient id="softInsetGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="hsl(26, 65%, 48%)" />
+              <stop offset="100%" stop-color="hsl(24, 60%, 42%)" />
             </linearGradient>
 
-            <!-- ظل ناعم -->
-            <filter id="goldShadow" x="-10%" y="-10%" width="140%" height="140%">
-              <feDropShadow
-                dx="0"
-                dy="4"
-                stdDeviation="6"
-                flood-color="#000000"
-                flood-opacity="0.65"
-              />
+            <!-- ظل داخلي خفيف جدا -->
+            <filter id="softInset">
+              <feOffset dx="0" dy="1" />
+              <feGaussianBlur stdDeviation="1" result="blur" />
+              <feComposite operator="out" in="SourceGraphic" in2="blur" result="inverse" />
+              <feFlood flood-color="#000" flood-opacity="0.15" />
+              <feComposite operator="in" in2="inverse" />
+              <feComposite operator="over" in2="SourceGraphic" />
             </filter>
           </defs>
 
-          <g fill="url(#goldGradient1)" stroke="" stroke-width="2" filter="">
+          <g fill="url(#softInsetGradient)" filter="url(#softInset)">
             <path
               d="M70.3,114.4c-0.8,23,15.4,37,17.4,38.6c-2.6,0.1-18.5,0.8-30.9-11.6
-         c-9.8-9.8-11.3-21.7-11.6-25.1c-0.1-1.8-0.7-19.2,13.5-30.9
-         c13.3-10.9,28.8-8.1,30.9-7.7C87.4,79.3,71.1,91.9,70.3,114.4z"
+      c-9.8-9.8-11.3-21.7-11.6-25.1c-0.1-1.8-0.7-19.2,13.5-30.9
+      c13.3-10.9,28.8-8.1,30.9-7.7C87.4,79.3,71.1,91.9,70.3,114.4z"
             />
             <path
               d="M132.4,52.5c-15.6-22.6-39.8-34.3-61.9-30c-3.9,0.8-21.4,5-31.9,20.6
-         c-1.7,2.6-6.6,10.1-7.5,20.6c-0.6,7.1,0.8,12.9,1.9,16.9
-         c2.7,10.2,5.9,12.3,7.5,18.8c1.3,5.5,1.4,14-5.6,26.3
-         c-3.5-2.1-27.2-17-31.9-46.9c-3.7-24,6.4-47.7,24.4-61.9
-         C51-1.9,85.2-1.9,108,15C125.2,27.6,130.7,45.7,132.4,52.5z"
+      c-1.7,2.6-6.6,10.1-7.5,20.6c-0.6,7.1,0.8,12.9,1.9,16.9
+      c2.7,10.2,5.9,12.3,7.5,18.8c1.3,5.5,1.4,14-5.6,26.3
+      c-3.5-2.1-27.2-17-31.9-46.9c-3.7-24,6.4-47.7,24.4-61.9
+      C51-1.9,85.2-1.9,108,15C125.2,27.6,130.7,45.7,132.4,52.5z"
             />
           </g>
         </svg>

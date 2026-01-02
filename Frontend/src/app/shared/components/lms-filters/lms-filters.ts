@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterDefinition, FilterState, FilterValue } from './lms-filters.types';
@@ -10,7 +10,7 @@ import { FilterDefinition, FilterState, FilterValue } from './lms-filters.types'
   templateUrl: './lms-filters.html',
   styleUrl: './lms-filters.scss',
 })
-export class LmsFiltersComponent<T> {
+export class LmsFiltersComponent<T> implements OnInit {
   @Input({ required: true }) filters: FilterDefinition<T>[] = [];
   @Input({ required: true }) state: FilterState = {};
   @Input() resultCount: number | null = null;
@@ -19,6 +19,12 @@ export class LmsFiltersComponent<T> {
   @Output() reset = new EventEmitter<void>();
 
   isOpen = false;
+
+  ngOnInit(): void {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 993px)').matches) {
+      this.isOpen = true;
+    }
+  }
 
   togglePanel(): void {
     this.isOpen = !this.isOpen;
