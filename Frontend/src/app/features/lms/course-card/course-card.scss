@@ -62,11 +62,11 @@ $gold-500: #b9822f;
   inset: 0;
 
   border-radius: 0.3rem;
-  border: 1px solid hsl(165, 93%, 11%);
-  background: #041e16;
-  color: $gold-100;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-  padding: 1.25rem 1.35rem;
+  border: 1px solid #e6e8ef;
+  background: #ffffff;
+  // box-shadow: 0 10px 24px rgba(60, 110, 180, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  box-shadow: 20px 8px 20px 7px rgb(229 229 229 / 6%), 10px -18px 15px 20px rgb(252 253 255 / 41%);
+
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
@@ -97,16 +97,23 @@ $gold-500: #b9822f;
 }
 
 .head_card {
-  margin-bottom: 2.5rem;
+  border-top-left-radius: 0.3rem;
+  border-top-right-radius: 0.3rem;
+  background: linear-gradient(
+    180deg,
+    hsl(213deg 78% 68%) 0%,
+    hsl(214deg 72% 60%) 45%,
+    hsl(216deg 65% 52%) 100%
+  );
+  padding: 1rem 1rem 2.5rem 1rem;
   display: flex;
   justify-content: space-between;
   flex-direction: row;
   .lms-course-card__thumb {
     width: 50px;
     height: 50px;
-    border-radius: 0.3rem;
+
     overflow: hidden;
-    // border: 1px solid rgba($gold-400, 0.35);
 
     display: flex;
     align-items: center;
@@ -143,11 +150,12 @@ $gold-500: #b9822f;
 }
 
 .lms-course-card__meta {
+  padding: 0rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   font-size: 0.85rem;
-  color: rgba($gold-200, 0.9);
+  color: #1f2937;
 }
 
 .lms-course-card__meta-item {
@@ -160,15 +168,18 @@ $gold-500: #b9822f;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.65rem;
-  color: rgba($gold-200, 0.7);
+  color: #6b7280;
 }
 
 .lms-course-card__meta-value {
   font-weight: 600;
-  color: $gold-100;
+  color: #1f2937;
   text-align: right;
 }
 .lms-course-card__footer {
+  border-bottom-left-radius: 0.3rem;
+  border-bottom-right-radius: 0.3rem;
+  padding: 0rem 1rem 1rem 1rem;
   display: flex;
   margin-top: auto;
   align-items: center;
@@ -193,44 +204,47 @@ $gold-500: #b9822f;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: rgba($gold-200, 0.7);
+  color: #6b7280;
 }
 
 .lms-course-card__price-value {
   font-size: 1rem;
   font-weight: 700;
-  color: $gold-100;
+  color: #1f2937;
 }
 
 .lms-course-card__price-value--strikethrough {
   text-decoration: line-through;
-  color: rgba($gold-200, 0.7);
+  color: #1f2937;
 }
 
 .lms-course-card__price-value--final {
-  color: $gold-100;
+  color: #1f2937;
 }
 
 .lms-course-card__price-discount {
   font-size: 0.7rem;
-  color: rgba($gold-200, 0.85);
+  color: #6b7280;
 }
 
 .lms-course-card .lms-primary-btn {
   border-radius: 0.3rem;
-  color: hsl(42.67deg 88.24% 80%);
+  color: #ffffff;
   padding: 0.75rem;
-  background: #041e16;
+  background: linear-gradient(
+    180deg,
+    hsl(213deg 78% 68%) 0%,
+    hsl(214deg 72% 60%) 45%,
+    hsl(216deg 65% 52%) 100%
+  );
   cursor: pointer;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   border: none;
-  border: 1px solid #023629;
 
   &:hover:not(:disabled) {
-    border-color: rgba($gold-400, 0.9);
     transform: translateY(-1px);
   }
 }
@@ -240,11 +254,18 @@ $gold-500: #b9822f;
   height: 35px;
 }
 .lms-course-card__description {
+  background: linear-gradient(
+    180deg,
+    hsl(213deg 78% 68%) 0%,
+    hsl(214deg 72% 60%) 45%,
+    hsl(216deg 65% 52%) 100%
+  );
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
-  color: rgba($gold-200, 0.9);
+  color: #1f2937;
   width: 100%;
+  padding: 1rem;
   display: -webkit-box;
   -webkit-line-clamp: 10;
   -webkit-box-orient: vertical;

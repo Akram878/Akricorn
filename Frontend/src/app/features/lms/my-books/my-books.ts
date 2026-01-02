@@ -3,7 +3,8 @@ import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
-import { appendAuthToken, resolveMediaUrl } from '../../../core/utils/media-url';
+import { FileDownloadService } from '../../../core/services/file-download.service';
+import { resolveMediaUrl } from '../../../core/utils/media-url';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { BookCardComponent } from '../book-card/book-card';
@@ -46,7 +47,8 @@ export class MyBooks implements OnInit, OnDestroy {
     private booksService: PublicBooksService,
     private notification: NotificationService,
 
-    private authService: AuthService
+    private authService: AuthService,
+    private fileDownload: FileDownloadService
   ) {}
 
   ngOnInit(): void {
@@ -100,9 +102,9 @@ export class MyBooks implements OnInit, OnDestroy {
       return;
     }
 
-    const token = this.authService.getAccessToken();
-    const url = appendAuthToken(resolveMediaUrl(fileUrl), token);
-    window.open(url, '_blank', 'noopener');
+    const url = resolveMediaUrl(fileUrl);
+    const fallbackName = book.title || 'book';
+    this.fileDownload.download(url, { fileName: fallbackName, openInNewTab: true });
     this.viewedBookIds.add(book.id);
     this.persistViewedBooks();
   }

@@ -20,14 +20,20 @@ $gold-500: #b9822f;
   height: 100%;
 
   .Large_brochure {
-    padding: 5rem 5rem 0 5rem;
-    .Brochure {
+    background-image: url(../../../assets/background/ChatGPT\ Image\ Jan\ 3\,\ 2026\,\ 12_11_56\ AM.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    background-blend-mode: multiply;
+
+    padding: 5rem 5rem 2.5rem 5rem;
+    > .Brochure {
       @include flex(row, space-between, center);
       gap: 2rem;
 
       flex-wrap: wrap;
-      .dis {
-        border-left: 0.2rem solid #d3be80;
+      > .dis {
+        border-left: 0.2rem solid hsl(108deg 36% 44%);
         padding-left: 0.5rem;
         flex-grow: 1;
         // flex-grow: 1;
@@ -55,13 +61,11 @@ $gold-500: #b9822f;
             padding: 0.75rem;
             background: linear-gradient(
               180deg,
-              hsl(45deg 48.78% 67.84%) 0%,
-              hsl(43.33deg 46.96% 54.9%) 40%,
-              #c89445 100%
+              hsl(96deg 38% 62%) 0%,
+              hsl(102deg 34% 52%) 45%,
+              hsl(108deg 36% 44%) 100%
             );
-
             &:hover:not(:disabled) {
-              border-color: rgba($gold-400, 0.9);
               transform: translateY(-1px);
             }
           }
@@ -79,7 +83,7 @@ $gold-500: #b9822f;
     .Brochure {
       flex-grow: 1;
       .dis {
-        border-left: 0.2rem solid #d3be80;
+        border-left: 0.2rem solid hsl(108deg 36% 44%);
         padding-left: 0.5rem;
         .Brochure_text {
           h1 {
@@ -99,12 +103,11 @@ $gold-500: #b9822f;
             padding: 0.75rem;
             background: linear-gradient(
               180deg,
-              hsl(45deg 48.78% 67.84%) 0%,
-              hsl(43.33deg 46.96% 54.9%) 40%,
-              #c89445 100%
+              hsl(96deg 38% 62%) 0%,
+              hsl(102deg 34% 52%) 45%,
+              hsl(108deg 36% 44%) 100%
             );
             &:hover:not(:disabled) {
-              border-color: rgba($gold-400, 0.9);
               transform: translateY(-1px);
             }
           }
@@ -120,19 +123,20 @@ $gold-500: #b9822f;
   width: 30rem;
   height: 20rem;
   position: relative;
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   overflow: hidden;
 
-  // التدرج المخملي الأساسي
-  background: radial-gradient(circle at 0% 0%, lighten($emerald-700, 6%) 0%, transparent 45%),
-    radial-gradient(circle at 100% 100%, $emerald-700 0%, $emerald-900 55%),
-    linear-gradient(135deg, $emerald-900 0%, $emerald-800 40%, $emerald-700 100%);
+  background: radial-gradient(
+      circle at 30% 25%,
+      rgba(255, 220, 150, 0.55) 0%,
+      rgba(255, 220, 150, 0) 55%
+    ),
+    radial-gradient(circle at 75% 80%, rgba(180, 205, 235, 0.45) 0%, rgba(180, 205, 235, 0) 60%),
+    linear-gradient(180deg, #e2ecf8 0%, #d4e0f0 50%, #c5d3e6 100%);
 
-  // إحساس مخملي + عمق
-  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18), inset 0 0 0 1px rgba(217, 167, 74, 0.25);
 
   padding: 1.5rem;
-  backdrop-filter: blur(2px);
 }
 
 .hero-velvet-plate__canvas {
@@ -153,14 +157,16 @@ $gold-500: #b9822f;
   padding: 1.5rem 1.8rem 2.2rem;
 
   &__header {
+    padding-bottom: 1.75rem;
     margin-bottom: 1.75rem;
+    border-bottom: 2px solid #e6e8ef;
   }
 
   &__title {
     font-family: 'Cormorant Garamond Bold', serif;
     font-size: 1.5rem;
     margin: 0 0 0.35rem;
-    color: #f5dca0; // ذهبي ناعم شبيه بالصورة
+    color: #1f2937;
   }
 
   &__subtitle {

@@ -14,7 +14,8 @@ import {
 import { buildToolFilters } from '../filters/lms-filter-config';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { appendAuthToken, resolveMediaUrl } from '../../../core/utils/media-url';
+import { FileDownloadService } from '../../../core/services/file-download.service';
+import { resolveMediaUrl } from '../../../core/utils/media-url';
 
 @Component({
   selector: 'app-lms-tools',
@@ -33,7 +34,8 @@ export class LmsTools implements OnInit {
   constructor(
     private toolsService: PublicToolsService,
     private authService: AuthService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private fileDownload: FileDownloadService
   ) {}
 
   ngOnInit(): void {
@@ -82,9 +84,9 @@ export class LmsTools implements OnInit {
       return;
     }
 
-    const token = this.authService.getAccessToken();
-    const url = appendAuthToken(resolveMediaUrl(tool.downloadUrl), token);
-    window.open(url, '_blank', 'noopener');
+    const url = resolveMediaUrl(tool.downloadUrl);
+    const fallbackName = tool.fileName?.trim() || tool.name || 'tool';
+    this.fileDownload.download(url, { fileName: fallbackName });
   }
 
   applyFilters(state: FilterState): void {

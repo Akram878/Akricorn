@@ -27,8 +27,8 @@
   <!-- GRID NAVIGATION -->
   <section class="lms-grid">
     <!-- Courses -->
-    <a [routerLink]="'/lms/courses'" class="lms-item">
-      <div class="lms-item__icon">
+    <a [routerLink]="'/lms/courses'" class="lms-item course-btn">
+      <div class="course-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="4" y="6" width="16" height="11" rx="2" />
           <path d="M4 10h16" />
@@ -42,8 +42,8 @@
     </a>
 
     <!-- My Courses -->
-    <a [routerLink]="'/lms/my-courses'" class="lms-item">
-      <div class="lms-item__icon">
+    <a [routerLink]="'/lms/my-courses'" class="lms-item course-btn">
+      <div class="course-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M6 5h9a2 2 0 0 1 2 2v11l-3.5-2L10 18l-4-2.5V7a2 2 0 0 1 2-2z" />
         </svg>
@@ -55,8 +55,8 @@
     </a>
 
     <!-- Library -->
-    <a [routerLink]="'/lms/library'" class="lms-item">
-      <div class="lms-item__icon">
+    <a [routerLink]="'/lms/library'" class="lms-item book-btn">
+      <div class="book-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="5" y="4" width="4" height="16" rx="1" />
           <rect x="10" y="4" width="4" height="16" rx="1" />
@@ -70,8 +70,8 @@
     </a>
 
     <!-- My Books -->
-    <a [routerLink]="'/lms/my-books'" class="lms-item">
-      <div class="lms-item__icon">
+    <a [routerLink]="'/lms/my-books'" class="lms-item book-btn">
+      <div class="book-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M6 4h9a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2V4z" />
           <path d="M9 8h5" />
@@ -85,8 +85,8 @@
     </a>
 
     <!-- Tools -->
-    <a [routerLink]="'/lms/tools'" class="lms-item">
-      <div class="lms-item__icon">
+    <a [routerLink]="'/lms/tools'" class="lms-item tools-btn">
+      <div class="tools-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M14.5 4a4 4 0 0 0-3.5 2.1l3.4 3.4A4 4 0 0 0 20 6.9L17 4h-2.5z" />
           <path d="M5 13.5 10.5 8l3.5 3.5L8.5 17a2 2 0 0 1-2.8 0L5 16.3a2 2 0 0 1 0-2.8z" />
@@ -99,8 +99,8 @@
     </a>
 
     <!-- Learning paths -->
-    <a [routerLink]="'/lms/learning-path'" class="lms-item">
-      <div class="lms-item__icon">
+    <a [routerLink]="'/lms/learning-path'" class="lms-item path-btn">
+      <div class="path-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="6" cy="6" r="2" />
           <circle cx="18" cy="9" r="2" />
@@ -116,8 +116,8 @@
     </a>
 
     <!-- My LMS -->
-    <div class="lms-item lms-item--disabled" aria-disabled="true">
-      <div class="lms-item__icon">
+    <div class="lms-item lms-btn">
+      <div class="lms-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="8" r="3" />
           <path d="M6 18a6 6 0 0 1 12 0" />
@@ -130,8 +130,8 @@
     </div>
 
     <!-- LMSes -->
-    <div class="lms-item lms-item--disabled" aria-disabled="true">
-      <div class="lms-item__icon">
+    <div class="lms-item lms-btn">
+      <div class="lms-btn lms-item__icon">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="12" r="7" />
           <path d="M12 9v6" />

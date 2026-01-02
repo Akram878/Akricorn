@@ -11,6 +11,62 @@ $gold-300: #f0cb7a;
 $gold-400: #d9a74a;
 $gold-500: #b9822f;
 
+.course-btn {
+  background: linear-gradient(180deg, hsl(213deg 78% 68%) 0%, hsl(216deg 65% 52%) 100%);
+
+  &:hover .course-btn svg * {
+    stroke: hsl(216deg 65% 52%);
+  }
+
+  svg {
+    stroke: hsl(213deg 95% 77%);
+  }
+}
+.tools-btn {
+  background: linear-gradient(180deg, hsl(258deg 55% 68%) 0%, hsl(262deg 50% 56%) 100%);
+
+  &:hover .tools-btn svg * {
+    stroke: hsl(262deg 50% 56%);
+  }
+  svg {
+    stroke: hsl(259, 95%, 77%);
+  }
+}
+.path-btn {
+  background: linear-gradient(180deg, hsl(190deg 55% 60%) 0%, hsl(195deg 50% 48%) 100%);
+
+  &:hover .path-btn svg * {
+    stroke: hsl(195deg 50% 48%);
+  }
+  svg {
+    stroke: hsl(190deg 95% 77%);
+  }
+}
+.book-btn {
+  background: linear-gradient(180deg, hsl(28deg 90% 62%) 0%, hsl(24deg 85% 52%) 100%);
+
+  &:hover .book-btn svg * {
+    stroke: hsl(24deg 85% 52%);
+  }
+  svg {
+    stroke: hsl(28deg 95% 77%);
+  }
+}
+.lms-btn {
+  background: linear-gradient(
+    180deg,
+    hsl(104deg 32% 58%) 0%,
+    hsl(108deg 28% 48%) 55%,
+    hsl(112deg 30% 40%) 100%
+  );
+  &:hover .lms-btn svg * {
+    stroke: hsl(112deg 30% 40%);
+  }
+  svg {
+    stroke: hsl(104deg 95% 77%);
+  }
+}
+
 .Lms {
   width: 100%;
 
@@ -38,7 +94,7 @@ $gold-500: #b9822f;
   gap: 1.5rem;
   flex-wrap: wrap;
   padding-bottom: 1.6rem;
-  border-bottom: 1px solid rgba($gold-300, 0.25);
+  border-bottom: 1px solid #e6e8ef;
 
   @media (max-width: 800px) {
     align-items: flex-start;
@@ -56,7 +112,7 @@ $gold-500: #b9822f;
 
   font-size: 2.4rem;
 
-  color: #d3be80;
+  color: #111827;
 
   @media (max-width: 600px) {
     font-size: 2rem;
@@ -87,21 +143,21 @@ $gold-500: #b9822f;
   @include flex(column, center, center);
   padding: 0.75rem;
   border-radius: 0.3rem;
-  background: rgba(2, 20, 15, 0.9);
-  border: 1px solid rgba($gold-300, 0.4);
+  background: #f0eaea;
+  border: 1px solid #e6e8ef;
 }
 
 .lms-stat__label {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba($gold-200, 0.8);
+  color: #6b7280;
 }
 
 .lms-stat__value {
   font-size: 1rem;
   font-weight: 600;
-  color: $gold-100;
+  color: #1f2937;
 }
 
 /* ================= GRID ================= */
@@ -123,41 +179,27 @@ $gold-500: #b9822f;
   padding: 1.5rem;
   border-radius: 0.3rem;
   text-decoration: none;
-  background-color: #041e16;
-  border: 1px solid hsl(165, 93%, 11%);
+  // background-color: #041e16;
+  // border: 1px solid hsl(165, 93%, 11%);
 
-  color: $gold-100;
+  color: #ffffff;
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease,
     background 0.16s ease;
 
   &:hover {
     transform: translateY(-2px);
-    border-color: rgba($gold-300, 0.8);
   }
 
   &:active {
     transform: translateY(1px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.9);
-  }
-
-  /* تأثير على الأيقونة المنقوشة أثناء الهوفر/الضغط */
-  &:hover .lms-item__icon {
-  }
-
-  &:hover .lms-item__icon svg * {
-    stroke: $gold-300;
-  }
-
-  &:active .lms-item__icon svg * {
-    stroke: $gold-100;
   }
 }
 
-.lms-item--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
+// .lms-item--disabled {
+//   opacity: 0.5;
+//   cursor: not-allowed;
+//   pointer-events: none;
+// }
 
 /* الأيقونة المنقوشة */
 
@@ -176,7 +218,7 @@ $gold-500: #b9822f;
 
   svg * {
     fill: transparent;
-    stroke: rgba($gold-200, 0.4);
+
     stroke-width: 1.5;
     stroke-linecap: round;
     stroke-linejoin: round;

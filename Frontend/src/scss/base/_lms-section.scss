@@ -30,22 +30,21 @@ $gold-400: #d9a74a;
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: rgba($gold-200, 0.7);
+  color: #6b7280;
 
   span {
     opacity: 0.7;
   }
 
   .active {
-    opacity: 1;
-    color: $gold-100;
+    color: #6b7280;
   }
 }
 
 .lms-section__header h2 {
   font-size: 1.6rem;
   font-weight: 700;
-  color: $gold-100;
+  color: #1f2937;
   margin: 0;
 }
 
@@ -53,7 +52,7 @@ $gold-400: #d9a74a;
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.6;
-  color: rgba($gold-200, 0.85);
+  color: #6b7280;
 }
 
 .lms-section__body {

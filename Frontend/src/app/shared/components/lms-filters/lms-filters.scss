@@ -19,9 +19,9 @@ $gold-400: #d9a74a;
   gap: 0.5rem;
   padding: 0.55rem 0.9rem;
   border-radius: 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: $emerald-800;
-  color: $gold-100;
+  border: none;
+  background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
+  color: #ffffff;
   font-size: 0.88rem;
   cursor: pointer;
 }
@@ -39,7 +39,7 @@ $gold-400: #d9a74a;
 }
 
 .lms-filters__panel {
-  background: rgba(2, 15, 12, 0.8);
+  background: #e6e8ef;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.3rem;
   padding: 1.2rem;
@@ -58,20 +58,20 @@ $gold-400: #d9a74a;
   h3 {
     margin: 0;
     font-size: 1rem;
-    color: $gold-100;
+    color: #6b7280;
   }
 
   p {
     margin: 0.25rem 0 0;
     font-size: 0.78rem;
-    color: rgba($gold-200, 0.75);
+    color: #6b7280;
   }
 }
 
 .lms-filters__close {
   background: transparent;
   border: none;
-  color: rgba($gold-200, 0.75);
+  color: #6b7280;
   cursor: pointer;
   font-size: 1rem;
 }
@@ -87,14 +87,9 @@ $gold-400: #d9a74a;
   outline: none;
   margin: 1rem 0;
   border-radius: 0.3rem;
-  color: hsl(168, 78.95%, 3.73%);
+  color: #f6f7fb;
   padding: 0.75rem;
-  background: linear-gradient(
-    180deg,
-    hsl(45, 48.78%, 67.84%) 0%,
-    hsl(43.33, 46.96%, 54.9%) 40%,
-    #c89445 100%
-  );
+  background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
 
   &:hover {
     cursor: pointer;
@@ -111,7 +106,7 @@ $gold-400: #d9a74a;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: rgba($gold-200, 0.75);
+  color: #6b7280;
 }
 
 .lms-filters__input,
@@ -120,18 +115,17 @@ $gold-400: #d9a74a;
   padding: 0.45rem 0.6rem;
   border-radius: 0.5rem;
   border: 1px solid rgba(0, 0, 0, 0.5);
-  background: $emerald-900;
-  color: $gold-100;
+  background: #f6f7fb;
+  color: #1f2937;
   font-size: 0.82rem;
   outline: none;
 
   &:focus {
-    border-color: rgba($gold-400, 0.85);
-    box-shadow: 0 0 0 1px rgba($gold-400, 0.35);
+    border-color: #1f2937;
   }
 
   &::placeholder {
-    color: rgba($gold-200, 0.5);
+    color: #6b7280;
   }
 }
 
@@ -152,7 +146,7 @@ $gold-400: #d9a74a;
 }
 
 .lms-filters__dash {
-  color: rgba($gold-200, 0.6);
+  color: #6b7280;
   font-size: 0.85rem;
 }
 
@@ -242,7 +236,7 @@ $gold-400: #d9a74a;
   .lms-filters__backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(2, 15, 12, 0.55);
+
     backdrop-filter: blur(2px);
     display: block;
     z-index: 40;

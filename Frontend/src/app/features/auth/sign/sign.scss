@@ -1,22 +1,17 @@
 @use '../../../../scss/base/mixins' as *;
 
-$emerald-900: #020f0c;
-$emerald-800: #021813;
-
-$gold-100: #fff4cf;
-$gold-200: #f9e0a2;
-$gold-300: #f0cb7a;
-$gold-400: #d9a74a;
-$gold-500: #b9822f;
-
-.sign-wrapper {
-  width: 100%;
-}
+// .sign-wrapper {
+//   width: 100%;
+//   height: 100%;
+// }
 
 .sign {
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
   gap: 0.3rem;
+  flex-shrink: 1;
 
   &::before {
     content: 'Create your account';
@@ -25,20 +20,22 @@ $gold-500: #b9822f;
 
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: $gold-200;
+
     opacity: 0.9;
   }
 }
 
 /* صفين جنب بعض */
 .field-row {
-  @include flex(row, space-between, flex-start);
+  // height: calc(100% / 6);
+  @include flex(row, center, flex-start);
   gap: 0.3rem;
   flex-wrap: nowrap;
+  width: 80%;
 }
 .field-row.phone-row {
   .country-field {
-    // flex: 0 0 20%;
+    flex: 0 0 20%;
     // min-width: 6.5rem;
   }
 
@@ -49,6 +46,8 @@ $gold-500: #b9822f;
 
 /* الحقول العامة */
 .field {
+  height: calc(100% / 6);
+  width: 80%;
   position: relative;
   flex-grow: 1;
 
@@ -64,25 +63,17 @@ $gold-500: #b9822f;
   select {
     width: 100%;
     border-radius: 0.3rem;
-    border: 1px solid rgba(185, 130, 47, 0.3);
+    border: 1px solid #e6e8ef;
     padding: 0.75rem;
 
-    background: rgba($emerald-900, 0.96);
-    color: $gold-100;
-
+    background: linear-gradient(180deg, #ffffff 0%, #fff8e6 55%, #f6f7fb 100%);
+    color: #6b7280;
     outline: none;
 
     transition: border 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
       transform 0.08s ease;
 
-    &::placeholder {
-      color: rgba($gold-200, 0.55);
-    }
-
     &:focus {
-      border-color: $gold-400;
-      background: rgba($emerald-800, 0.98);
-      box-shadow: 0 0 0 1px rgba($gold-300, 0.35), 0 18px 36px rgba(0, 0, 0, 0.9);
       transform: translateY(-1px);
     }
   }
@@ -90,8 +81,7 @@ $gold-500: #b9822f;
   select {
     appearance: none;
     cursor: pointer;
-    background-image: linear-gradient(45deg, transparent 50%, $gold-300 50%),
-      linear-gradient(135deg, $gold-300 50%, transparent 50%);
+
     background-position: calc(100% - 16px) calc(50% - 3px), calc(100% - 11px) calc(50% - 3px);
     background-size: 7px 7px, 7px 7px;
     background-repeat: no-repeat;
@@ -133,8 +123,6 @@ $gold-500: #b9822f;
       border-radius: 0.65rem;
 
       background: rgba(5, 19, 17, 0.98);
-      border: 1px solid rgba($gold-500, 0.18);
-      color: $gold-100;
 
       line-height: 1.4;
 
@@ -172,8 +160,6 @@ $gold-500: #b9822f;
     @include flex(row, flex-start, center);
     gap: 0.3rem;
 
-    color: rgba($gold-100, 0.8);
-
     /* رفع النص قليلاً ليوازي منتصف الـ checkbox */
     label,
     span,
@@ -182,16 +168,24 @@ $gold-500: #b9822f;
       top: -1px; // عدّلها لـ -2px لو حاب ترفعه أكثر شوي
     }
 
+    label {
+      font-size: x-small;
+      width: fit-content;
+      margin: 0;
+    }
+
     .policy-link {
+      color: #c8942e;
+      // background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
+      font-size: x-small;
       border: none;
       background: none;
       padding: 0;
-      color: $gold-300;
+
       text-decoration: underline;
       text-decoration-style: dotted;
       cursor: pointer;
       &:hover {
-        color: $gold-100;
       }
     }
   }
@@ -200,7 +194,7 @@ $gold-500: #b9822f;
     width: 1rem;
     height: 1rem;
     border-radius: 0.35rem;
-    accent-color: $gold-400;
+
     cursor: pointer;
   }
   .checkbox.checkbox-invalid {
@@ -215,9 +209,10 @@ $gold-500: #b9822f;
 
 /* الأزرار أسفل فورم التسجيل */
 .buttonContainer {
+  width: 80%;
   margin-top: 0.4rem;
   @include flex(row, space-between, center);
-  gap: 1rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   font-size: small;
 
@@ -258,11 +253,10 @@ $gold-500: #b9822f;
   position: relative;
   max-width: 540px;
   margin: 6vh auto;
-  background: rgba($emerald-900, 0.98);
-  border: 1px solid rgba($gold-500, 0.4);
+
   border-radius: 0.8rem;
   padding: 1.2rem 1.4rem 1.4rem;
-  color: $gold-100;
+
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
   z-index: 1000;
 }
@@ -277,7 +271,6 @@ $gold-500: #b9822f;
     font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: $gold-200;
   }
 }
 
@@ -285,14 +278,13 @@ $gold-500: #b9822f;
   align-self: flex-start;
   border: none;
   background: none;
-  color: $gold-300;
+
   cursor: pointer;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 
   &:hover {
-    color: $gold-100;
     text-decoration: underline;
   }
 }
@@ -300,7 +292,7 @@ $gold-500: #b9822f;
 .privacy-content {
   line-height: 1.6;
   font-size: 0.9rem;
-  color: rgba($gold-100, 0.9);
+
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -320,20 +312,13 @@ $gold-500: #b9822f;
   border-radius: 0.3rem;
   padding: 0.75rem;
   border: none;
-  color: hsl(168, 78.95%, 3.73%);
-  background: linear-gradient(
-    180deg,
-    hsl(45, 48.78%, 67.84%) 0%,
-    hsl(43.33, 46.96%, 54.9%) 40%,
-    #c89445 100%
-  );
+
+  background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
 
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, opacity 0.15s ease;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
-    filter: brightness(1.03);
   }
 
   &:active:not(:disabled) {
@@ -357,14 +342,12 @@ $gold-500: #b9822f;
   background: none;
   padding: 0;
 
-  color: rgba($gold-200, 0.82);
   text-decoration: none;
   cursor: pointer;
 
   transition: color 0.16s ease, text-shadow 0.16s ease;
 
   &:hover {
-    color: $gold-100;
     text-shadow: 0 0 14px rgba(0, 0, 0, 0.9);
     text-decoration: underline;
     text-decoration-style: dotted;
