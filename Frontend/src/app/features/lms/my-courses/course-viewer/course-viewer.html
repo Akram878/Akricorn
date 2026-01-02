@@ -15,31 +15,67 @@
 
     <ng-container *ngIf="!isLoading && !error && course">
       <div class="course-viewer__hero">
-        <div class="course-viewer__thumb" aria-hidden="true">
-          <img
-            *ngIf="courseThumbnailUrl"
-            [src]="courseThumbnailUrl"
-            [alt]="course.title"
-            loading="lazy"
-          />
-          <div class="course-viewer__thumb-placeholder" *ngIf="!courseThumbnailUrl">🎓</div>
-        </div>
-
         <div class="course-viewer__info">
-          <div class="course-viewer__info-header">
-            <div>
-              <span class="course-viewer__badge" *ngIf="course.completedAt">مكتمل</span>
-              <span
-                class="course-viewer__badge course-viewer__badge--active"
-                *ngIf="!course.completedAt"
-              >
-                قيد الدراسة
-              </span>
-              <h3>{{ course.title }}</h3>
+          <div class="course-viewer__thumb" aria-hidden="true">
+            <img
+              *ngIf="courseThumbnailUrl"
+              [src]="courseThumbnailUrl"
+              [alt]="course.title"
+              loading="lazy"
+            />
+            <div class="course-viewer__thumb-placeholder" *ngIf="!courseThumbnailUrl">
+              <svg class="logo__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 134 155">
+                <defs>
+                  <!-- تدرج ذهبي -->
+                  <linearGradient id="goldGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="50%" stop-color="#020f0c" />
+                    <stop offset="100%" stop-color="#021813" />
+                    <!-- <stop offset="75%" stop-color="#08342a" />
+                    <stop offset="100%" stop-color="rgb(12.08, 78.52, 63.42)" /> -->
+                  </linearGradient>
+
+                  <!-- ظل ناعم -->
+                  <filter id="goldShadow" x="-10%" y="-10%" width="140%" height="140%">
+                    <feDropShadow
+                      dx="0"
+                      dy="4"
+                      stdDeviation="6"
+                      flood-color="#000000"
+                      flood-opacity="0.65"
+                    />
+                  </filter>
+                </defs>
+
+                <g fill="url(#goldGradient1)" stroke="" stroke-width="2" filter="">
+                  <path
+                    d="M70.3,114.4c-0.8,23,15.4,37,17.4,38.6c-2.6,0.1-18.5,0.8-30.9-11.6
+         c-9.8-9.8-11.3-21.7-11.6-25.1c-0.1-1.8-0.7-19.2,13.5-30.9
+         c13.3-10.9,28.8-8.1,30.9-7.7C87.4,79.3,71.1,91.9,70.3,114.4z"
+                  />
+                  <path
+                    d="M132.4,52.5c-15.6-22.6-39.8-34.3-61.9-30c-3.9,0.8-21.4,5-31.9,20.6
+         c-1.7,2.6-6.6,10.1-7.5,20.6c-0.6,7.1,0.8,12.9,1.9,16.9
+         c2.7,10.2,5.9,12.3,7.5,18.8c1.3,5.5,1.4,14-5.6,26.3
+         c-3.5-2.1-27.2-17-31.9-46.9c-3.7-24,6.4-47.7,24.4-61.9
+         C51-1.9,85.2-1.9,108,15C125.2,27.6,130.7,45.7,132.4,52.5z"
+                  />
+                </g>
+              </svg>
             </div>
           </div>
 
-          <p class="course-viewer__description">{{ course.description }}</p>
+          <div class="course-viewer__info-header">
+            <h3>{{ course.title }}</h3>
+            <p class="course-viewer__description">{{ course.description }}</p>
+          </div>
+
+          <span class="course-viewer__badge" *ngIf="course.completedAt">مكتمل</span>
+          <span
+            class="course-viewer__badge course-viewer__badge--active"
+            *ngIf="!course.completedAt"
+          >
+            قيد الدراسة
+          </span>
 
           <div class="course-viewer__meta">
             <div class="course-viewer__meta-item" *ngIf="course.category">
@@ -60,14 +96,6 @@
             <div class="course-viewer__meta-item">
               <span>الأقسام</span>
               <strong>{{ course.sections?.length || 0 }}</strong>
-            </div>
-          </div>
-
-          <div class="course-viewer__paths" *ngIf="hasLearningPaths">
-            <h4>تقدم المسارات</h4>
-            <div class="course-viewer__path" *ngFor="let path of course.learningPaths">
-              <span>{{ path.learningPathTitle }}</span>
-              <span class="course-viewer__path-progress">{{ formatPathProgress(path) }}</span>
             </div>
           </div>
         </div>

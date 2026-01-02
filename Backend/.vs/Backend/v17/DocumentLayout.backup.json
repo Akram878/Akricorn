@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "D:\\Akricorn\\Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\lmscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\lmscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -53,10 +57,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\lmscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|solutionrelative:controllers\\lmscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E83DC8B8-1D08-4DF8-8509-58B159913C76}|Backend.csproj|d:\\akricorn\\backend\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -262,7 +262,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "PaymentsController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\PaymentsController.cs",
               "RelativeDocumentMoniker": "Controllers\\PaymentsController.cs",
@@ -275,19 +275,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "AdminLearningPathsController.cs",
-              "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminLearningPathsController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AdminLearningPathsController.cs",
-              "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AdminLearningPathsController.cs",
-              "RelativeToolTip": "Controllers\\AdminLearningPathsController.cs",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAowEkAAABQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-30T08:58:54.619Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "AdminToolsController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminToolsController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminToolsController.cs",
@@ -299,7 +287,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "AdminBooksController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminBooksController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminBooksController.cs",
@@ -311,20 +299,49 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "AuthController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AuthController.cs",
               "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAAI0BAAAAAAAAAAAqwKMBAAAhAAAAAAAAAA==",
+              "ViewState": "AgIAAFUBAAAAAAAAAAAiwKMBAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-06T05:51:11.127Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "LmsController.cs",
+              "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\LmsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\LmsController.cs",
+              "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\LmsController.cs",
+              "RelativeToolTip": "Controllers\\LmsController.cs",
+              "ViewState": "AgIAAJ4CAAAAAAAAAAAmwK8CAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T07:07:55.314Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 4,
+              "Title": "AdminLearningPathsController.cs",
+              "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminLearningPathsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AdminLearningPathsController.cs",
+              "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\AdminLearningPathsController.cs",
+              "RelativeToolTip": "Controllers\\AdminLearningPathsController.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAowEkAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-30T08:58:54.619Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "AdminCoursesController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminCoursesController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminCoursesController.cs",
@@ -336,7 +353,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "AdminCourseContentController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminCourseContentController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminCourseContentController.cs",
@@ -348,7 +365,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "LearningPathStorageHelper.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Helpers\\LearningPathStorageHelper.cs",
               "RelativeDocumentMoniker": "Helpers\\LearningPathStorageHelper.cs",
@@ -372,7 +389,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "AdminDashboardController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminDashboardController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminDashboardController.cs",
@@ -384,7 +401,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "AdminUsersController.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\AdminUsersController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminUsersController.cs",
@@ -396,7 +413,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "User.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Models\\User.cs",
               "RelativeDocumentMoniker": "Models\\User.cs",
@@ -408,7 +425,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "AppDbContext.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Data\\AppDbContext.cs",
               "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
@@ -420,7 +437,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "PricingHelper.cs",
               "DocumentMoniker": "D:\\Akricorn\\Backend\\Helpers\\PricingHelper.cs",
               "RelativeDocumentMoniker": "Helpers\\PricingHelper.cs",
@@ -441,18 +458,6 @@
               "ViewState": "AgIAABYAAAAAAAAAAAAgwG8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-25T13:38:20.277Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "LmsController.cs",
-              "DocumentMoniker": "D:\\Akricorn\\Backend\\Controllers\\LmsController.cs",
-              "RelativeDocumentMoniker": "Controllers\\LmsController.cs",
-              "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\LmsController.cs",
-              "RelativeToolTip": "Controllers\\LmsController.cs",
-              "ViewState": "AgIAAMgCAAAAAAAAAAAmwN0CAAAzAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T07:07:55.314Z"
             },
             {
               "$type": "Document",
@@ -1004,10 +1009,6 @@
               "RelativeToolTip": "Backend.csproj",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-11-14T15:44:47.174Z"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }
