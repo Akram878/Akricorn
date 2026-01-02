@@ -20,10 +20,11 @@ export class BookCardComponent {
   @Input() owned = false;
   @Input() isProcessing = false;
   @Input() showBuy = true;
-
+  @Input() showRate = false;
+  @Input() rateDisabled = false;
   @Output() view = new EventEmitter<void>();
   @Output() buy = new EventEmitter<void>();
-
+  @Output() rate = new EventEmitter<void>();
   isExpanded = false;
 
   toggleDescription(): void {
@@ -57,6 +58,12 @@ export class BookCardComponent {
     this.view.emit();
   }
 
+  onRate(): void {
+    if (this.rateDisabled) {
+      return;
+    }
+    this.rate.emit();
+  }
   onBuy(): void {
     if (this.isProcessing) {
       return;

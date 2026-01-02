@@ -43,7 +43,10 @@
             [book]="b"
             [owned]="true"
             [showBuy]="false"
+            [showRate]="hasViewedBook(b)"
+            [rateDisabled]="!canRateBook(b)"
             (view)="openFile(b)"
+            (rate)="openRatingModal(b)"
           ></app-book-card>
         </div>
       </ng-container>
@@ -54,37 +57,6 @@
     </div>
   </div>
 </div>
-<section class="book-viewer" *ngIf="selectedBook">
-  <div class="book-viewer__backdrop" (click)="closeViewer()"></div>
-  <div class="book-viewer__panel" role="dialog" aria-modal="true">
-    <header class="book-viewer__header">
-      <div>
-        <h3>{{ selectedBook.title }}</h3>
-        <p>عارض الكتاب</p>
-      </div>
-      <div class="book-viewer__actions">
-        <button
-          type="button"
-          class="lms-secondary-btn"
-          (click)="openRatingModal()"
-          [disabled]="!canRateSelectedBook()"
-        >
-          تقييم الكتاب
-        </button>
-        <button type="button" class="lms-secondary-btn" (click)="closeViewer()">إغلاق</button>
-      </div>
-    </header>
-
-    <div class="book-viewer__body">
-      <div class="lms-section__state" *ngIf="isViewerLoading">جارِ تحميل الملف...</div>
-      <iframe
-        *ngIf="!isViewerLoading && selectedBookSafeUrl"
-        [src]="selectedBookSafeUrl"
-        title="Book PDF Viewer"
-      ></iframe>
-    </div>
-  </div>
-</section>
 
 <section class="book-rating" *ngIf="isRatingModalOpen">
   <div class="book-rating__backdrop" (click)="closeRatingModal()"></div>
@@ -104,16 +76,23 @@
         ★
       </button>
     </div>
+    <button
+      type="button"
+      class="book-rating__submit"
+      (click)="submitRating()"
+      [disabled]="isSubmittingRating || ratingValue < 1"
+    >
+      {{ isSubmittingRating ? 'جارِ الإرسال...' : 'إرسال التقييم' }}
+    </button>
     <div class="book-rating__actions">
       <button
         type="button"
-        class="lms-primary-btn"
-        (click)="submitRating()"
-        [disabled]="isSubmittingRating || ratingValue < 1"
+        class="lms-secondary-btn"
+        (click)="closeRatingModal()"
+        [disabled]="isSubmittingRating"
       >
-        {{ isSubmittingRating ? 'جارِ الإرسال...' : 'إرسال التقييم' }}
+        إلغاء
       </button>
-      <button type="button" class="lms-secondary-btn" (click)="closeRatingModal()">إلغاء</button>
     </div>
   </div>
 </section>

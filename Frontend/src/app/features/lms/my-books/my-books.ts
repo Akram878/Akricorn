@@ -2,9 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
 import { resolveMediaUrl } from '../../../core/utils/media-url';
-import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { BookCardComponent } from '../book-card/book-card';
@@ -33,14 +32,12 @@ export class MyBooks implements OnInit, OnDestroy {
   isLoading = false;
   error: string | null = null;
   selectedBook: MyBook | null = null;
-  selectedBookSafeUrl: SafeResourceUrl | null = null;
-  isViewerLoading = false;
+
   isRatingModalOpen = false;
   ratingStars = [1, 2, 3, 4, 5];
   ratingValue = 0;
   isSubmittingRating = false;
-  private activeObjectUrl: string | null = null;
-  private downloadSubscription?: Subscription;
+
   private authSubscription?: Subscription;
   private viewedBookIds = new Set<number>();
   private ratedBookIds = new Set<number>();
@@ -49,9 +46,7 @@ export class MyBooks implements OnInit, OnDestroy {
     private booksService: PublicBooksService,
     private notification: NotificationService,
 
-    private http: HttpClient,
-    private authService: AuthService,
-    private sanitizer: DomSanitizer
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -105,28 +100,14 @@ export class MyBooks implements OnInit, OnDestroy {
       return;
     }
 
-    this.cleanupObjectUrl();
-    this.selectedBook = book;
-    this.selectedBookSafeUrl = null;
-    this.isViewerLoading = true;
-
     const url = resolveMediaUrl(fileUrl);
-    this.downloadSubscription = this.http.get(url, { responseType: 'blob' }).subscribe({
-      next: (blob) => {
-        this.activeObjectUrl = URL.createObjectURL(blob);
-        this.selectedBookSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-          this.activeObjectUrl
-        );
-        this.isViewerLoading = false;
-        this.viewedBookIds.add(book.id);
-        this.persistViewedBooks();
-      },
-      error: () => {
-        this.notification.showError('Failed to load the file.');
-        this.isViewerLoading = false;
-        this.closeViewer();
-      },
-    });
+    const opened = window.open(url, '_blank', 'noopener');
+    if (!opened) {
+      this.notification.showError('تعذر فتح الملف في تبويب جديد.');
+      return;
+    }
+    this.viewedBookIds.add(book.id);
+    this.persistViewedBooks();
   }
 
   trackByBookId(index: number, book: MyBook): number {
@@ -144,29 +125,22 @@ export class MyBooks implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.cleanupObjectUrl();
     this.authSubscription?.unsubscribe();
   }
 
-  closeViewer(): void {
-    this.selectedBook = null;
-    this.selectedBookSafeUrl = null;
-    this.isViewerLoading = false;
-    this.isRatingModalOpen = false;
-    this.cleanupObjectUrl();
-  }
-
-  openRatingModal(): void {
-    if (!this.canRateSelectedBook()) {
+  openRatingModal(book: MyBook): void {
+    if (!this.canRateBook(book)) {
       return;
     }
 
+    this.selectedBook = book;
     this.ratingValue = 0;
     this.isRatingModalOpen = true;
   }
 
   closeRatingModal(): void {
     this.isRatingModalOpen = false;
+    this.selectedBook = null;
   }
 
   selectRating(value: number): void {
@@ -190,6 +164,7 @@ export class MyBooks implements OnInit, OnDestroy {
         this.ratedBookIds.add(this.selectedBook!.id);
         this.isSubmittingRating = false;
         this.isRatingModalOpen = false;
+        this.selectedBook = null;
       },
       error: (err) => {
         if (err?.error?.message) {
@@ -202,25 +177,13 @@ export class MyBooks implements OnInit, OnDestroy {
     });
   }
 
-  canRateSelectedBook(): boolean {
-    return Boolean(
-      this.selectedBook &&
-        this.viewedBookIds.has(this.selectedBook.id) &&
-        !this.ratedBookIds.has(this.selectedBook.id)
-    );
+  canRateBook(book: MyBook): boolean {
+    return Boolean(this.viewedBookIds.has(book.id) && !this.ratedBookIds.has(book.id));
   }
-  private cleanupObjectUrl(): void {
-    if (this.downloadSubscription) {
-      this.downloadSubscription.unsubscribe();
-      this.downloadSubscription = undefined;
-    }
-    if (this.activeObjectUrl) {
-      URL.revokeObjectURL(this.activeObjectUrl);
-      this.activeObjectUrl = null;
-    }
+  hasViewedBook(book: MyBook): boolean {
+    return this.viewedBookIds.has(book.id);
   }
   private resetState(): void {
-    this.cleanupObjectUrl();
     this.myBooks = [];
     this.filteredBooks = [];
     this.filters = [];
@@ -228,8 +191,7 @@ export class MyBooks implements OnInit, OnDestroy {
     this.isLoading = false;
     this.error = null;
     this.selectedBook = null;
-    this.selectedBookSafeUrl = null;
-    this.isViewerLoading = false;
+
     this.isRatingModalOpen = false;
     this.ratingValue = 0;
     this.isSubmittingRating = false;

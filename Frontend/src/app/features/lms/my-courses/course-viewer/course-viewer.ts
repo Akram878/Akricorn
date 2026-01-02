@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import {
@@ -13,18 +12,6 @@ import {
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { resolveMediaUrl } from '../../../../core/utils/media-url';
-type ViewerType = 'video' | 'pdf' | 'image' | 'audio' | 'embed' | 'download';
-
-interface SelectedLessonFile {
-  id: number;
-  name: string;
-  url: string;
-  displayUrl: string;
-  safeUrl: SafeResourceUrl | null;
-  type: ViewerType;
-  lessonTitle: string;
-  sectionTitle: string;
-}
 
 @Component({
   selector: 'app-course-viewer',
@@ -37,28 +24,22 @@ export class CourseViewer implements OnInit, OnDestroy {
   courseId!: number;
   course: MyCourseDetail | null = null;
 
-  selectedFile: SelectedLessonFile | null = null;
   courseThumbnailUrl: string | null = null;
   isLoading = false;
   error: string | null = null;
-  isMediaLoading = false;
-  isSidebarOpen = true;
   completingLessons = new Set<number>();
   ratingValue = 0;
   ratingStars = [1, 2, 3, 4, 5];
   isSubmittingRating = false;
-  private activeObjectUrl: string | null = null;
   private courseThumbnailObjectUrl: string | null = null;
-  private mediaSubscription?: Subscription;
   private courseThumbnailSubscription?: Subscription;
   private authSubscription?: Subscription;
   constructor(
     private route: ActivatedRoute,
     private coursesService: PublicCoursesService,
-    private sanitizer: DomSanitizer,
     private notifications: NotificationService,
-    private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -76,10 +57,8 @@ export class CourseViewer implements OnInit, OnDestroy {
 
     this.authSubscription = this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
       if (!isAuthenticated) {
-        this.cleanupMediaUrl();
         this.cleanupCourseThumbnail();
         this.course = null;
-        this.selectedFile = null;
         this.error = 'يرجى تسجيل الدخول للوصول إلى الكورس.';
       }
     });
@@ -108,67 +87,18 @@ export class CourseViewer implements OnInit, OnDestroy {
     });
   }
 
-  selectFile(file: CourseLessonFile, lessonTitle: string, sectionTitle: string): void {
-    const type = this.detectFileType(file);
+  openLessonFile(file: CourseLessonFile): void {
     const resolvedUrl = resolveMediaUrl(file.url);
-
-    this.cleanupMediaUrl();
-    this.selectedFile = {
-      id: file.id,
-      name: file.name,
-      url: resolvedUrl,
-      displayUrl: '',
-      safeUrl: null,
-      type,
-      lessonTitle,
-      sectionTitle,
-    };
-
-    if (type === 'embed') {
-      const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(resolvedUrl);
-      this.selectedFile = { ...this.selectedFile, displayUrl: resolvedUrl, safeUrl };
-      return;
-    }
-
     if (!this.authService.isAuthenticated()) {
-      this.handleMediaError(type);
+      this.notifications.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
       return;
     }
-
-    this.isMediaLoading = true;
-
-    this.mediaSubscription = this.http.get(resolvedUrl, { responseType: 'blob' }).subscribe({
-      next: (blob) => {
-        if (this.selectedFile?.id !== file.id) {
-          this.isMediaLoading = false;
-          return;
-        }
-        this.activeObjectUrl = URL.createObjectURL(blob);
-        const safeUrl =
-          type === 'pdf'
-            ? this.sanitizer.bypassSecurityTrustResourceUrl(this.activeObjectUrl)
-            : null;
-        this.selectedFile = {
-          ...this.selectedFile,
-          displayUrl: this.activeObjectUrl,
-          safeUrl,
-        };
-        this.isMediaLoading = false;
-      },
-      error: () => {
-        this.isMediaLoading = false;
-        this.handleMediaError(type);
-      },
-    });
+    const opened = window.open(resolvedUrl, '_blank', 'noopener');
+    if (!opened) {
+      this.notifications.showError('تعذر فتح الملف في تبويب جديد.');
+    }
   }
 
-  closeViewer(): void {
-    this.cleanupMediaUrl();
-    this.selectedFile = null;
-  }
-  toggleSidebar(): void {
-    this.isSidebarOpen = !this.isSidebarOpen;
-  }
   completeLesson(lessonId: number): void {
     if (this.completingLessons.has(lessonId) || !this.course) {
       return;
@@ -281,61 +211,15 @@ export class CourseViewer implements OnInit, OnDestroy {
     return this.course?.sections.reduce((sum, section) => sum + section.lessons.length, 0) ?? 0;
   }
 
-  private detectFileType(file: Pick<CourseLessonFile, 'name' | 'url'>): ViewerType {
-    const normalizedName = file.name.toLowerCase();
-    const normalizedUrl = file.url.toLowerCase();
-    const extension =
-      normalizedName.split('.').pop()?.split('?')[0] ||
-      normalizedUrl.split('.').pop()?.split('?')[0] ||
-      '';
-
-    if (['mp4', 'webm', 'ogg'].includes(extension)) return 'video';
-    if (['mp3', 'wav', 'aac', 'm4a'].includes(extension)) return 'audio';
-    if (extension === 'pdf') return 'pdf';
-    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'].includes(extension)) return 'image';
-
-    // لو رابط خارجي يمكن تضمينه
-    if (normalizedUrl.startsWith('http')) return 'embed';
-
-    return 'download';
-  }
-
   formatPathProgress(path: CourseLearningPathProgress): string {
     if (!path.totalCourses) return '0%';
     return `${path.completedCourses}/${path.totalCourses} · ${path.completionPercent}%`;
   }
 
-  handleMediaError(type: ViewerType): void {
-    const messageMap: Record<ViewerType, string> = {
-      video: 'تعذر تحميل الفيديو حالياً. حاول مرة أخرى لاحقاً.',
-      audio: 'تعذر تشغيل الملف الصوتي حالياً.',
-      image: 'تعذر تحميل الصورة.',
-      pdf: 'تعذر تحميل ملف PDF.',
-      embed: 'تعذر تحميل المحتوى الخارجي.',
-      download: 'تعذر تحميل الملف.',
-    };
-
-    const message = messageMap[type] || 'تعذر تحميل الملف.';
-    this.notifications.showError(message);
-  }
-
   ngOnDestroy(): void {
-    this.cleanupMediaUrl();
     this.cleanupCourseThumbnail();
 
     this.authSubscription?.unsubscribe();
-  }
-
-  private cleanupMediaUrl(): void {
-    if (this.mediaSubscription) {
-      this.mediaSubscription.unsubscribe();
-      this.mediaSubscription = undefined;
-    }
-    if (this.activeObjectUrl) {
-      URL.revokeObjectURL(this.activeObjectUrl);
-      this.activeObjectUrl = null;
-    }
-    this.isMediaLoading = false;
   }
 
   private loadCourseThumbnail(thumbnailUrl?: string | null): void {

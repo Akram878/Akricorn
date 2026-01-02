@@ -91,6 +91,15 @@
       <button type="button" class="lms-secondary-btn" (click)="onView()">View</button>
       <button
         type="button"
+        class="lms-secondary-btn"
+        *ngIf="showRate"
+        (click)="onRate()"
+        [disabled]="rateDisabled"
+      >
+        تقييم
+      </button>
+      <button
+        type="button"
         class="lms-primary-btn"
         *ngIf="showBuy && !owned"
         (click)="onBuy()"
