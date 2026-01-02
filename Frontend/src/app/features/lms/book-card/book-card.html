@@ -76,8 +76,9 @@
       class="lms-book-card__toggle"
       *ngIf="hasDescription() && isLongDescription()"
       (click)="toggleDescription()"
+      [attr.aria-expanded]="isExpanded"
     >
-      {{ isExpanded ? 'Show less' : '…' }}
+      {{ isExpanded ? 'عرض أقل' : 'عرض المزيد' }}
     </button>
   </div>
 
