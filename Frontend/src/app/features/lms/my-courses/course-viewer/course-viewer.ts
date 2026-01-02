@@ -11,7 +11,7 @@ import {
 } from '../../../../core/services/public-courses.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { resolveMediaUrl } from '../../../../core/utils/media-url';
+import { appendAuthToken, resolveMediaUrl } from '../../../../core/utils/media-url';
 
 @Component({
   selector: 'app-course-viewer',
@@ -88,11 +88,12 @@ export class CourseViewer implements OnInit, OnDestroy {
   }
 
   openLessonFile(file: CourseLessonFile): void {
-    const resolvedUrl = resolveMediaUrl(file.url);
     if (!this.authService.isAuthenticated()) {
       this.notifications.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
       return;
     }
+    const token = this.authService.getAccessToken();
+    const resolvedUrl = appendAuthToken(resolveMediaUrl(file.url), token);
     const opened = window.open(resolvedUrl, '_blank', 'noopener');
     if (!opened) {
       this.notifications.showError('تعذر فتح الملف في تبويب جديد.');

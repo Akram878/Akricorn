@@ -14,3 +14,15 @@ export const resolveMediaUrl = (url: string, apiBaseUrl: string = API_BASE_URL):
 
   return `${normalizedBase}${normalizedPath}`;
 };
+export const appendAuthToken = (url: string, token: string | null): string => {
+  if (!url || !token) {
+    return url;
+  }
+
+  if (url.includes('token=')) {
+    return url;
+  }
+
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}token=${encodeURIComponent(token)}`;
+};
