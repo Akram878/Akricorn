@@ -24,8 +24,9 @@
         <app-tool-card
           *ngFor="let t of filteredTools; trackBy: trackByToolId"
           [tool]="t"
-          [isDownloadAvailable]="false"
+          [isDownloadAvailable]="!!t.downloadUrl"
           (open)="openTool(t)"
+          (download)="downloadTool(t)"
         ></app-tool-card>
       </div>
 

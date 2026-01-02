@@ -12,6 +12,9 @@ import {
   FilterState,
 } from '../../../shared/components/lms-filters/lms-filters.types';
 import { buildToolFilters } from '../filters/lms-filter-config';
+import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { appendAuthToken, resolveMediaUrl } from '../../../core/utils/media-url';
 
 @Component({
   selector: 'app-lms-tools',
@@ -27,7 +30,11 @@ export class LmsTools implements OnInit {
   error: string | null = null;
   filters: FilterDefinition<PublicTool>[] = [];
   filterState: FilterState = {};
-  constructor(private toolsService: PublicToolsService) {}
+  constructor(
+    private toolsService: PublicToolsService,
+    private authService: AuthService,
+    private notification: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.loadTools();
@@ -62,6 +69,22 @@ export class LmsTools implements OnInit {
     }
 
     window.open(tool.url, '_blank');
+  }
+
+  downloadTool(tool: PublicTool): void {
+    if (!tool.downloadUrl) {
+      this.notification.showError('File is not available.');
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.notification.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
+      return;
+    }
+
+    const token = this.authService.getAccessToken();
+    const url = appendAuthToken(resolveMediaUrl(tool.downloadUrl), token);
+    window.open(url, '_blank', 'noopener');
   }
 
   applyFilters(state: FilterState): void {

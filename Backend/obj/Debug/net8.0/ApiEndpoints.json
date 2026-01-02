@@ -1348,5 +1348,21 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Backend.Controllers.ToolFilesController",
+    "Method": "GetToolFile",
+    "RelativePath": "api/tools/files/{fileId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "fileId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

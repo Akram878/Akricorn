@@ -9,6 +9,8 @@ export interface PublicTool {
   url: string;
   category: string;
   displayOrder: number;
+  downloadUrl?: string;
+  fileName?: string;
 }
 
 @Injectable({

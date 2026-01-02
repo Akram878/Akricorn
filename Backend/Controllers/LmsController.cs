@@ -1076,21 +1076,32 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetTools()
         {
             var tools = await _context.Tools
+                 .Include(t => t.Files)
+                .ThenInclude(f => f.FileMetadata)
                 .Where(t => t.IsActive)
                 .OrderBy(t => t.DisplayOrder)
                 .ThenBy(t => t.Name)
-                .Select(t => new
-                {
+                 .ToListAsync();
+
+            var result = tools.Select(t =>
+            {
+            var primaryFile = t.Files?
+                .OrderBy(f => f.Id)
+                .FirstOrDefault();
+
+            return new
+            {
                     t.Id,
                     t.Name,
                     t.Description,
                     t.Url,
                     t.Category,
-                    t.DisplayOrder
-                })
-                .ToListAsync();
-
-            return Ok(tools);
+                t.DisplayOrder,
+                downloadUrl = primaryFile != null ? BuildToolDownloadUrl(primaryFile.Id) : string.Empty,
+                fileName = primaryFile?.FileMetadata?.OriginalName ?? string.Empty
+            };
+            });
+            return Ok(result);
         }
 
         // ============================
@@ -1239,6 +1250,11 @@ namespace Backend.Controllers
         private string BuildBookDownloadUrl(int fileId)
         {
             return Url.Content($"/api/books/files/{fileId}");
+        }
+
+        private string BuildToolDownloadUrl(int fileId)
+        {
+            return Url.Content($"/api/tools/files/{fileId}");
         }
 
         private async Task<bool> HasCourseAccess(int userId, int courseId)
