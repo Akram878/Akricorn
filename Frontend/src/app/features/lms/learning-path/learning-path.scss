@@ -23,10 +23,10 @@ $gold-400: #d9a74a;
   flex-direction: column;
   gap: 0.8rem;
   padding: 1rem;
-  border-radius: 1rem;
-  background: rgba(2, 15, 12, 0.85);
+  border-radius: 0.3rem;
+  background: linear-gradient(180deg, hsl(190, 55%, 60%) 0%, hsl(195, 50%, 48%) 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: $gold-100;
+  color: #1f2937;
 }
 
 .lms-path-card__header {
@@ -35,17 +35,16 @@ $gold-400: #d9a74a;
   justify-content: space-between;
   gap: 0.8rem;
   padding: 1rem;
-  border-radius: 1rem;
-  background: rgba(2, 15, 12, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.3rem;
+  background: #ffffff;
 }
 
 .lms-path-card__toggle {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: $emerald-800;
-  color: $gold-100;
+  border: none;
+  background: linear-gradient(180deg, hsl(190, 55%, 60%) 0%, hsl(195, 50%, 48%) 100%);
+  color: #ffffff;
   padding: 0.35rem 0.6rem;
-  border-radius: 999px;
+  border-radius: 0.3rem;
   font-size: 0.75rem;
   cursor: pointer;
 }
@@ -54,7 +53,7 @@ $gold-400: #d9a74a;
   margin: 0;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: rgba($gold-200, 0.8);
+  color: #ffffff;
 }
 
 .lms-path-card__meta {
@@ -62,11 +61,10 @@ $gold-400: #d9a74a;
   gap: 0.6rem;
   flex-wrap: wrap;
   font-size: 0.75rem;
-  color: rgba($gold-200, 0.7);
+  color: #ffffff;
   span {
     padding: 0.2rem 0.6rem;
     border-radius: 999px;
-    background: rgba($emerald-700, 0.8);
   }
 }
 
@@ -75,7 +73,7 @@ $gold-400: #d9a74a;
   align-items: center;
   gap: 0.6rem;
   font-size: 0.75rem;
-  color: rgba($gold-200, 0.75);
+  color: #ffffff;
 }
 
 .lms-path-card__progress-bar {
@@ -88,7 +86,12 @@ $gold-400: #d9a74a;
 
 .lms-path-card__progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, $gold-200, $gold-400);
+  background: linear-gradient(
+    180deg,
+    hsl(96, 38%, 62%) 0%,
+    hsl(102, 34%, 52%) 45%,
+    hsl(108, 36%, 44%) 100%
+  );
 }
 
 .lms-path-card__courses {
@@ -96,7 +99,7 @@ $gold-400: #d9a74a;
   flex-direction: column;
   gap: 0.4rem;
   padding: 0.6rem 0.75rem;
-  border-radius: 0.8rem;
+  border-radius: 0.3rem;
   background: rgba(2, 15, 12, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -112,7 +115,7 @@ $gold-400: #d9a74a;
     width: 1.4rem;
     height: 1.4rem;
     border-radius: 0.4rem;
-    background: rgba($emerald-700, 0.9);
+
     display: grid;
     place-items: center;
     font-size: 0.7rem;
@@ -120,15 +123,15 @@ $gold-400: #d9a74a;
 
   .status {
     font-size: 0.7rem;
-    color: $gold-100;
+    color: #ffffff;
   }
 }
 
 .lms-path-card__course.is-completed {
-  color: $gold-100;
+  color: #ffffff;
 
   .order {
-    background: rgba($gold-400, 0.35);
+    background: linear-gradient(180deg, hsl(190, 55%, 60%) 0%, hsl(195, 50%, 48%) 100%);
   }
 }
 .lms-path-card__footer {
