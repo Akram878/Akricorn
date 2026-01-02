@@ -258,7 +258,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
@@ -272,6 +272,10 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-07T13:10:32.432Z",
               "IsPinned": true
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",
@@ -305,7 +309,7 @@
               "RelativeDocumentMoniker": "Controllers\\LmsController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\LmsController.cs",
               "RelativeToolTip": "Controllers\\LmsController.cs",
-              "ViewState": "AgIAAGwEAAAAAAAAAAAcwIYEAAA9AAAAAAAAAA==",
+              "ViewState": "AgIAAGIFAAAAAAAAAAAkwGwFAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-29T07:07:55.314Z",
               "EditorCaption": ""
@@ -1005,10 +1009,6 @@
               "RelativeToolTip": "Backend.csproj",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-11-14T15:44:47.174Z"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }
