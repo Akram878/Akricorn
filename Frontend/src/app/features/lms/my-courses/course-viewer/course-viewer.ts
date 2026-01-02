@@ -175,8 +175,11 @@ export class CourseViewer implements OnInit, OnDestroy {
       next: (res) => {
         this.markLessonCompleted(lessonId);
         this.notifications.showSuccess(res.message || 'تم إنهاء الدرس.');
-        if (res.courseCompleted) {
-          this.loadCourse();
+        if (res.courseCompleted && this.course && !this.course.completedAt) {
+          this.course = {
+            ...this.course,
+            completedAt: new Date().toISOString(),
+          };
         }
         this.completingLessons.delete(lessonId);
       },

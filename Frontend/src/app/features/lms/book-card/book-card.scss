@@ -153,6 +153,21 @@ $gold-400: #d9a74a;
   flex-wrap: wrap;
 }
 
+.lms-primary-btn,
+.lms-secondary-btn {
+  border-radius: 0.3rem;
+  color: hsl(42.67, 88.24%, 80%);
+  padding: 0.75rem;
+  background: #041e16;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  border: 1px solid #023629;
+}
+
 @media (max-width: 768px) {
   .lms-book-card {
     padding: 0.85rem;
