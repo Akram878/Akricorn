@@ -22,6 +22,7 @@ export interface MyBook {
   downloadUrl?: string;
   fileUrl?: string;
   rating?: number | null;
+  ratingCount?: number | null;
   grantedAt: string | null;
   isFromCourse: boolean | null;
 }

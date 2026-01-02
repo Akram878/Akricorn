@@ -1023,6 +1023,22 @@ namespace Backend.Controllers
                 .ThenInclude(b => b.Files)
                 .ToListAsync();
 
+            var bookIds = userBooks
+             .Select(ub => ub.BookId)
+             .Distinct()
+             .ToList();
+
+            var ratingStats = await _context.BookRatings
+                .Where(r => bookIds.Contains(r.BookId))
+                .GroupBy(r => r.BookId)
+                .Select(g => new
+                {
+                    BookId = g.Key,
+                    Count = g.Count(),
+                    Average = Math.Round(g.Average(x => x.Rating), 2)
+                })
+                .ToDictionaryAsync(x => x.BookId, x => x);
+
             var books = userBooks.Select(ub =>
             {
             var primaryFileId = ub.Book.Files
@@ -1030,7 +1046,8 @@ namespace Backend.Controllers
                 .Select(f => f.Id)
                 .FirstOrDefault();
 
-            return new
+                var stats = ratingStats.TryGetValue(ub.Book.Id, out var rating) ? rating : null;
+                return new
             {
                     ub.Book.Id,
                     ub.Book.Title,
@@ -1038,7 +1055,9 @@ namespace Backend.Controllers
                     ub.Book.Price,
                     ub.Book.Category,
                     ub.Book.ThumbnailUrl,
-                downloadUrl = primaryFileId > 0 ? BuildBookDownloadUrl(primaryFileId) : string.Empty,
+                    rating = stats?.Average ?? 0,
+                    ratingCount = stats?.Count ?? 0,
+                    downloadUrl = primaryFileId > 0 ? BuildBookDownloadUrl(primaryFileId) : string.Empty,
                 ub.GrantedAt,
                     ub.IsFromCourse
             };

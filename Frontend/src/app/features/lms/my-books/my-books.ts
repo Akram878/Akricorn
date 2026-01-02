@@ -158,6 +158,7 @@ export class MyBooks implements OnInit, OnDestroy {
     this.booksService.rateBook(this.selectedBook.id, this.ratingValue).subscribe({
       next: (response) => {
         this.notification.showSuccess(response.message);
+        this.updateBookRating(this.selectedBook!.id, response.averageRating, response.ratingCount);
         this.ratedBookIds.add(this.selectedBook!.id);
         this.isSubmittingRating = false;
         this.isRatingModalOpen = false;
@@ -225,5 +226,13 @@ export class MyBooks implements OnInit, OnDestroy {
 
   private persistViewedBooks(): void {
     localStorage.setItem(this.viewedStorageKey, JSON.stringify(Array.from(this.viewedBookIds)));
+  }
+
+  private updateBookRating(bookId: number, rating: number, ratingCount: number): void {
+    const book = this.myBooks.find((item) => item.id === bookId);
+    if (book) {
+      book.rating = rating;
+      book.ratingCount = ratingCount;
+    }
   }
 }
