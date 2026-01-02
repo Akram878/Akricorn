@@ -36,7 +36,7 @@
           <td>{{ b.price | currency : 'USD' : 'symbol' : '1.0-2' }}</td>
           <td>
             <div class="rating-chip">
-              <span>{{ (b.rating ?? 0) | number : '1.1-1' }}</span>
+              <span>{{ b.rating ?? 0 | number : '1.1-1' }}</span>
               <span class="rating-count">({{ b.ratingCount ?? 0 }})</span>
             </div>
           </td>
@@ -46,11 +46,11 @@
             </span>
           </td>
           <td class="actions-cell">
-            <button class="btn-small" (click)="openEditEditor(b)">Edit</button>
             <button class="btn-secondary" (click)="onToggle(b)">
               {{ b.isActive ? 'Disable' : 'Enable' }}
             </button>
             <button class="btn-danger" (click)="onDelete(b)">Delete</button>
+            <button class="btn-small btn-primary" (click)="openEditEditor(b)">Edit</button>
           </td>
         </tr>
       </tbody>

@@ -39,17 +39,16 @@ $gold-500: #b9822f;
 .profile-payments__body {
   margin-top: 1.5rem;
   padding: 1.4rem;
-  border-radius: 1rem;
-  background: radial-gradient(circle at top left, rgba(217, 167, 74, 0.16), transparent 65%),
-    $emerald-900;
+  border-radius: 0.3rem;
+  background-color: rgb(4 30 22);
   border: 1px solid rgba(6, 95, 70, 0.9);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 .payments-state {
   padding: 1rem;
-  border-radius: 0.7rem;
-  background: rgba(15, 23, 42, 0.6);
+  border-radius: 0.3rem;
+
   text-align: center;
   font-size: 0.9rem;
   color: rgba($gold-200, 0.9);
@@ -77,11 +76,11 @@ $gold-500: #b9822f;
     letter-spacing: 0.14em;
     color: rgba($gold-200, 0.75);
     padding: 0.8rem 0.75rem;
-    border-bottom: 1px solid rgba(30, 64, 175, 0.45);
+    border-bottom: 1px solid hsl(165, 93%, 11%);
   }
 
   tbody tr {
-    border-bottom: 1px solid rgba(30, 64, 175, 0.2);
+    border-bottom: 1px solid hsl(165, 93%, 11%);
   }
 
   tbody td {
@@ -105,12 +104,10 @@ $gold-500: #b9822f;
   display: inline-flex;
   align-items: center;
   padding: 0.2rem 0.6rem;
-  border-radius: 999px;
+  border-radius: 0.3rem;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(148, 163, 184, 0.5);
 }
 
 .payments-table__status--paid {
@@ -137,9 +134,9 @@ $gold-500: #b9822f;
 
 .chip-btn {
   padding: 0.35rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.8);
-  background: rgba(15, 23, 42, 0.95);
+  border-radius: 0.3rem;
+  border: 1px solid hsl(165, 93%, 11%);
+  background-color: rgb(4 30 22);
   color: rgba($gold-200, 0.96);
   font-size: 0.78rem;
   cursor: pointer;
@@ -154,7 +151,7 @@ $gold-500: #b9822f;
   &:hover {
     transform: translateY(-1px);
     border-color: rgba($gold-400, 0.9);
-    background: rgba(15, 23, 42, 1);
+
     color: $gold-100;
   }
 }

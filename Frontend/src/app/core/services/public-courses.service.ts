@@ -48,6 +48,7 @@ export interface CourseLessonView {
   id: number;
   title: string;
   order: number;
+  isCompleted?: boolean;
   files: CourseLessonFile[];
 }
 
@@ -76,6 +77,11 @@ export interface CourseCompletionResponse {
   message: string;
   completedAt?: string;
   learningPaths: CourseLearningPathProgress[];
+}
+
+export interface LessonCompletionResponse {
+  message: string;
+  courseCompleted: boolean;
 }
 // رد الـ API عند شراء كورس عبر نظام الدفع
 export interface CoursePaymentResponse {
@@ -129,6 +135,13 @@ export class PublicCoursesService {
   completeMyCourse(courseId: number): Observable<CourseCompletionResponse> {
     return this.http.post<CourseCompletionResponse>(
       `${this.baseUrl}/my-courses/${courseId}/complete`,
+      {}
+    );
+  }
+
+  completeLesson(courseId: number, lessonId: number): Observable<LessonCompletionResponse> {
+    return this.http.post<LessonCompletionResponse>(
+      `${this.baseUrl}/my-courses/${courseId}/lessons/${lessonId}/complete`,
       {}
     );
   }

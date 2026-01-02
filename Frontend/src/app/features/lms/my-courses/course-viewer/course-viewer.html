@@ -37,14 +37,6 @@
               </span>
               <h3>{{ course.title }}</h3>
             </div>
-            <button
-              type="button"
-              class="course-viewer__action"
-              (click)="finishCourse()"
-              [disabled]="isCompleting || !!course.completedAt"
-            >
-              {{ course.completedAt ? 'تم إنهاء الكورس' : 'إنهاء الكورس' }}
-            </button>
           </div>
 
           <p class="course-viewer__description">{{ course.description }}</p>
@@ -106,7 +98,22 @@
                       <span class="course-viewer__lesson-index">{{ lIndex + 1 }}</span>
                       <h4>{{ lesson.title }}</h4>
                     </div>
-                    <span class="course-viewer__lesson-count">{{ lesson.files.length }} ملفات</span>
+                    <div class="course-viewer__lesson-actions">
+                      <span class="course-viewer__lesson-count"
+                        >{{ lesson.files.length }} ملفات</span
+                      >
+                      <span class="course-viewer__lesson-status" *ngIf="lesson.isCompleted">
+                        مكتمل
+                      </span>
+                      <button
+                        type="button"
+                        class="course-viewer__lesson-action"
+                        (click)="completeLesson(lesson.id)"
+                        [disabled]="lesson.isCompleted || isLessonCompleting(lesson.id)"
+                      >
+                        {{ lesson.isCompleted ? 'تم إنهاء الدرس' : 'إنهاء الدرس' }}
+                      </button>
+                    </div>
                   </div>
 
                   <div
@@ -152,7 +159,8 @@
               <span [style.width.%]="courseProgressPercent"></span>
             </div>
             <p class="course-viewer__progress-note">
-              {{ course?.completedAt ? 'تم إنهاء الكورس بنجاح.' : 'لم يتم إنهاء الكورس بعد.' }}
+              {{ completedLessonsCount }}/{{ totalLessonsCount }} دروس مكتملة
+              <span *ngIf="course?.completedAt">· تم إنهاء الكورس بنجاح.</span>
             </p>
           </div>
 

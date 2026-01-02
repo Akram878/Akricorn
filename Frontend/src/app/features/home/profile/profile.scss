@@ -152,11 +152,13 @@ $gold-500: #b9822f;
 .profile__list-item {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.65rem 0.9rem;
+  width: 100%;
   border-radius: 0.3rem;
-
-  border: 1px solid hsl(165, 93%, 11%);
+  border: 1px solid rgba(185, 130, 47, 0.3);
+  padding: 0.75rem;
+  background: rgba(2, 15, 12, 0.96);
+  color: #fff4cf;
+  outline: none;
 
   span {
     font-size: 0.75rem;

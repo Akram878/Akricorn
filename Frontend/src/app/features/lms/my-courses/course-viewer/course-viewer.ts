@@ -40,10 +40,10 @@ export class CourseViewer implements OnInit, OnDestroy {
   selectedFile: SelectedLessonFile | null = null;
   courseThumbnailUrl: string | null = null;
   isLoading = false;
-  isCompleting = false;
   error: string | null = null;
   isMediaLoading = false;
   isSidebarOpen = true;
+  completingLessons = new Set<number>();
   private activeObjectUrl: string | null = null;
   private courseThumbnailObjectUrl: string | null = null;
   private mediaSubscription?: Subscription;
@@ -165,30 +165,31 @@ export class CourseViewer implements OnInit, OnDestroy {
   toggleSidebar(): void {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
-  finishCourse(): void {
-    if (this.isCompleting) {
+  completeLesson(lessonId: number): void {
+    if (this.completingLessons.has(lessonId) || !this.course) {
       return;
     }
 
-    this.isCompleting = true;
-    this.coursesService.completeMyCourse(this.courseId).subscribe({
+    this.completingLessons.add(lessonId);
+    this.coursesService.completeLesson(this.courseId, lessonId).subscribe({
       next: (res) => {
-        if (this.course) {
-          this.course.completedAt =
-            res.completedAt ?? this.course.completedAt ?? new Date().toISOString();
-          this.course.learningPaths = res.learningPaths;
+        this.markLessonCompleted(lessonId);
+        this.notifications.showSuccess(res.message || 'تم إنهاء الدرس.');
+        if (res.courseCompleted) {
+          this.loadCourse();
         }
-
-        const message = res.message || 'تم إنهاء الكورس بنجاح.';
-        this.notifications.showSuccess(message);
-        this.isCompleting = false;
+        this.completingLessons.delete(lessonId);
       },
       error: (err) => {
-        const message = err?.error?.message || 'تعذر إنهاء الكورس.';
+        const message = err?.error?.message || 'تعذر إنهاء الدرس.';
         this.notifications.showError(message);
-        this.isCompleting = false;
+        this.completingLessons.delete(lessonId);
       },
     });
+  }
+
+  isLessonCompleting(lessonId: number): boolean {
+    return this.completingLessons.has(lessonId);
   }
 
   get hasSections(): boolean {
@@ -200,7 +201,36 @@ export class CourseViewer implements OnInit, OnDestroy {
   }
 
   get courseProgressPercent(): number {
-    return this.course?.completedAt ? 100 : 0;
+    const total = this.totalLessonsCount;
+    if (!this.course) {
+      return 0;
+    }
+    if (total === 0) {
+      return 100;
+    }
+    if (this.course.completedAt) {
+      return 100;
+    }
+    return Math.round((this.completedLessonsCount / total) * 100);
+  }
+
+  get completedLessonsCount(): number {
+    if (!this.course) {
+      return 0;
+    }
+    if (this.course.completedAt) {
+      return this.totalLessonsCount;
+    }
+    return this.course.sections.reduce((sum, section) => {
+      return (
+        sum +
+        section.lessons.reduce((lessonSum, lesson) => lessonSum + (lesson.isCompleted ? 1 : 0), 0)
+      );
+    }, 0);
+  }
+
+  get totalLessonsCount(): number {
+    return this.course?.sections.reduce((sum, section) => sum + section.lessons.length, 0) ?? 0;
   }
 
   private detectFileType(file: Pick<CourseLessonFile, 'name' | 'url'>): ViewerType {
@@ -296,6 +326,19 @@ export class CourseViewer implements OnInit, OnDestroy {
     if (this.courseThumbnailObjectUrl) {
       URL.revokeObjectURL(this.courseThumbnailObjectUrl);
       this.courseThumbnailObjectUrl = null;
+    }
+  }
+
+  private markLessonCompleted(lessonId: number): void {
+    if (!this.course) {
+      return;
+    }
+    for (const section of this.course.sections) {
+      const lesson = section.lessons.find((entry) => entry.id === lessonId);
+      if (lesson) {
+        lesson.isCompleted = true;
+        break;
+      }
     }
   }
 }

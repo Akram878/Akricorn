@@ -1,14 +1,12 @@
 @use '../../../../scss/base/lms-section' as *;
 
 .lms-library-grid {
-  display: grid;
-
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-@media (max-width: 768px) {
-  .lms-library-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-}
+// @media (max-width: 768px) {
+//   .lms-library-grid {
+//     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+//   }

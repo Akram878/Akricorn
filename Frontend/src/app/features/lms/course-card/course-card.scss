@@ -106,7 +106,7 @@ $gold-500: #b9822f;
     height: 50px;
     border-radius: 0.3rem;
     overflow: hidden;
-    border: 1px solid rgba($gold-400, 0.35);
+    // border: 1px solid rgba($gold-400, 0.35);
 
     display: flex;
     align-items: center;
@@ -235,6 +235,10 @@ $gold-500: #b9822f;
   }
 }
 
+.logo__icon {
+  width: 35px;
+  height: 35px;
+}
 .lms-course-card__description {
   margin: 0;
   font-size: 0.9rem;

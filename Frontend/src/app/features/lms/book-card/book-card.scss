@@ -16,18 +16,22 @@ $gold-400: #d9a74a;
   gap: 0.9rem;
   padding: 1rem;
   border-radius: 1rem;
-  background: rgba(2, 15, 12, 0.85);
+  background: #041e16;
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: $gold-100;
   min-height: 100%;
 }
 
+.logo__icon {
+  width: 35px;
+  height: 35px;
+}
 .lms-book-card__cover {
   width: 50px;
   height: 50px;
   border-radius: 0.8rem;
   overflow: hidden;
-  background: $emerald-800;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,7 +56,7 @@ $gold-400: #d9a74a;
 .lms-book-card__header {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.8rem;
 }
 

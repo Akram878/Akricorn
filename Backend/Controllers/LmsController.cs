@@ -634,6 +634,12 @@ namespace Backend.Controllers
                 .Distinct()
                 .ToList() ?? new List<int>();
 
+            var completedLessonIds = await _context.UserLessonProgresses
+               .Where(p => p.UserId == userId.Value && p.Lesson.Section.CourseId == courseId)
+               .Select(p => p.LessonId)
+               .ToListAsync();
+            var completedLessonSet = completedLessonIds.ToHashSet();
+
             Dictionary<int, int> totalByPath = new();
             Dictionary<int, int> completedByPath = new();
             Dictionary<int, DateTime?> completedAtByPath = new();
@@ -691,6 +697,7 @@ namespace Backend.Controllers
                             id = l.Id,
                             title = l.Title,
                             order = l.Order,
+                            isCompleted = completedLessonSet.Contains(l.Id),
                             files = l.Files
                                 .OrderBy(f => f.Id)
                                 .Select(f => new
