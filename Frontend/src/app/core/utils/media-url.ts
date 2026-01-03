@@ -5,7 +5,12 @@ export const resolveMediaUrl = (url: string, apiBaseUrl: string = API_BASE_URL):
     return url;
   }
 
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('data:') ||
+    url.startsWith('blob:')
+  ) {
     return url;
   }
 

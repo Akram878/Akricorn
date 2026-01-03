@@ -12,6 +12,24 @@
   <div class="status" *ngIf="isLoadingDetails">Loading book details...</div>
   <div class="status error" *ngIf="error">{{ error }}</div>
 
+  <div class="book-editor__panel1">
+    <h3>Cover</h3>
+    <div class="thumbnail" [class.thumbnail--empty]="!form.get('thumbnailUrl')?.value">
+      <img
+        *ngIf="form.get('thumbnailUrl')?.value"
+        [src]="form.get('thumbnailUrl')?.value"
+        alt="Thumbnail"
+      />
+      <span *ngIf="!form.get('thumbnailUrl')?.value">No image</span>
+    </div>
+
+    <label class="btn-secondary">
+      Change image
+      <input type="file" accept="image/*" hidden (change)="onThumbnailSelected($event)" />
+    </label>
+    <p class="field-hint">Any image format is allowed. Image size must not be 50 × 50.</p>
+  </div>
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="book-editor__body">
     <div class="book-editor__grid">
       <div class="form-field">
@@ -43,24 +61,6 @@
     </div>
 
     <div class="book-editor__panels">
-      <div class="book-editor__panel">
-        <h3>Cover</h3>
-        <div class="thumbnail" [class.thumbnail--empty]="!form.get('thumbnailUrl')?.value">
-          <img
-            *ngIf="form.get('thumbnailUrl')?.value"
-            [src]="form.get('thumbnailUrl')?.value"
-            alt="Thumbnail"
-          />
-          <span *ngIf="!form.get('thumbnailUrl')?.value">No image</span>
-        </div>
-
-        <label class="btn-secondary">
-          Change image
-          <input type="file" accept="image/*" hidden (change)="onThumbnailSelected($event)" />
-        </label>
-        <p class="field-hint">Any image format is allowed. Image size must not be 50 × 50.</p>
-      </div>
-
       <div class="book-editor__panel">
         <div class="book-editor__panel-header">
           <h3>Files</h3>
