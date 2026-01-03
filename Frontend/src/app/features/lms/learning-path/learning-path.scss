@@ -152,6 +152,8 @@ $gold-400: #d9a74a;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.6);
   color: #ffffff;
+  padding: 1rem;
+  border-radius: 0.3rem;
 }
 
 .lms-path-card__price {
@@ -187,6 +189,9 @@ $gold-400: #d9a74a;
 }
 
 .lms-path-card .lms-primary-btn.is-disabled {
+  border: none;
+  padding: 1rem;
+  border-radius: 0.3rem;
   opacity: 0.6;
   cursor: not-allowed;
 }

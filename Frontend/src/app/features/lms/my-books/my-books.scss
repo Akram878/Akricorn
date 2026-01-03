@@ -43,8 +43,9 @@ $gold-500: #b9822f;
 
 .book-rating__header {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
 
   h3 {
     margin: 0;
@@ -56,6 +57,14 @@ $gold-500: #b9822f;
     font-size: 0.85rem;
     color: #6b7280;
   }
+}
+
+.book-rating__close {
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #6b7280;
 }
 
 .book-rating__stars {
@@ -100,12 +109,6 @@ $gold-500: #b9822f;
   background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
   border: none;
   cursor: pointer;
-}
-
-.book-rating__actions {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
 }
 
 .lms-primary-btn,

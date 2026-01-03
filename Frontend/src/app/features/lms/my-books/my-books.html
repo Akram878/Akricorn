@@ -62,8 +62,11 @@
   <div class="book-rating__backdrop" (click)="closeRatingModal()"></div>
   <div class="book-rating__panel" role="dialog" aria-modal="true">
     <header class="book-rating__header">
-      <h3>Rate book</h3>
-      <p>{{ selectedBook?.title }}</p>
+      <div>
+        <h3>Rate book</h3>
+        <p>{{ selectedBook?.title }}</p>
+      </div>
+      <button type="button" class="book-rating__close" (click)="closeRatingModal()">×</button>
     </header>
     <div class="book-rating__stars">
       <button
@@ -84,15 +87,5 @@
     >
       {{ isSubmittingRating ? 'Sending...' : 'Submit rating' }}
     </button>
-    <div class="book-rating__actions">
-      <button
-        type="button"
-        class="lms-secondary-btn"
-        (click)="closeRatingModal()"
-        [disabled]="isSubmittingRating"
-      >
-        Cancel
-      </button>
-    </div>
   </div>
 </section>
