@@ -109,7 +109,6 @@ export class MyBooks implements OnInit, OnDestroy {
 
     const opened = window.open(url, '_blank', 'noopener');
     if (!opened) {
-      this.notification.showError('Please allow pop-ups to view this book.');
       return;
     }
     this.viewedBookIds.add(book.id);
