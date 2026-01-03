@@ -287,8 +287,7 @@
               "RelativeToolTip": "Controllers\\ToolFilesController.cs",
               "ViewState": "AgIAAEkAAAAAAAAAAAAIwHoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-02T10:31:39.855Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-02T10:31:39.855Z"
             },
             {
               "$type": "Document",
@@ -322,14 +321,10 @@
               "RelativeDocumentMoniker": "Controllers\\LmsController.cs",
               "ToolTip": "D:\\Akricorn\\Backend\\Controllers\\LmsController.cs",
               "RelativeToolTip": "Controllers\\LmsController.cs",
-              "ViewState": "AgIAANQEAAAAAAAAAAAcwPIEAAA2AAAAAAAAAA==",
+              "ViewState": "AgIAAPYEAAAAAAAAAAAqwBQFAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-29T07:07:55.314Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",
@@ -341,8 +336,7 @@
               "RelativeToolTip": "Controllers\\BookFilesController.cs",
               "ViewState": "AgIAAC0AAAAAAAAAAAAowEMAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-25T04:39:39.976Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-25T04:39:39.976Z"
             },
             {
               "$type": "Document",
@@ -354,8 +348,7 @@
               "RelativeToolTip": "Controllers\\CoursesController.cs",
               "ViewState": "AgIAAFYAAAAAAAAAAAAwwGcAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-25T13:38:20.277Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-25T13:38:20.277Z"
             },
             {
               "$type": "Document",
@@ -1027,6 +1020,10 @@
               "RelativeToolTip": "Backend.csproj",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-11-14T15:44:47.174Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }

@@ -77,15 +77,25 @@
               </span>
             </div>
 
-            <button
-              type="button"
-              class="lms-primary-btn"
-              [class.is-disabled]="p.isOwned"
-              [disabled]="p.isPurchasing || p.isOwned"
-              (click)="onPurchase(p)"
-            >
-              {{ p.isOwned ? 'Owned' : p.isPurchasing ? 'Processing...' : 'Buy Path' }}
-            </button>
+            <div class="lms-path-card__actions">
+              <button
+                type="button"
+                class="lms-primary-btn"
+                [class.is-disabled]="p.isOwned"
+                [disabled]="p.isPurchasing || p.isOwned"
+                (click)="onPurchase(p)"
+              >
+                {{ p.isOwned ? 'Owned' : p.isPurchasing ? 'Processing...' : 'Buy Path' }}
+              </button>
+              <button
+                type="button"
+                class="lms-primary-btn lms-primary-btn--outline"
+                *ngIf="p.completedAt"
+                (click)="openRatingModal(p)"
+              >
+                تقييم المسار
+              </button>
+            </div>
           </footer>
         </article>
       </div>
@@ -105,3 +115,37 @@
     </div>
   </div>
 </div>
+
+<section class="path-rating" *ngIf="isRatingModalOpen">
+  <div class="path-rating__backdrop" (click)="closeRatingModal()"></div>
+  <div class="path-rating__panel" role="dialog" aria-modal="true">
+    <header class="path-rating__header">
+      <div>
+        <h3>تقييم المسار</h3>
+        <p>{{ selectedPath?.title }}</p>
+      </div>
+      <button type="button" class="path-rating__close" (click)="closeRatingModal()">×</button>
+    </header>
+
+    <div class="path-rating__stars">
+      <button
+        type="button"
+        class="path-rating__star"
+        *ngFor="let star of ratingStars"
+        (click)="selectRating(star)"
+        [class.is-selected]="star <= ratingValue"
+      >
+        ★
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="path-rating__submit"
+      (click)="submitRating()"
+      [disabled]="isSubmittingRating || ratingValue < 1"
+    >
+      {{ isSubmittingRating ? 'جارٍ الإرسال...' : 'إرسال التقييم' }}
+    </button>
+  </div>
+</section>

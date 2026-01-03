@@ -262,9 +262,33 @@ namespace Backend.Controllers
             if (alreadyPurchased)
                 return Conflict(new { message = "You already own this learning path." });
 
+            var pathCourseDetails = learningPath.LearningPathCourses?
+                .Where(lpc => lpc.Course != null && lpc.Course.IsActive)
+                .Select(lpc => (CourseId: lpc.CourseId, Price: lpc.Course.Price))
+                .ToList() ?? new List<(int CourseId, decimal Price)>();
 
+            if (pathCourseDetails.Count == 0)
+                return BadRequest(new { message = "Learning path has no active courses to purchase." });
 
-            var amount = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(learningPath.Price, learningPath.Discount);
+            var pathCourseIds = pathCourseDetails
+                .Select(x => x.CourseId)
+                .Distinct()
+                .ToList();
+
+            var ownedCourseIds = await _context.UserCourses
+               .Where(uc => uc.UserId == userId.Value && pathCourseIds.Contains(uc.CourseId))
+               .Select(uc => uc.CourseId)
+               .ToListAsync();
+
+          var missingCourseDetails = pathCourseDetails
+                .Where(x => !ownedCourseIds.Contains(x.CourseId))
+                .ToList();
+
+            if (missingCourseDetails.Count == 0)
+                return Conflict(new { message = "You already own all courses in this learning path." });
+
+            var basePrice = missingCourseDetails.Sum(x => x.Price);
+            var amount = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(basePrice, learningPath.Discount);
 
             var payment = new Payment
             {
@@ -293,29 +317,19 @@ namespace Backend.Controllers
 
             _context.UserPurchases.Add(userPurchase);
 
-            var pathCourseIds = learningPath.LearningPathCourses?
-          .Where(lpc => lpc.Course != null && lpc.Course.IsActive)
-          .Select(lpc => lpc.CourseId)
-          .Distinct()
-          .ToList() ?? new List<int>();
+            var missingCourseIds = missingCourseDetails
+                  .Select(x => x.CourseId)
+                  .Distinct()
+                  .ToList();
 
-            if (pathCourseIds.Count > 0)
+            foreach (var courseId in missingCourseIds)
             {
-                var ownedCourseIds = await _context.UserCourses
-                    .Where(uc => uc.UserId == userId.Value && pathCourseIds.Contains(uc.CourseId))
-                    .Select(uc => uc.CourseId)
-                    .ToListAsync();
-
-                var missingCourseIds = pathCourseIds.Except(ownedCourseIds).ToList();
-                foreach (var courseId in missingCourseIds)
+                _context.UserCourses.Add(new UserCourse
                 {
-                    _context.UserCourses.Add(new UserCourse
-                    {
-                        UserId = userId.Value,
-                        CourseId = courseId,
-                        PurchasedAt = DateTime.UtcNow
-                    });
-                }
+                    UserId = userId.Value,
+                    CourseId = courseId,
+                    PurchasedAt = DateTime.UtcNow
+                });
             }
 
             await _context.SaveChangesAsync();
@@ -1207,6 +1221,15 @@ namespace Backend.Controllers
                     .ToHashSetAsync();
             }
 
+            var ownedCourseIds = new HashSet<int>();
+            if (userId.HasValue && pathCourseIds.Count > 0)
+            {
+                ownedCourseIds = await _context.UserCourses
+                    .Where(uc => uc.UserId == userId.Value && pathCourseIds.Contains(uc.CourseId))
+                    .Select(uc => uc.CourseId)
+                    .ToHashSetAsync();
+            }
+
             var result = paths.Select(p =>
             {
             var courses = p.LearningPathCourses
@@ -1217,6 +1240,7 @@ namespace Backend.Controllers
                     var hasProgress = courseProgress.TryGetValue(lpc.CourseId, out var cp);
                     var isCompleted = hasProgress && cp.IsCompleted;
                     var isInProgress = hasProgress && cp.InProgress;
+                    var isOwned = userId.HasValue && ownedCourseIds.Contains(lpc.CourseId);
 
                     return new
                     {
@@ -1232,7 +1256,9 @@ namespace Backend.Controllers
                             : lpc.Course.Rating,
                         thumbnailUrl = lpc.Course.ThumbnailUrl,
                         isCompleted,
-                        isInProgress
+                        isInProgress,
+                        isOwned
+
                     };
                 })
                 .ToList();
@@ -1254,18 +1280,24 @@ namespace Backend.Controllers
                     .Max();
             }
 
-            return new
+                var courseTotalPrice = courses.Sum(c => c.price);
+                var missingCoursesPrice = userId.HasValue
+                    ? courses.Where(c => !c.isOwned).Sum(c => c.price)
+                    : courseTotalPrice;
+                var isOwnedByCourses = userId.HasValue && courses.Count > 0 && courses.All(c => c.isOwned);
+
+                return new
             {
                     p.Id,
                     p.Title,
                     p.Description,
-                    p.Price,
-                finalPrice = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(p.Price, p.Discount),
-                rating = pathRatingStats.TryGetValue(p.Id, out var pathRatings) ? pathRatings.Average : p.Rating,
+                    Price = missingCoursesPrice,
+                    finalPrice = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(missingCoursesPrice, p.Discount),
+                    rating = pathRatingStats.TryGetValue(p.Id, out var pathRatings) ? pathRatings.Average : p.Rating,
                     ratingCount = pathRatingStats.TryGetValue(p.Id, out var pathRatings2) ? pathRatings2.Count : 0,
                     p.Discount,
-                isOwned = ownedPathIds.Contains(p.Id),
-                coursesCount = totalCourses,
+                    isOwned = ownedPathIds.Contains(p.Id) || isOwnedByCourses,
+                    coursesCount = totalCourses,
                 completedCourses = completedCount,
                 completionPercent,
                 completedAt,

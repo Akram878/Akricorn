@@ -29,9 +29,12 @@ interface UiLearningPath {
   discount?: number | null;
   isOwned: boolean;
   isPurchasing: boolean;
+  rating?: number | null;
+  ratingCount?: number | null;
   coursesCount: number;
   completedCourses: number;
   completionPercent: number;
+  completedAt?: string | null;
   courses: UiLearningPathCourse[];
   isExpanded: boolean;
 }
@@ -57,6 +60,11 @@ export class LearningPath implements OnInit, OnDestroy {
   error: string | null = null;
   filters: FilterDefinition<UiLearningPath>[] = [];
   filterState: FilterState = {};
+  isRatingModalOpen = false;
+  isSubmittingRating = false;
+  ratingValue = 0;
+  ratingStars = [1, 2, 3, 4, 5];
+  selectedPath: UiLearningPath | null = null;
   private authSubscription?: Subscription;
 
   constructor(
@@ -155,6 +163,48 @@ export class LearningPath implements OnInit, OnDestroy {
     });
   }
 
+  openRatingModal(path: UiLearningPath): void {
+    this.selectedPath = path;
+    this.ratingValue = 0;
+    this.isRatingModalOpen = true;
+  }
+
+  closeRatingModal(): void {
+    this.isRatingModalOpen = false;
+    this.selectedPath = null;
+    this.ratingValue = 0;
+  }
+
+  selectRating(value: number): void {
+    this.ratingValue = value;
+  }
+
+  submitRating(): void {
+    if (!this.selectedPath || this.ratingValue < 1 || this.ratingValue > 5) {
+      return;
+    }
+
+    this.isSubmittingRating = true;
+
+    this.pathsService.ratePath(this.selectedPath.id, this.ratingValue).subscribe({
+      next: (response) => {
+        this.selectedPath!.rating = response.averageRating;
+        this.selectedPath!.ratingCount = response.ratingCount;
+        this.notification.showSuccess('تم إرسال تقييم المسار بنجاح.');
+        this.isSubmittingRating = false;
+        this.closeRatingModal();
+      },
+      error: (err) => {
+        if (err?.error?.message) {
+          this.notification.showError(err.error.message);
+        } else {
+          this.notification.showError('تعذر إرسال تقييم المسار.');
+        }
+        this.isSubmittingRating = false;
+      },
+    });
+  }
+
   getBasePrice(path: UiLearningPath): number {
     return path.price ?? 0;
   }
@@ -200,9 +250,12 @@ export class LearningPath implements OnInit, OnDestroy {
       discount: path.discount ?? 0,
       isOwned: path.isOwned ?? false,
       isPurchasing: false,
+      rating: path.rating ?? null,
+      ratingCount: path.ratingCount ?? null,
       coursesCount: path.coursesCount,
       completedCourses: path.completedCourses,
       completionPercent: path.completionPercent,
+      completedAt: path.completedAt ?? null,
       courses,
       isExpanded: false,
     };
