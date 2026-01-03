@@ -4,6 +4,7 @@
   color: #e2e8f0;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .topbar {
@@ -24,7 +25,9 @@
   gap: 12px;
 }
 
-.topbar__hamburger {
+.menu-toggle {
+  align-self: flex-start;
+  margin: 12px 12px 0;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
@@ -35,7 +38,7 @@
   cursor: pointer;
 }
 
-.topbar__hamburger span {
+.menu-toggle span {
   width: 18px;
   height: 2px;
   background: #e2e8f0;
@@ -74,7 +77,7 @@
 
 .menu {
   position: absolute;
-  top: 60px;
+  top: 56px;
   left: 12px;
   background: #0b1220;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -118,30 +121,6 @@
 }
 
 @media (min-width: 900px) {
-  .menu {
-    position: static;
-    display: flex !important;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    background: #0f172a;
-    border: none;
-    box-shadow: none;
-    width: auto;
-    padding: 0 20px 12px 20px;
-  }
-
-  .menu a,
-  .menu__logout {
-    padding: 6px 10px;
-    border-radius: 6px;
-  }
-
-  .menu__logout {
-    border-top: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
   .dashboard-shell {
     gap: 0;
   }
