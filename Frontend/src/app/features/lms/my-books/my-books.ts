@@ -3,7 +3,6 @@ import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
-import { FileDownloadService } from '../../../core/services/file-download.service';
 import { resolveMediaUrl } from '../../../core/utils/media-url';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
@@ -47,8 +46,7 @@ export class MyBooks implements OnInit, OnDestroy {
     private booksService: PublicBooksService,
     private notification: NotificationService,
 
-    private authService: AuthService,
-    private fileDownload: FileDownloadService
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -103,8 +101,11 @@ export class MyBooks implements OnInit, OnDestroy {
     }
 
     const url = resolveMediaUrl(fileUrl);
-    const fallbackName = book.title || 'book';
-    this.fileDownload.download(url, { fileName: fallbackName, openInNewTab: true });
+    const opened = window.open(url, '_blank', 'noopener');
+    if (!opened) {
+      this.notification.showError('Please allow pop-ups to view this book.');
+      return;
+    }
     this.viewedBookIds.add(book.id);
     this.persistViewedBooks();
   }

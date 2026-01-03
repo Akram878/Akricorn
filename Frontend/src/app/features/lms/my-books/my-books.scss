@@ -16,6 +16,8 @@ $gold-500: #b9822f;
   position: fixed;
   inset: 0;
   z-index: 999;
+  display: grid;
+  place-items: center;
 }
 
 .book-rating__backdrop {
@@ -27,8 +29,7 @@ $gold-500: #b9822f;
 
 .book-rating__panel {
   position: relative;
-  max-width: 420px;
-  margin: 15vh auto;
+  width: min(420px, 92vw);
   background: #ffffff;
   border: 1px solid #c8942e;
   border-radius: 0.8rem;
@@ -127,11 +128,5 @@ $gold-500: #b9822f;
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-}
-
-@media (max-width: 480px) {
-  .book-rating__panel {
-    margin: 18vh 1rem;
   }
 }
