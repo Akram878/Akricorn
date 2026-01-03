@@ -81,6 +81,35 @@
       <div class="form-grid">
         <div class="form-card">
           <h4>Path details</h4>
+
+          <div class="form-field">
+            <span>Thumbnail (max 50x50)</span>
+            <div class="thumbnail-block">
+              <div class="thumbnail-preview">
+                <img
+                  *ngIf="thumbnailPreview || pathForm.get('thumbnailUrl')?.value; else noThumb"
+                  [src]="thumbnailPreview || pathForm.get('thumbnailUrl')?.value"
+                  alt="Path thumbnail"
+                />
+                <ng-template #noThumb>
+                  <div class="thumbnail-placeholder">No image</div>
+                </ng-template>
+              </div>
+              <div class="thumbnail-actions">
+                <label class="btn-secondary">
+                  Upload image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    (change)="onThumbnailSelected($event)"
+                  />
+                </label>
+              </div>
+            </div>
+            <p class="field-hint" *ngIf="!thumbnailError">Thumbnail must be 50x50 or smaller.</p>
+            <p class="field-hint error" *ngIf="thumbnailError">{{ thumbnailError }}</p>
+          </div>
           <label class="form-field">
             <span>Title</span>
             <input type="text" formControlName="title" placeholder="Learning path title" />
@@ -94,10 +123,6 @@
             ></textarea>
           </label>
 
-          <label class="form-field">
-            <span>Thumbnail (max 50x50)</span>
-            <input type="file" accept="image/*" (change)="onThumbnailSelected($event)" />
-          </label>
           <label class="form-field">
             <span>Discount (%)</span>
             <input type="number" formControlName="discount" min="0" max="100" />

@@ -32,12 +32,7 @@
           <td>{{ tool.id }}</td>
           <td>
             <div class="title-cell">
-              <img *ngIf="tool.avatarUrl" class="avatar" [src]="tool.avatarUrl" alt="Tool avatar" />
-              <div *ngIf="!tool.avatarUrl" class="avatar-placeholder">No image</div>
-              <div>
-                <div class="title-text">{{ tool.name }}</div>
-                <div class="subtitle-text">{{ tool.description }}</div>
-              </div>
+              <div class="title-text">{{ tool.name }}</div>
             </div>
           </td>
           <td>
@@ -54,11 +49,11 @@
             </span>
           </td>
           <td class="actions-cell">
-            <button class="btn-small" (click)="onEdit(tool)">Edit</button>
             <button class="btn-secondary" (click)="onToggle(tool)">
               {{ tool.isActive ? 'Disable' : 'Enable' }}
             </button>
             <button class="btn-danger" (click)="onDelete(tool)">Delete</button>
+            <button class="btn-small" (click)="onEdit(tool)">Edit</button>
           </td>
         </tr>
       </tbody>
@@ -82,6 +77,28 @@
       <div class="form-grid">
         <div class="form-card">
           <h4>Tool details</h4>
+
+          <h4>Avatar (50x50)</h4>
+          <div class="thumbnail-block">
+            <div class="thumbnail-preview">
+              <img
+                *ngIf="avatarPreview; else noAvatar"
+                class="avatar"
+                [src]="avatarPreview"
+                alt="Tool avatar preview"
+              />
+              <ng-template #noAvatar>
+                <div class="thumbnail-placeholder">No image</div>
+              </ng-template>
+            </div>
+            <div class="thumbnail-actions">
+              <label class="btn-secondary">
+                Upload avatar
+                <input type="file" accept="image/*" hidden (change)="onAvatarSelected($event)" />
+              </label>
+            </div>
+          </div>
+          <p class="field-hint">Avatar image must be 50 x 50.</p>
           <label class="form-field">
             <span>Name</span>
             <input type="text" formControlName="name" placeholder="Tool name" />
@@ -113,23 +130,6 @@
         </div>
 
         <div class="form-card">
-          <h4>Avatar (50x50)</h4>
-          <div class="thumbnail-preview">
-            <div class="avatar-preview">
-              <img
-                *ngIf="avatarPreview"
-                class="avatar"
-                [src]="avatarPreview"
-                alt="Tool avatar preview"
-              />
-              <span *ngIf="!avatarPreview">No image</span>
-            </div>
-            <label class="file-button">
-              <input type="file" accept="image/*" (change)="onAvatarSelected($event)" />
-              Upload avatar
-            </label>
-          </div>
-
           <h4>Tool files (.zip or .exe)</h4>
           <label class="file-button">
             <input type="file" accept=".zip,.exe" multiple (change)="onFilesSelected($event)" />
