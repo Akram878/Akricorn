@@ -64,7 +64,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<AdminSeeder>();
 builder.Services.AddScoped<PasswordHasher<AdminAccount>>();
-builder.Services.AddScoped<DataSeeder>();
+
 builder.Services.AddScoped<PasswordHasher<User>>();
 // CORS to allow Angular on http://localhost:4200
 builder.Services.AddCors(options =>
@@ -192,8 +192,7 @@ using (var scope = app.Services.CreateScope())
     var adminSeeder = scope.ServiceProvider.GetRequiredService<AdminSeeder>();
     await adminSeeder.SeedAsync();
 
-    var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-    await dataSeeder.SeedAsync();
+   
 }
 
 // ============================
