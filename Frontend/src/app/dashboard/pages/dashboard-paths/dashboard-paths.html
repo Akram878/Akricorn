@@ -68,11 +68,11 @@
 
   <div *ngIf="showForm" class="editor-wrapper">
     <div class="editor-header">
+      <button type="button" class="btn-secondary" (click)="resetForm()">← Back</button>
       <div>
         <h3>{{ editMode ? 'Edit learning path' : 'Create new learning path' }}</h3>
         <p>Configure the path details and attach courses in order.</p>
       </div>
-      <button type="button" class="btn-secondary" (click)="resetForm()">Back to list</button>
     </div>
 
     <div class="status error" *ngIf="error">{{ error }}</div>

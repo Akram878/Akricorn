@@ -227,14 +227,16 @@
 
 .editor-wrapper {
   margin-top: 8px;
+  padding: 20px;
 }
 
 .editor-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
 }
 
 .editor-header h3 {
