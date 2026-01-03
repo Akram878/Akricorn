@@ -3,7 +3,7 @@ import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { PublicBooksService, MyBook } from '../../../core/services/public-books.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
-import { resolveMediaUrl } from '../../../core/utils/media-url';
+import { appendAuthToken, resolveMediaUrl } from '../../../core/utils/media-url';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { BookCardComponent } from '../book-card/book-card';
@@ -100,7 +100,13 @@ export class MyBooks implements OnInit, OnDestroy {
       return;
     }
 
-    const url = resolveMediaUrl(fileUrl);
+    const token = this.authService.getAccessToken();
+    if (!token) {
+      this.notification.showError('Please sign in to access the file.');
+      return;
+    }
+    const url = appendAuthToken(resolveMediaUrl(fileUrl), token);
+
     const opened = window.open(url, '_blank', 'noopener');
     if (!opened) {
       this.notification.showError('Please allow pop-ups to view this book.');
