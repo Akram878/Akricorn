@@ -190,7 +190,7 @@ export class LearningPath implements OnInit, OnDestroy {
       next: (response) => {
         this.selectedPath!.rating = response.averageRating;
         this.selectedPath!.ratingCount = response.ratingCount;
-        this.notification.showSuccess('تم إرسال تقييم المسار بنجاح.');
+        this.notification.showSuccess('Path rating submitted successfully.');
         this.isSubmittingRating = false;
         this.closeRatingModal();
       },
@@ -198,7 +198,7 @@ export class LearningPath implements OnInit, OnDestroy {
         if (err?.error?.message) {
           this.notification.showError(err.error.message);
         } else {
-          this.notification.showError('تعذر إرسال تقييم المسار.');
+          this.notification.showError('Could not submit the path rating.');
         }
         this.isSubmittingRating = false;
       },

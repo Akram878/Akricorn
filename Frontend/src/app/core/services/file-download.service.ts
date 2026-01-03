@@ -22,7 +22,7 @@ export class FileDownloadService {
     this.http.get(url, { responseType: 'blob', observe: 'response' }).subscribe({
       next: (response: HttpResponse<Blob>) => {
         if (!response.body) {
-          this.notification.showError('تعذر تنزيل الملف.');
+          this.notification.showError('Unable to download the file.');
           return;
         }
 
@@ -45,7 +45,7 @@ export class FileDownloadService {
         setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
       },
       error: () => {
-        this.notification.showError('تعذر تنزيل الملف.');
+        this.notification.showError('Unable to download the file.');
       },
     });
   }

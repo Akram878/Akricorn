@@ -17,7 +17,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
 
   const isAdminRequest = req.url.includes('/api/admin');
 
-  // لو الطلب رايح إلى /api/admin → استخدم adminToken فقط
+  // If the request goes to /api/admin → use adminToken only
   if (isAdminRequest) {
     tokenToUse = req.url.includes('/api/admin/login')
       ? null
@@ -25,19 +25,19 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
       ? adminAuthService.getAccessToken()
       : null;
   } else {
-    // LMS محمي + باقي الطلبات → توكن المستخدم فقط
+    // Protected LMS + other requests → user token only
     tokenToUse =
       isAuthRequest || !authService.isAuthenticated() ? null : authService.getAccessToken();
   }
 
   // ================================
-  //  ⭐ التعديل الوحيد المسموح به ⭐
+  //  ⭐ The only allowed modification ⭐
   // ================================
-  // معالجة مشاكل multipart/form-data
+  // Handling multipart/form-data issues
   const extraOptions: any = {};
   if (req.method === 'POST' || req.method === 'PUT') {
-    extraOptions.withCredentials = true; // مهم لعدم حذف التوكن
-    extraOptions.reportProgress = true; // مفيد للرفع
+    extraOptions.withCredentials = true; // Important to keep the token
+    extraOptions.reportProgress = true; // Useful for uploads
   }
 
   const authReq = tokenToUse
@@ -45,7 +45,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         setHeaders: {
           Authorization: `Bearer ${tokenToUse}`,
         },
-        ...extraOptions, // ← ← إضافة التعديل هنا فقط
+        ...extraOptions, // ← ← Add the modification here only
       })
     : req;
 
@@ -56,7 +56,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // ⛔ "Failed to fetch" (مثلاً السيرفر طافي)
+      // ⛔ "Failed to fetch" (e.g., the server is down)
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         notification.showError(
           'Cannot connect to the server. Please check that the backend is running.'
@@ -114,7 +114,7 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
         }
 
         // ======================
-        //     باقي الحالات
+        //     Remaining cases
         // ======================
         if (error.error?.message) {
           message = error.error.message;

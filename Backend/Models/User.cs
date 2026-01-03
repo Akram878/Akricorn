@@ -16,20 +16,20 @@ namespace Backend.Models
         public string Email { get; set; }
 
         // Authentication
-        // نخزن هنا الـ Hash فقط وليس الباسورد الخام
+        // Store only the hash here, not the raw password
         public string PasswordHash { get; set; }
 
         // Profile
         public string City { get; set; }
         public DateTime? BirthDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        // منطق "يمكن تعديل تاريخ الميلاد مرة واحدة فقط"
+        // Logic: "Birth date can only be edited once"
         public bool CanEditBirthDate { get; set; } = true;
 
-        // دور المستخدم داخل المنصة (Student, Premium, etc)
+        // User role within the platform (Student, Premium, etc)
         public string Role { get; set; } = "User";
 
-        // هل الحساب مفعّل أم لا (للتعطيل من الداشبورد)
+        // Whether the account is active (for disabling from the dashboard)
         public bool IsActive { get; set; } = true;
 
         // Navigation Properties

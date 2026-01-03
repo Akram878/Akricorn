@@ -268,7 +268,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
@@ -284,6 +284,10 @@
               "IsPinned": true
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "AuthControllerTests.cs",
@@ -291,7 +295,7 @@
               "RelativeDocumentMoniker": "..\\Backend.Test\\AuthControllerTests.cs",
               "ToolTip": "D:\\Akricorn\\Backend.Test\\AuthControllerTests.cs",
               "RelativeToolTip": "..\\Backend.Test\\AuthControllerTests.cs",
-              "ViewState": "AgIAADwAAAAAAAAAAAAowA8AAAABAAAAAAAAAA==",
+              "ViewState": "AgIAABMBAAAAAAAAAAAswDcBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-03T02:41:00.062Z",
               "EditorCaption": ""
@@ -357,10 +361,6 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-29T07:07:55.314Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             },
             {
               "$type": "Document",

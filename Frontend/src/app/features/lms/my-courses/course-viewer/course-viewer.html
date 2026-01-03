@@ -1,16 +1,16 @@
 <section class="lms-section course-viewer">
   <header class="lms-section__header">
     <div class="lms-section__breadcrumb">
-      <a routerLink="/lms/my-courses">كورساتي</a>
+      <a routerLink="/lms/my-courses">My Courses</a>
       <span>/</span>
-      <span class="active">عارض الكورس</span>
+      <span class="active">Course Viewer</span>
     </div>
-    <h2>{{ course?.title || 'تفاصيل الكورس' }}</h2>
-    <p>تابع الدروس والملفات الخاصة بالكورس من مكان واحد.</p>
+
+    <p>Follow the course lessons and files from one place.</p>
   </header>
 
   <div class="lms-section__body">
-    <div class="lms-section__state" *ngIf="isLoading">جارِ تحميل بيانات الكورس...</div>
+    <div class="lms-section__state" *ngIf="isLoading">Loading course data...</div>
     <div class="lms-section__state lms-section__state--error" *ngIf="error">{{ error }}</div>
 
     <ng-container *ngIf="!isLoading && !error && course">
@@ -26,7 +26,7 @@
             <div class="course-viewer__thumb-placeholder" *ngIf="!courseThumbnailUrl">
               <svg class="logo__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 134 155">
                 <defs>
-                  <!-- تدرج ذهبي -->
+                  <!-- Golden gradient -->
                   <linearGradient id="goldGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="50%" stop-color="#020f0c" />
                     <stop offset="100%" stop-color="#021813" />
@@ -34,7 +34,7 @@
                     <stop offset="100%" stop-color="rgb(12.08, 78.52, 63.42)" /> -->
                   </linearGradient>
 
-                  <!-- ظل ناعم -->
+                  <!-- Soft shadow -->
                   <filter id="goldShadow" x="-10%" y="-10%" width="140%" height="140%">
                     <feDropShadow
                       dx="0"
@@ -65,36 +65,38 @@
           </div>
 
           <div class="course-viewer__info-header">
-            <h3>{{ course.title }}</h3>
+            <div class="titstat">
+              <h3>{{ course.title }}</h3>
+              <span class="course-viewer__badge" *ngIf="course.completedAt">Completed</span>
+              <span
+                class="course-viewer__badge course-viewer__badge--active"
+                *ngIf="!course.completedAt"
+              >
+                In progress
+              </span>
+            </div>
+
             <p class="course-viewer__description">{{ course.description }}</p>
           </div>
 
-          <span class="course-viewer__badge" *ngIf="course.completedAt">مكتمل</span>
-          <span
-            class="course-viewer__badge course-viewer__badge--active"
-            *ngIf="!course.completedAt"
-          >
-            قيد الدراسة
-          </span>
-
           <div class="course-viewer__meta">
             <div class="course-viewer__meta-item" *ngIf="course.category">
-              <span>المستوى</span>
+              <span>Level</span>
               <strong>{{ course.category }}</strong>
             </div>
             <div
               class="course-viewer__meta-item"
               *ngIf="course.hours !== null && course.hours !== undefined"
             >
-              <span>المدة</span>
-              <strong>{{ course.hours }} ساعة</strong>
+              <span>Duration</span>
+              <strong>{{ course.hours }} hours</strong>
             </div>
             <div class="course-viewer__meta-item" *ngIf="course.pathTitle">
-              <span>المسار</span>
+              <span>Path</span>
               <strong>{{ course.pathTitle }}</strong>
             </div>
             <div class="course-viewer__meta-item">
-              <span>الأقسام</span>
+              <span>Sections</span>
               <strong>{{ course.sections?.length || 0 }}</strong>
             </div>
           </div>
@@ -110,10 +112,10 @@
             >
               <div class="course-viewer__section-header">
                 <div>
-                  <span class="course-viewer__section-index">قسم {{ sIndex + 1 }}</span>
+                  <span class="course-viewer__section-index">Section {{ sIndex + 1 }}</span>
                   <h3>{{ section.title }}</h3>
                 </div>
-                <span class="course-viewer__section-count">{{ section.lessons.length }} دروس</span>
+                <span class="course-viewer__section-count">{{ section.lessons.length }} lessons</span>
               </div>
 
               <div class="course-viewer__lessons">
@@ -128,10 +130,10 @@
                     </div>
                     <div class="course-viewer__lesson-actions">
                       <span class="course-viewer__lesson-count"
-                        >{{ lesson.files.length }} ملفات</span
+                        >{{ lesson.files.length }} files</span
                       >
                       <span class="course-viewer__lesson-status" *ngIf="lesson.isCompleted">
-                        مكتمل
+                        Completed
                       </span>
                       <button
                         type="button"
@@ -139,7 +141,7 @@
                         (click)="completeLesson(lesson.id)"
                         [disabled]="lesson.isCompleted || isLessonCompleting(lesson.id)"
                       >
-                        {{ lesson.isCompleted ? 'تم إنهاء الدرس' : 'إنهاء الدرس' }}
+                        {{ lesson.isCompleted ? 'Lesson completed' : 'Finish lesson' }}
                       </button>
                     </div>
                   </div>
@@ -155,13 +157,13 @@
                       (click)="openLessonFile(file)"
                     >
                       <span class="course-viewer__file-name">{{ file.name }}</span>
-                      <span class="course-viewer__file-action">عرض</span>
+                      <span class="course-viewer__file-action">View</span>
                     </button>
                   </div>
 
                   <ng-template #emptyFiles>
                     <div class="lms-section__state lms-section__state--empty">
-                      لا توجد ملفات لهذا الدرس.
+                      There are no files for this lesson.
                     </div>
                   </ng-template>
                 </div>
@@ -171,7 +173,7 @@
 
           <ng-template #emptySections>
             <div class="lms-section__state lms-section__state--empty">
-              لا توجد أقسام متاحة لهذا الكورس.
+              No sections are available for this course.
             </div>
           </ng-template>
         </div>
@@ -179,23 +181,23 @@
         <aside class="course-viewer__progress">
           <div class="course-viewer__progress-card">
             <div class="course-viewer__progress-header">
-              <h4>تقدم الكورس</h4>
+              <h4>Course progress</h4>
               <span class="course-viewer__progress-value">{{ courseProgressPercent }}%</span>
             </div>
             <div class="course-viewer__progress-bar" role="progressbar">
               <span [style.width.%]="courseProgressPercent"></span>
             </div>
             <p class="course-viewer__progress-note">
-              {{ completedLessonsCount }}/{{ totalLessonsCount }} دروس مكتملة
-              <span *ngIf="course?.completedAt">· تم إنهاء الكورس بنجاح.</span>
+              {{ completedLessonsCount }}/{{ totalLessonsCount }} completed lessons
+              <span *ngIf="course?.completedAt">· The course was completed successfully.</span>
             </p>
           </div>
 
           <div class="course-viewer__progress-card">
             <div class="course-viewer__progress-header">
-              <h4>تقدم المسار التعليمي</h4>
+              <h4>Learning path progress</h4>
               <span class="course-viewer__progress-value">
-                {{ hasLearningPaths ? 'متابع' : 'غير متصل بمسار' }}
+                {{ hasLearningPaths ? 'Linked' : 'Not linked to a path' }}
               </span>
             </div>
 
@@ -218,20 +220,20 @@
             </ng-container>
 
             <ng-template #noLearningPath>
-              <p class="course-viewer__progress-note">لا يوجد مسار مرتبط بهذا الكورس.</p>
+              <p class="course-viewer__progress-note">No learning path is linked to this course.</p>
             </ng-template>
           </div>
 
           <div class="course-viewer__progress-card course-viewer__rating-card">
             <div class="course-viewer__progress-header">
-              <h4>تقييم الكورس</h4>
+              <h4>Course rating</h4>
               <span class="course-viewer__progress-value">
                 {{ course.rating ?? 0 | number : '1.1-1' }}/5
               </span>
             </div>
             <p class="course-viewer__progress-note">
-              {{ course.ratingCount ?? 0 }} تقييم
-              <span *ngIf="course.userRating">· تقييمك {{ course.userRating }}/5</span>
+              {{ course.ratingCount ?? 0 }} ratings
+              <span *ngIf="course.userRating">· Your rating {{ course.userRating }}/5</span>
             </p>
 
             <div class="course-viewer__rating-stars">
@@ -253,11 +255,11 @@
               (click)="submitRating()"
               [disabled]="!canRateCourse || isSubmittingRating"
             >
-              {{ course.userRating ? 'تم إرسال التقييم' : 'إرسال التقييم' }}
+              {{ course.userRating ? 'Rating submitted' : 'Submit rating' }}
             </button>
 
             <p class="course-viewer__progress-note" *ngIf="!course.completedAt">
-              أكمل الكورس أولاً حتى تتمكن من تقييمه.
+              Complete the course first to be able to rate it.
             </p>
           </div>
         </aside>

@@ -2,12 +2,12 @@
 @use '../../../scss/base/variables' as *;
 
 // Emerald velvet
-$emerald-900: #020f0c; // خلفية شبه سوداء مائلة للأخضر
+$emerald-900: #020f0c; // Almost black background with a green tint
 $emerald-800: #021813;
 $emerald-700: #08342a;
 $emerald-600: #0e4334;
 
-// Gold (للنصوص والأزرار)
+// Gold (for text and buttons)
 $gold-100: #fff4cf;
 $gold-200: #f9e0a2;
 $gold-300: #f0cb7a;
@@ -57,7 +57,7 @@ $gold-500: #b9822f;
             display: inline-block;
             margin: 1rem 0;
             border-radius: 0.3rem;
-            color: hsl(168deg 78.95% 3.73%);
+            color: #f6f7fb;
             padding: 0.75rem;
             background: linear-gradient(
               180deg,
@@ -99,7 +99,7 @@ $gold-500: #b9822f;
             display: inline-block;
             margin: 1rem 0;
             border-radius: 0.3rem;
-            color: hsl(168deg 78.95% 3.73%);
+            color: #f6f7fb;
             padding: 0.75rem;
             background: linear-gradient(
               180deg,
@@ -117,7 +117,7 @@ $gold-500: #b9822f;
   }
 }
 
-/* البطاقة المخملية + شكل الثقب الأسود */
+/* Velvet card + black hole shape */
 .hero-velvet-plate {
   flex-grow: 1;
   width: 30rem;

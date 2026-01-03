@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-// الكورسات العامة لصفحة /lms/courses
+// Public courses for the /lms/courses page
 export interface PublicCourse {
   id: number;
   title: string;
@@ -13,15 +13,15 @@ export interface PublicCourse {
   finalPrice?: number;
   thumbnailUrl?: string | null;
   createdAt?: string;
-  // الحقول الإضافية (اختيارية حالياً)
-  hours?: number; // عدد الساعات
+  // Additional fields (optional for now)
+  hours?: number; // Number of hours
   category?: string; // Beginner / Intermediate / ...
-  rating?: number; // من 0 إلى 5
+  rating?: number; // From 0 to 5
   ratingCount?: number;
-  pathTitle?: string | null; // اسم الـ Path إن وجد
+  pathTitle?: string | null; // Path name if available
 }
 
-// الكورسات التي يملكها المستخدم (My Courses)
+// Courses the user owns (My Courses)
 export interface MyCourse {
   id: number;
   title: string;
@@ -32,10 +32,10 @@ export interface MyCourse {
 
   completedAt?: string | null;
 
-  // 🆕 حقول إضافية مستخدمة في my-courses.html
-  category?: string; // Beginner / Intermediate / Advanced / ... (اختياري)
-  hours?: number; // عدد الساعات (اختياري)
-  pathTitle?: string | null; // اسم الـ learning path إن وجد (اختياري)
+  // 🆕 Additional fields used in my-courses.html
+  category?: string; // Beginner / Intermediate / Advanced / ... (optional)
+  hours?: number; // Number of hours (optional)
+  pathTitle?: string | null; // Learning path name if available (optional)
   rating?: number;
   ratingCount?: number;
 }
@@ -94,7 +94,7 @@ export interface CourseRatingResponse {
   averageRating: number;
   ratingCount: number;
 }
-// رد الـ API عند شراء كورس عبر نظام الدفع
+// API response when purchasing a course via the payment system
 export interface CoursePaymentResponse {
   message: string;
   paymentId: number;
@@ -109,15 +109,15 @@ export interface CoursePaymentResponse {
   providedIn: 'root',
 })
 export class PublicCoursesService {
-  // Endpoint الـ LMS الأساسي
+  // Main LMS endpoint
   private baseUrl = `${API_BASE_URL}/api/lms`;
   private coursesBaseUrl = `${API_BASE_URL}/api/courses`;
-  // Endpoint للدفع الافتراضي
+  // Endpoint for the mock payment
   private paymentsBaseUrl = `${API_BASE_URL}/api/payments`;
 
   constructor(private http: HttpClient) {}
 
-  // جلب قائمة الكورسات العامة
+  // Fetch the list of public courses
   getCourses(): Observable<PublicCourse[]> {
     return this.http.get<PublicCourse[]>(`${this.coursesBaseUrl}`);
   }
@@ -127,22 +127,22 @@ export class PublicCoursesService {
     return this.http.get<PublicCourse[]>(`${this.coursesBaseUrl}/featured`);
   }
 
-  // شراء كورس (الآن عبر نظام المدفوعات)
+  // Purchase a course (now via the payments system)
   purchaseCourse(courseId: number): Observable<CoursePaymentResponse> {
     return this.http.post<CoursePaymentResponse>(`${this.paymentsBaseUrl}/course/${courseId}`, {});
   }
 
-  // كورسات المستخدم (My Courses)
+  // User courses (My Courses)
   getMyCourses(): Observable<MyCourse[]> {
     return this.http.get<MyCourse[]>(`${this.baseUrl}/my-courses`);
   }
 
-  // تفاصيل كورس مملوك مع المحتوى والملفات
+  // Owned course details with content and files
   getMyCourse(courseId: number): Observable<MyCourseDetail> {
     return this.http.get<MyCourseDetail>(`${this.baseUrl}/my-courses/${courseId}`);
   }
 
-  // إنهاء كورس وتحديث تقدّم المسارات
+  // Complete a course and update path progress
   completeMyCourse(courseId: number): Observable<CourseCompletionResponse> {
     return this.http.post<CourseCompletionResponse>(
       `${this.baseUrl}/my-courses/${courseId}/complete`,

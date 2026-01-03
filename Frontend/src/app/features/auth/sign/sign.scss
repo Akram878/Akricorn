@@ -25,7 +25,7 @@
   }
 }
 
-/* صفين جنب بعض */
+/* Two fields side by side */
 .field-row {
   // height: calc(100% / 6);
   @include flex(row, center, flex-start);
@@ -44,7 +44,7 @@
   }
 }
 
-/* الحقول العامة */
+/* General fields */
 .field {
   height: calc(100% / 6);
   width: 80%;
@@ -154,18 +154,18 @@
     }
   }
 }
-/* سياسة الخصوصية */
+/* Privacy policy */
 .policy-field {
   .policy-container {
     @include flex(row, flex-start, center);
     gap: 0.3rem;
 
-    /* رفع النص قليلاً ليوازي منتصف الـ checkbox */
+    /* Raise the text slightly to align with the middle of the checkbox */
     label,
     span,
     p {
       position: relative;
-      top: -1px; // عدّلها لـ -2px لو حاب ترفعه أكثر شوي
+      top: -1px; // Adjust to -2px if you want to lift it a bit more
     }
 
     label {
@@ -207,7 +207,7 @@
   }
 }
 
-/* الأزرار أسفل فورم التسجيل */
+/* Buttons below the signup form */
 .buttonContainer {
   width: 80%;
   margin-top: 0.4rem;
@@ -222,7 +222,7 @@
 
   .policy-container {
     display: flex;
-    align-items: center; // النص بمحاذاة منتصف الـ checkbox
+    align-items: center; // Text aligned with the middle of the checkbox
     gap: 0.5rem;
     margin-bottom: 0.2rem;
     font-size: small;
@@ -305,7 +305,7 @@
   }
 }
 
-/* زر التسجيل */
+/* Signup button */
 .btn.signup-btn {
   cursor: pointer;
 
@@ -326,7 +326,7 @@
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.9);
   }
 
-  /* شكل الزر لما يكون معطّل (الحقول ناقصة / فيها خطأ / checkbox مش معلم) */
+  /* Button appearance when disabled (fields missing / invalid / checkbox unchecked) */
   &:disabled,
   &[disabled] {
     opacity: 0.5;
@@ -336,7 +336,7 @@
   }
 }
 
-/* رابط العودة إلى تسجيل الدخول */
+/* Link back to login */
 .login-link.txtna {
   border: none;
   background: none;

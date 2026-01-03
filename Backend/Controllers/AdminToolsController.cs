@@ -143,7 +143,7 @@ namespace Backend.Controllers
 
         // =========================
         //  POST: /api/admin/tools/{id}/upload-avatar
-        //  رفع الصورة الرمزية للأداة
+        //  Upload the tool avatar
         // =========================
         [HttpPost("{id:int}/upload-avatar")]
         [DisableRequestSizeLimit]
@@ -183,7 +183,7 @@ namespace Backend.Controllers
 
         // =========================
         //  POST: /api/admin/tools/{id}/files/upload
-        //  رفع ملف أداة
+        //  Upload a tool file
         // =========================
         [HttpPost("{id:int}/files/upload")]
         [DisableRequestSizeLimit]
@@ -247,7 +247,7 @@ namespace Backend.Controllers
 
         // =========================
         //  GET: /api/admin/tools/files/{fileId}
-        //  تحميل ملف أداة (أدمن فقط)
+        //  Download a tool file (admin only)
         // =========================
         [HttpGet("files/{fileId:int}")]
         public async Task<IActionResult> DownloadFile(int fileId)
@@ -279,7 +279,7 @@ namespace Backend.Controllers
 
         // =========================
         //  DELETE: /api/admin/tools/files/{fileId}
-        //  حذف ملف أداة
+        //  Delete a tool file
         // =========================
         [HttpDelete("files/{fileId:int}")]
         public async Task<IActionResult> DeleteFile(int fileId)

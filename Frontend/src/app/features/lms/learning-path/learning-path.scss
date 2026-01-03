@@ -224,12 +224,13 @@ $gold-400: #d9a74a;
   h3 {
     margin: 0;
     font-size: 1.1rem;
+    color: #6b7280;
   }
 
   p {
     margin: 0.35rem 0 0;
     font-size: 0.9rem;
-    color: #4b5563;
+    color: #6b7280;
   }
 }
 
@@ -248,16 +249,26 @@ $gold-400: #d9a74a;
 }
 
 .path-rating__star {
-  border: none;
-  background: transparent;
-  font-size: 1.6rem;
+  border: 1px solid #c8942e;
+  background-color: #ffffff;
+  color: #c8942e;
+  border-radius: 0.3rem;
+  padding: 0.25rem 0.45rem;
+  font-size: 1rem;
   cursor: pointer;
-  color: #d1d5db;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+
+  &:hover:not(:disabled) {
+    color: #ebaf37;
+    border-color: #ebaf37;
+    transform: translateY(-1px);
+  }
 }
 
 .path-rating__star.is-selected {
-  color: #fbbf24;
+  color: #ebaf37;
+  border-color: #ebaf37;
+  box-shadow: 0 4px 12px rgba($gold-400, 0.25);
 }
 
 .path-rating__submit {
@@ -265,14 +276,9 @@ $gold-400: #d9a74a;
   border: none;
   padding: 0.7rem 1rem;
   border-radius: 0.4rem;
-  background: #041e16;
-  color: hsl(42.67, 88.24%, 80%);
+  background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
+  color: #ffffff;
   cursor: pointer;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
 }
 
 @media (max-width: 768px) {

@@ -140,9 +140,9 @@ export class DashboardUserDetailComponent implements OnInit {
     });
 
     return [
-      ...(this.overview.purchases?.courses ?? []).map((item) => toRow('كورس', item)),
-      ...(this.overview.purchases?.books ?? []).map((item) => toRow('كتاب', item)),
-      ...(this.overview.purchases?.paths ?? []).map((item) => toRow('مسار', item)),
+      ...(this.overview.purchases?.courses ?? []).map((item) => toRow('Course', item)),
+      ...(this.overview.purchases?.books ?? []).map((item) => toRow('Book', item)),
+      ...(this.overview.purchases?.paths ?? []).map((item) => toRow('Path', item)),
     ];
   }
 
@@ -168,8 +168,8 @@ export class DashboardUserDetailComponent implements OnInit {
     });
 
     return [
-      ...(this.overview.courses?.active ?? []).map((course) => toRow('نشط', course)),
-      ...(this.overview.courses?.completed ?? []).map((course) => toRow('مكتمل', course)),
+      ...(this.overview.courses?.active ?? []).map((course) => toRow('Active', course)),
+      ...(this.overview.courses?.completed ?? []).map((course) => toRow('Completed', course)),
     ];
   }
 }

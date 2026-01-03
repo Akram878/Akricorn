@@ -30,7 +30,7 @@ import { buildBookFilters } from '../filters/lms-filter-config';
   styleUrl: './library.scss',
 })
 export class Library implements OnInit, OnDestroy {
-  // كل الكتب المتاحة (حتى للزائر)
+  // All available books (even for visitors)
   books: PublicBook[] = [];
 
   filteredBooks: PublicBook[] = [];
@@ -38,7 +38,7 @@ export class Library implements OnInit, OnDestroy {
   filters: FilterDefinition<PublicBook>[] = [];
   filterState: FilterState = {};
 
-  // IDs للكتب المملوكة
+  // IDs of owned books
   private ownedBookIds: Set<number> = new Set<number>();
   bookThumbnails: Record<number, string> = {};
   private thumbnailObjectUrls: Map<number, string> = new Map();
@@ -74,7 +74,7 @@ export class Library implements OnInit, OnDestroy {
     this.authSubscription?.unsubscribe();
   }
 
-  // تحميل الكتب العامة
+  // Load public books
   loadBooks(): void {
     this.isLoading = true;
     this.error = null;
@@ -90,13 +90,13 @@ export class Library implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: () => {
-        this.error = 'حدث خطأ أثناء تحميل الكتب. حاول مرة أخرى لاحقاً.';
+        this.error = 'An error occurred while loading the books. Please try again later.';
         this.isLoading = false;
       },
     });
   }
 
-  // تحميل الكتب التي يملكها المستخدم
+  // Load books owned by the user
   loadMyBooks(): void {
     this.booksService.getMyBooks().subscribe({
       next: (data: MyBook[]) => {
@@ -104,12 +104,12 @@ export class Library implements OnInit, OnDestroy {
         this.applyFilters(this.filterState);
       },
       error: () => {
-        // في حال المستخدم غير مسجّل أو حصل خطأ 401، نتجاهله
+        // If the user is not logged in or a 401 occurs, ignore it
       },
     });
   }
 
-  // هل هذا الكتاب مملوك؟
+  // Is this book owned?
   isBookOwned(book: PublicBook): boolean {
     return this.ownedBookIds.has(book.id);
   }
@@ -125,7 +125,7 @@ export class Library implements OnInit, OnDestroy {
     );
   }
 
-  // المنطق: شراء / عرض في My Books
+  // Logic: purchase / view in My Books
   onView(book: PublicBook): void {
     if (this.isBookOwned(book)) {
       this.router.navigate(['/lms/my-books']);

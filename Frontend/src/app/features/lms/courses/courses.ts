@@ -30,16 +30,16 @@ import { buildCourseFilters } from '../filters/lms-filter-config';
   styleUrl: './courses.scss',
 })
 export class Courses implements OnInit, OnDestroy {
-  // كل الكورسات من الباك إند
+  // All courses from the back end
   courses: PublicCourse[] = [];
 
-  // الكورسات بعد تطبيق الفلاتر
+  // Courses after applying filters
   filteredCourses: PublicCourse[] = [];
 
   isLoading = false;
   error: string | null = null;
 
-  // IDs للكورسات المملوكة
+  // IDs of owned courses
   private ownedCourseIds: Set<number> = new Set<number>();
 
   private authSubscription?: Subscription;
@@ -86,7 +86,7 @@ export class Courses implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: () => {
-        this.error = 'حدث خطأ أثناء تحميل الكورسات. حاول مرة أخرى لاحقاً.';
+        this.error = 'An error occurred while loading the courses. Please try again later.';
         this.isLoading = false;
       },
     });
@@ -103,7 +103,7 @@ export class Courses implements OnInit, OnDestroy {
         this.applyFilters(this.filterState);
       },
       error: () => {
-        // نطنش الخطأ هنا، لأن الفلاتر والكورسات تعمل حتى بدون MyCourses
+        // Ignore the error here because filters and courses work even without MyCourses
       },
     });
   }

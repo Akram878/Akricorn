@@ -28,7 +28,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    // تعريف نظام البيرر (JWT)
+    // Define the bearer system (JWT)
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Enter: Bearer {your token}"
     });
 
-    // جعل كل Endpoints تستخدم نظام المصادقة
+    // Make all endpoints use authentication
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -55,7 +55,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // دعم رفع الملفات عبر FormData
+    // Support file uploads via FormData
     options.OperationFilter<SwaggerFileOperationFilter>();
 });
 
@@ -66,7 +66,7 @@ builder.Services.AddScoped<AdminSeeder>();
 builder.Services.AddScoped<PasswordHasher<AdminAccount>>();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddScoped<PasswordHasher<User>>();
-// CORS للسماح لـ Angular على http://localhost:4200
+// CORS to allow Angular on http://localhost:4200
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDev", policy =>
@@ -115,7 +115,7 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
 
-        // أعد كتابة رد الـ 401 برسالة أوضح بدل الرد الافتراضي الفارغ
+        // Rewrite the 401 response with a clearer message instead of the empty default
         options.Events = new JwtBearerEvents
         {
 
@@ -223,7 +223,7 @@ app.Use(async (context, next) =>
 
     await next();
 });
-// ملفات Angular الـ static (لو حاطط الـ build هنا)
+// Angular static files (if hosting the build here)
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = context =>
@@ -239,16 +239,16 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseRouting();
 
-// CORS لازم يكون بعد UseRouting وقبل Auth
+// CORS must be after UseRouting and before Auth
 app.UseCors("AllowAngularDev");
 
-// مصادقة ثم تفويض
+// Authenticate then authorize
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// لدعم Angular Router لما تستضيف الـ build داخل نفس الباك إند
+// To support Angular Router when hosting the build inside the same backend
 app.MapFallbackToFile("index.html");
 
 app.Run();

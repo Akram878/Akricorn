@@ -6,7 +6,7 @@ import { UserStoreService } from './user-store.service';
 import { API_BASE_URL } from '../config/api.config';
 
 // ============================
-//       واجهات البيانات
+//       Data interfaces
 // ============================
 
 export interface User {
@@ -22,7 +22,7 @@ export interface User {
   city?: string;
   birthDate?: string;
 
-  password?: string; // لاستعماله في التسجيل فقط (لن نستقبله من الباك إند)
+  password?: string; // To be used for signup only (we will not receive it from the back end)
   confirmPassword?: string;
   acceptedPolicy?: boolean;
   isGuest?: boolean;
@@ -30,13 +30,13 @@ export interface User {
   canEditBirthDate?: boolean;
 }
 
-// استجابة Auth من الباك إند (user + token)
+// Auth response from the back end (user + token)
 export interface AuthResponse {
   user: User;
   token: string;
 }
 
-// طلب تعديل المعلومات الشخصية
+// Request to update personal information
 export interface UpdateProfileRequest {
   name: string;
   family: string;
@@ -45,7 +45,7 @@ export interface UpdateProfileRequest {
   currentPassword: string;
 }
 
-// طلب إعدادات الحساب
+// Request for account settings
 export interface UpdateAccountSettingsRequest {
   email: string;
   countryCode: string;
@@ -61,7 +61,7 @@ export class AuthService {
   private apiUrl = `${API_BASE_URL}/api/auth`;
   private readonly tokenStorageKey = 'auth_token';
   private readonly adminTokenStorageKey = 'adminToken';
-  // ✅ هنا التعديل المهم
+  // ✅ Important change here
   currentUser$!: Observable<User | null>;
   isLoggedIn$!: Observable<boolean>;
 
@@ -122,7 +122,7 @@ export class AuthService {
         const userFromApi = response.user;
         const token = response.token;
 
-        // تخزين المستخدم
+        // Store the user
         this.userStore.setUser(
           {
             ...userFromApi,
@@ -131,7 +131,7 @@ export class AuthService {
           true
         );
 
-        // تخزين التوكن
+        // Store the token
         if (token) {
           this.setToken(token);
         }

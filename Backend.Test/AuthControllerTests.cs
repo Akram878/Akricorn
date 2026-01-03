@@ -38,7 +38,7 @@ namespace Backend.Tests
             Assert.Contains("number", errors.Keys);
             Assert.Contains("city", errors.Keys);
             Assert.Contains("birthDate", errors.Keys);
-            Assert.Contains("countryCode", errors.Keys);
+          
             Assert.Contains("acceptedPolicy", errors.Keys);
         }
 
@@ -301,7 +301,7 @@ namespace Backend.Tests
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["Jwt:Key"] = "supersecretkeysupersecretkey",
+                    ["Jwt:Key"] = "unit-test-secret-key-should-be-at-least-32-bytes",
                     ["Jwt:Issuer"] = "test-issuer",
                     ["Jwt:Audience"] = "test-audience"
                 })

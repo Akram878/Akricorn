@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class NotificationService {
-  // حالياً نستعمل alert، لاحقاً ممكن نستبدلها بتوست جميل
+  // Currently using alert; later we might replace it with a nicer toast
   showError(message: string): void {
     alert(message);
   }

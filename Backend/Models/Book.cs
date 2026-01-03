@@ -6,13 +6,13 @@ namespace Backend.Models
     {
         public int Id { get; set; }
 
-        public string Title { get; set; }        // اسم الكتاب
-        public string Description { get; set; }  // وصف
-        public decimal Price { get; set; }       // سعر الكتاب لو اشتريناه لوحده
+        public string Title { get; set; }        // Book title
+        public string Description { get; set; }  // Description
+        public decimal Price { get; set; }       // Book price if purchased individually
        
         public bool IsActive { get; set; } = true;
 
-        public string Category { get; set; } = string.Empty; // فئة الكتاب
+        public string Category { get; set; } = string.Empty; // Book category
 
         public string? ThumbnailUrl { get; set; }
 

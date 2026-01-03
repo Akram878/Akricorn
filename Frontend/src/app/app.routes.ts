@@ -14,9 +14,9 @@ import { Sign } from './features/auth/sign/sign';
 
 // Home
 import { ProfileComponent } from './features/home/profile/profile';
-import { Payments } from './features/home/profile/payments/payments'; // 🆕 صفحة المدفوعات
+import { Payments } from './features/home/profile/payments/payments'; // 🆕 Payments page
 
-// 🛡 AuthGuard (لليوزر)
+// 🛡 AuthGuard (for user)
 import { authGuard } from './core/guards/auth-guard';
 
 // LMS sub pages
@@ -111,7 +111,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
-        path: 'profile/payments', // 🆕 صفحة سجل المدفوعات
+        path: 'profile/payments', // 🆕 Payments history page
         component: Payments,
         canActivate: [authGuard],
       },
@@ -119,13 +119,13 @@ export const routes: Routes = [
     ],
   },
 
-  // 🆕 صفحة تسجيل الدخول للداشبورد
+  // 🆕 Dashboard login page
   {
     path: 'dashboard/login',
     component: DashboardLoginComponent,
   },
 
-  // 🆕 الداشبورد المحمي
+  // 🆕 Protected dashboard
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,

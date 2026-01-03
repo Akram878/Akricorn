@@ -47,11 +47,11 @@ export class CourseViewer implements OnInit, OnDestroy {
     this.courseId = param ? Number(param) : NaN;
 
     if (!this.courseId || Number.isNaN(this.courseId)) {
-      this.error = 'لم يتم العثور على الكورس المطلوب.';
+      this.error = 'The requested course was not found.';
       return;
     }
     if (!this.authService.isAuthenticated()) {
-      this.error = 'يرجى تسجيل الدخول للوصول إلى الكورس.';
+      this.error = 'Please sign in to access the course.';
       return;
     }
 
@@ -59,7 +59,7 @@ export class CourseViewer implements OnInit, OnDestroy {
       if (!isAuthenticated) {
         this.cleanupCourseThumbnail();
         this.course = null;
-        this.error = 'يرجى تسجيل الدخول للوصول إلى الكورس.';
+        this.error = 'Please sign in to access the course.';
       }
     });
     this.loadCourse();
@@ -80,7 +80,7 @@ export class CourseViewer implements OnInit, OnDestroy {
         if (err?.error?.message) {
           this.error = err.error.message;
         } else {
-          this.error = 'حدث خطأ أثناء تحميل الكورس.';
+          this.error = 'An error occurred while loading the course.';
         }
         this.isLoading = false;
       },
@@ -89,7 +89,7 @@ export class CourseViewer implements OnInit, OnDestroy {
 
   openLessonFile(file: CourseLessonFile): void {
     if (!this.authService.isAuthenticated()) {
-      this.notifications.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
+      this.notifications.showError('Please sign in to access the file.');
       return;
     }
     const token = this.authService.getAccessToken();
@@ -106,7 +106,7 @@ export class CourseViewer implements OnInit, OnDestroy {
     this.coursesService.completeLesson(this.courseId, lessonId).subscribe({
       next: (res) => {
         this.markLessonCompleted(lessonId);
-        this.notifications.showSuccess(res.message || 'تم إنهاء الدرس.');
+        this.notifications.showSuccess(res.message || 'The lesson has been completed.');
         if (res.courseCompleted && this.course && !this.course.completedAt) {
           this.course = {
             ...this.course,
@@ -116,7 +116,7 @@ export class CourseViewer implements OnInit, OnDestroy {
         this.completingLessons.delete(lessonId);
       },
       error: (err) => {
-        const message = err?.error?.message || 'تعذر إنهاء الدرس.';
+        const message = err?.error?.message || 'Could not complete the lesson.';
         this.notifications.showError(message);
         this.completingLessons.delete(lessonId);
       },
@@ -136,7 +136,7 @@ export class CourseViewer implements OnInit, OnDestroy {
     }
     const course = this.course;
     if (this.ratingValue < 1 || this.ratingValue > 5) {
-      this.notifications.showError('يرجى اختيار تقييم من 1 إلى 5.');
+      this.notifications.showError('Please choose a rating from 1 to 5.');
       return;
     }
 
@@ -149,11 +149,11 @@ export class CourseViewer implements OnInit, OnDestroy {
           ratingCount: res.ratingCount,
           userRating: this.ratingValue,
         };
-        this.notifications.showSuccess(res.message || 'تم إرسال تقييمك بنجاح.');
+        this.notifications.showSuccess(res.message || 'Your rating has been sent successfully.');
         this.isSubmittingRating = false;
       },
       error: (err) => {
-        const message = err?.error?.message || 'تعذر إرسال التقييم.';
+        const message = err?.error?.message || 'Could not submit the rating.';
         this.notifications.showError(message);
         this.isSubmittingRating = false;
       },

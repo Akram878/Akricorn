@@ -14,7 +14,7 @@ $gold-500: #b9822f;
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem 1.5rem 2.5rem;
-  color: $gold-100;
+  color: #111827;
 }
 
 .profile-payments__header {
@@ -32,7 +32,7 @@ $gold-500: #b9822f;
   p {
     margin: 0;
     font-size: 0.9rem;
-    color: rgba($gold-200, 0.85);
+    color: #6b7280;
   }
 }
 
@@ -40,9 +40,8 @@ $gold-500: #b9822f;
   margin-top: 1.5rem;
   padding: 1.4rem;
   border-radius: 0.3rem;
-  background-color: rgb(4 30 22);
-  border: 1px solid rgba(6, 95, 70, 0.9);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+
+  border: 1px solid #c8942e;
 }
 
 .payments-state {
@@ -51,7 +50,7 @@ $gold-500: #b9822f;
 
   text-align: center;
   font-size: 0.9rem;
-  color: rgba($gold-200, 0.9);
+  color: #6b7280;
 }
 
 .payments-state--error {
@@ -74,19 +73,19 @@ $gold-500: #b9822f;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: rgba($gold-200, 0.75);
+    color: #6b7280;
     padding: 0.8rem 0.75rem;
-    border-bottom: 1px solid hsl(165, 93%, 11%);
+    border-bottom: 1px solid #c8942e;
   }
 
-  tbody tr {
-    border-bottom: 1px solid hsl(165, 93%, 11%);
+  tbody tr:not(:last-child) {
+    border-bottom: 1px solid #c8942e;
   }
 
   tbody td {
     padding: 0.85rem 0.75rem;
     font-size: 0.88rem;
-    color: rgba($gold-100, 0.95);
+    color: #1f2937;
   }
 }
 
@@ -103,7 +102,7 @@ $gold-500: #b9822f;
 .payments-table__status {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.6rem;
+
   border-radius: 0.3rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -135,9 +134,9 @@ $gold-500: #b9822f;
 .chip-btn {
   padding: 0.35rem 0.9rem;
   border-radius: 0.3rem;
-  border: 1px solid hsl(165, 93%, 11%);
-  background-color: rgb(4 30 22);
-  color: rgba($gold-200, 0.96);
+  border: none;
+  background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
+  color: #f6f7fb;
   font-size: 0.78rem;
   cursor: pointer;
 

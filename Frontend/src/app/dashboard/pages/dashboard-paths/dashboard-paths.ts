@@ -28,14 +28,14 @@ export class DashboardPaths implements OnInit {
   isLoading = false;
   error: string | null = null;
 
-  // كل الكورسات المتاحة في النظام
+  // All courses available in the system
   courses: AdminCourseDto[] = [];
   isLoadingCourses = false;
 
-  // الكورسات التي تنتمي للمسار الحالي وبالترتيب
+  // Courses belonging to the current path in order
   selectedCourseIds: number[] = [];
 
-  // فورم المسار
+  // Path form
   pathForm: FormGroup;
   isSaving = false;
   editMode = false;
@@ -44,7 +44,7 @@ export class DashboardPaths implements OnInit {
   selectedThumbnailFile: File | null = null;
   thumbnailPreview: string | null = null;
   thumbnailError: string | null = null;
-  // هل مودال المسار مفتوح؟
+  // Is the path modal open?
   showForm = false;
 
   constructor(
@@ -97,7 +97,7 @@ export class DashboardPaths implements OnInit {
     });
   }
 
-  // اسم الكورس من الـ ID (للعرض)
+  // Course name from the ID (for display)
   getCourseTitle(id: number): string {
     const c = this.courses.find((x) => x.id === id);
     return c ? c.title : `Course #${id}`;
@@ -117,7 +117,7 @@ export class DashboardPaths implements OnInit {
     return this.selectedCourseIds.reduce((sum, id) => sum + this.getCoursePrice(id), 0);
   }
 
-  // فتح مودال إنشاء مسار جديد
+  // Open modal to create a new path
   openCreateForm(): void {
     this.editMode = false;
     this.editingPathId = null;
@@ -138,7 +138,7 @@ export class DashboardPaths implements OnInit {
     this.showForm = true;
   }
 
-  // فتح مودال تعديل مسار
+  // Open modal to edit a path
   onEdit(path: PathView): void {
     this.editMode = true;
     this.editingPathId = path.id;
@@ -162,7 +162,7 @@ export class DashboardPaths implements OnInit {
     this.showForm = true;
   }
 
-  // إغلاق المودال
+  // Close the modal
   resetForm(): void {
     this.editMode = false;
     this.editingPathId = null;
@@ -183,7 +183,7 @@ export class DashboardPaths implements OnInit {
     this.showForm = false;
   }
 
-  // إضافة كورس للمسار
+  // Add a course to the path
   onAddCourse(courseIdStr: string): void {
     const id = Number(courseIdStr);
     if (!id || Number.isNaN(id)) return;
@@ -191,12 +191,12 @@ export class DashboardPaths implements OnInit {
     this.selectedCourseIds.push(id);
   }
 
-  // إزالة كورس من المسار
+  // Remove a course from the path
   removeCourse(index: number): void {
     this.selectedCourseIds.splice(index, 1);
   }
 
-  // تحريك كورس للأعلى
+  // Move a course up
   moveCourseUp(index: number): void {
     if (index <= 0) return;
     const tmp = this.selectedCourseIds[index - 1];
@@ -204,7 +204,7 @@ export class DashboardPaths implements OnInit {
     this.selectedCourseIds[index] = tmp;
   }
 
-  // تحريك كورس للأسفل
+  // Move a course down
   moveCourseDown(index: number): void {
     if (index >= this.selectedCourseIds.length - 1) return;
     const tmp = this.selectedCourseIds[index + 1];
@@ -250,7 +250,7 @@ export class DashboardPaths implements OnInit {
     this.selectedThumbnailFile = null;
   }
 
-  // حفظ المسار (إنشاء / تعديل)
+  // Save path (create / edit)
   onSubmit(): void {
     if (this.pathForm.invalid || this.isSaving) return;
 
@@ -270,7 +270,7 @@ export class DashboardPaths implements OnInit {
       price: totalPrice,
       discount: value.discount,
       isActive: value.isActive,
-      courseIds: [...this.selectedCourseIds], // الترتيب مهم هنا
+      courseIds: [...this.selectedCourseIds], // Order matters here
     };
 
     if (this.editMode && this.editingPathId != null) {
@@ -302,7 +302,7 @@ export class DashboardPaths implements OnInit {
     }
   }
 
-  // تفعيل / تعطيل مسار
+  // Activate / deactivate a path
   onToggle(path: AdminLearningPathDto): void {
     this.adminPaths.toggleActive(path.id).subscribe({
       next: (res) => {
@@ -334,7 +334,7 @@ export class DashboardPaths implements OnInit {
     });
   }
 
-  // حذف مسار
+  // Delete a path
   onDelete(path: AdminLearningPathDto): void {
     const confirmDelete = confirm(`Delete learning path "${path.title}" ?`);
     if (!confirmDelete) return;

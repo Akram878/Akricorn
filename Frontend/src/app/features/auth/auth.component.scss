@@ -1,7 +1,7 @@
 @use '../../../scss/base/mixins' as *;
 @use '../../../scss/base/variables' as *;
 
-// نفس ألوان الهوم
+// Same colors as home
 $emerald-900: #020f0c;
 $emerald-800: #021813;
 $emerald-700: #08342a;
@@ -31,7 +31,7 @@ $gold-500: #b9822f;
 }
 
 h1 {
-  display: inline-block; /* 🔑 مهم جدًا */
+  display: inline-block; /* 🔑 Very important */
   background-image: linear-gradient(135deg, #e6be63 0%, #d9a74a 40%, #c8942e 70%, #a8731f 100%);
 
   -webkit-background-clip: text;
@@ -55,10 +55,10 @@ h1 {
   }
 }
 
-/* الحاوية الرئيسية بغريد 3 أعمدة */
+/* Main container with a 3-column grid */
 .regBox {
   width: 100%;
-  // ❌ لا نحتاج height: 100% هنا أبداً، هي اللي تكسر الحساب مع الزوم
+  // ❌ We do not need height: 100% here; it breaks sizing with zoom
   // height: 100%;
 
   display: grid;
@@ -75,7 +75,7 @@ h1 {
   //   linear-gradient(135deg, $emerald-900 0%, $emerald-800 40%, $emerald-700 100%);
 }
 
-/* اللوجو في الأعلى يسار (عمودين) */
+/* Logo at top left (two columns) */
 .logoBox {
   grid-area: logo;
   @include flex(row, center, center);
@@ -100,7 +100,7 @@ h1 {
   }
 }
 
-/* الفورم (لوغين أو ساين) على اليمين كامل */
+/* Form (login or sign) on the right full width */
 .authBox {
   grid-area: form;
   align-self: stretch;
@@ -130,7 +130,7 @@ h1 {
   }
 }
 
-/* السوشال + نص التبديل في الأسفل يسار */
+/* Social + toggle text at the bottom left */
 .altBox {
   @include flex(row, space-evenly, center);
   gap: 1.5rem;
@@ -183,7 +183,7 @@ h1 {
   }
 }
 
-/* موبايل / شاشات صغيرة: غريد عمودي */
+/* Mobile / small screens: vertical grid */
 @media (max-width: 900px) {
   .regBox {
     grid-template-columns: 1fr;

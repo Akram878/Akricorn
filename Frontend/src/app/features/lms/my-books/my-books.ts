@@ -98,7 +98,7 @@ export class MyBooks implements OnInit, OnDestroy {
     }
 
     if (!this.authService.isAuthenticated()) {
-      this.notification.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
+      this.notification.showError('Please sign in to access the file.');
       return;
     }
 
@@ -148,7 +148,7 @@ export class MyBooks implements OnInit, OnDestroy {
 
   submitRating(): void {
     if (!this.selectedBook || this.ratingValue < 1 || this.ratingValue > 5) {
-      this.notification.showError('يرجى اختيار تقييم صالح.');
+      this.notification.showError('Please choose a valid rating.');
       return;
     }
 
@@ -170,7 +170,7 @@ export class MyBooks implements OnInit, OnDestroy {
         if (err?.error?.message) {
           this.notification.showError(err.error.message);
         } else {
-          this.notification.showError('تعذر إرسال التقييم.');
+          this.notification.showError('Could not submit the rating.');
         }
         this.isSubmittingRating = false;
       },

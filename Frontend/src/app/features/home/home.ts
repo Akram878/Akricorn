@@ -27,7 +27,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
   private ctx: CanvasRenderingContext2D | null = null;
   private animationId: number | null = null;
   private resizeHandler?: () => void;
-  private t = 0; // الزمن للأنيميشن
+  private t = 0; // Time for the animation
 
   private stars: Star3D[] = [];
   private universeReady = false;
@@ -59,7 +59,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
     if (!ctx) return;
     this.ctx = ctx;
 
-    // توليد "الكون" مرة واحدة
+    // Generate the "universe" once
     this.createUniverse();
 
     this.resizeHandler = () => {
@@ -137,7 +137,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // توليد النجوم مرة واحدة
+  // Generate the stars once
   private createUniverse(): void {
     this.stars = [];
     const starCount = 420;
@@ -176,9 +176,9 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
     ctx.save();
     ctx.translate(width / 2, height / 2);
 
-    /* 🎨 ألوان معدلة لتناسب السماء */
-    const axisColor = 'rgba(120, 170, 210, 0.45)'; // سماوي هادئ
-    const gold = '#D9A74A'; // ذهبي أعمق وأوضح
+    /* 🎨 Adjusted colors to suit the sky */
+    const axisColor = 'rgba(120, 170, 210, 0.45)'; // Calm sky blue
+    const gold = '#D9A74A'; // Deeper, clearer gold
 
     const R = Math.min(width, height) * 0.42;
     const unit = R / 4;
@@ -210,7 +210,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
     const pulse = 0.96 + 0.04 * Math.sin(this.t * 0.6);
     ctx.scale(pulse, pulse);
 
-    /* ===== قرص المجرة ===== */
+    /* ===== Galactic disk ===== */
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 0.8;
 
@@ -227,7 +227,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
       ctx.stroke();
     }
 
-    /* ===== الشبكة الشعاعية ===== */
+    /* ===== Radial grid ===== */
     const radialLines = 12;
     for (let i = 0; i < radialLines; i++) {
       const a = (i / radialLines) * Math.PI * 2;
@@ -239,7 +239,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
       ctx.stroke();
     }
 
-    /* ===== محاور الإحداثيات ===== */
+    /* ===== Coordinate axes ===== */
     ctx.lineWidth = 1.6;
     ctx.strokeStyle = gold;
 
@@ -267,7 +267,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
     ctx.lineTo(p2.x, p2.y);
     ctx.stroke();
 
-    /* ===== المدارات ===== */
+    /* ===== Orbits ===== */
     ctx.strokeStyle = gold;
     ctx.lineWidth = 0.9;
 
@@ -310,7 +310,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
       ctx.fill();
     });
 
-    /* ===== النجوم ===== */
+    /* ===== Stars ===== */
     ctx.fillStyle = gold;
     for (const s of this.stars) {
       const p = project(s.x, s.y, s.z);
@@ -324,7 +324,7 @@ export class HOME implements OnInit, AfterViewInit, OnDestroy {
     }
     ctx.globalAlpha = 1;
 
-    /* ===== نواة المجرة ===== */
+    /* ===== Galactic core ===== */
     const core = project(0, 0, 0);
     const grad = ctx.createRadialGradient(core.x, core.y, 0, core.x, core.y, 14);
     grad.addColorStop(0, 'rgba(217,167,74,0.55)');

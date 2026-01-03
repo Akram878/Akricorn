@@ -12,7 +12,7 @@ $gold-400: #d9a74a;
   flex-direction: column;
   gap: 0.3rem;
 
-  /* عنوان افتراضي يطلع فوق الفورم */
+  /* Default heading above the form */
   &::before {
     content: 'Sign in to your account';
     display: block;

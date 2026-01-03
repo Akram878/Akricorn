@@ -201,11 +201,11 @@ namespace Backend.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
             {
-                // بيانات دخول خاطئة
+                // Invalid login credentials
                 return Unauthorized(new { message = "Invalid email or password." });
             }
 
-            // ✅ حساب معطَّل: لا يسمح له بتسجيل الدخول أبداً
+            // ✅ Disabled account: never allow login
             if (!user.IsActive)
             {
                 return StatusCode(403, new { message = "Your account has been disabled. Please contact support." });
@@ -214,7 +214,7 @@ namespace Backend.Controllers
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
             if (result == PasswordVerificationResult.Failed)
             {
-                // بيانات دخول خاطئة
+                // Invalid login credentials
                 return Unauthorized(new { message = "Invalid email or password." });
             }
 
@@ -298,7 +298,7 @@ namespace Backend.Controllers
             if (user == null)
                 return NotFound(new { message = "User not found." });
 
-            // ✅ لو الأدمن عطّل الحساب بعد ما المستخدم دخل
+            // ✅ If admin disabled the account after the user logged in
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
 
@@ -393,7 +393,7 @@ namespace Backend.Controllers
             if (user == null)
                 return NotFound(new { message = "User not found." });
 
-            // ✅ لا تسمح لمستخدم معطّل بتعديل حسابه
+            // ✅ Do not allow a disabled user to update their account
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
 
@@ -447,7 +447,7 @@ namespace Backend.Controllers
             if (user == null)
                 return NotFound(new { message = "User not found." });
 
-            // ✅ حتى لو حاول يحذف حسابه وهو معطّل → نمنع
+            // ✅ Even if a disabled user tries to delete the account, block it
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
 

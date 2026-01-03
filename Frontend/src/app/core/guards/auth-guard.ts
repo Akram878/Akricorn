@@ -8,7 +8,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // لو ما في توكن → رجّعه على صفحة اللوجين الصحيحة
+  // If there is no token → send them to the correct login page
   const redirectToSign = route.data?.['redirectToSign'] === true;
   const target = redirectToSign ? '/auth/sign' : '/auth/login';
 

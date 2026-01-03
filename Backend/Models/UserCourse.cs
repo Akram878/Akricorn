@@ -2,7 +2,7 @@
 
 namespace Backend.Models
 {
-    // الكورسات التي يملكها المستخدم (My Courses)
+    // Courses owned by the user (My Courses)
     public class UserCourse
     {
 

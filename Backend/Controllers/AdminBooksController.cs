@@ -30,7 +30,7 @@ namespace Backend.Controllers
 
         // =========================
         //  GET: /api/admin/books
-        //  عرض كل الكتب (للداشبورد)
+        //  Show all books (dashboard)
         // =========================
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetAll()
@@ -80,7 +80,7 @@ namespace Backend.Controllers
 
         // =========================
         //  GET: /api/admin/books/{id}
-        //  عرض كتاب واحد بالتفصيل
+        //  Show a single book in detail
         // =========================
         [HttpGet("{id:int}")]
         public async Task<ActionResult<BookDto>> GetById(int id)
@@ -128,7 +128,7 @@ namespace Backend.Controllers
 
         // =========================
         //  POST: /api/admin/books
-        //  إنشاء كتاب جديد
+        //  Create a new book
         // =========================
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookRequest request)
@@ -184,7 +184,7 @@ namespace Backend.Controllers
 
         // =========================
         //  PUT: /api/admin/books/{id}
-        //  تعديل كتاب موجود
+        //  Update an existing book
         // =========================
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateBookRequest request)
@@ -245,7 +245,7 @@ namespace Backend.Controllers
 
         // =========================
         //  DELETE: /api/admin/books/{id}
-        //  حذف كتاب
+        //  Delete a book
         // =========================
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
@@ -295,7 +295,7 @@ namespace Backend.Controllers
 
         // =========================
         //  PATCH: /api/admin/books/{id}/toggle
-        //  تفعيل/تعطيل كتاب
+        //  Enable/disable a book
         // =========================
         [HttpPatch("{id:int}/toggle")]
         public async Task<IActionResult> ToggleActive(int id)
@@ -339,7 +339,7 @@ namespace Backend.Controllers
 
         // =========================
         //  POST: /api/admin/books/{id}/upload-thumbnail
-        //  رفع صورة الغلاف
+        //  Upload the cover image
         // =========================
         [HttpPost("{id:int}/upload-thumbnail")]
         [DisableRequestSizeLimit]
@@ -408,7 +408,7 @@ namespace Backend.Controllers
 
         // =========================
         //  POST: /api/admin/books/{id}/files/upload
-        //  رفع ملف للكتاب
+        //  Upload a book file
         // =========================
         [HttpPost("{id:int}/files/upload")]
         [DisableRequestSizeLimit]
@@ -502,7 +502,7 @@ namespace Backend.Controllers
 
         // =========================
         //  DELETE: /api/admin/books/files/{fileId}
-        //  حذف ملف كتاب
+        //  Delete a book file
         // =========================
         [HttpDelete("files/{fileId:int}")]
         public async Task<IActionResult> DeleteFile(int fileId)
@@ -697,7 +697,7 @@ namespace Backend.Controllers
     }
 
     // ==========================
-    //   DTOs للكتب
+    //   DTOs for books
     // ==========================
 
     public class BookDto

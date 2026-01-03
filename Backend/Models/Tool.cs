@@ -1,19 +1,19 @@
 ﻿namespace Backend.Models
 {
-    // أداة / رابط مفيد يعرض في الموقع أو لوحة التحكم
+    // Tool/useful link shown on the site or dashboard
     public class Tool
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }          // اسم الأداة
-        public string Description { get; set; }   // وصف قصير
-        public string Url { get; set; }           // رابط الأداة (موقع خارجي مثلاً)
-        public string Category { get; set; }      // تصنيف (برمجة، دراسة، إنتاجية...)
+        public string Name { get; set; }          // Tool name
+        public string Description { get; set; }   // Short description
+        public string Url { get; set; }           // Tool URL (e.g., external site)
+        public string Category { get; set; }      // Category (Programming, study, productivity...)
         public bool IsActive { get; set; } = true;
-        public int DisplayOrder { get; set; } = 0; // لترتيب الظهور
+        public int DisplayOrder { get; set; } = 0; // For display ordering
 
 
-        public string AvatarUrl { get; set; }     // الصورة الرمزية للأداة
+        public string AvatarUrl { get; set; }     // Tool avatar image
 
         public ICollection<ToolFile> Files { get; set; }
         public ICollection<FileMetadata> FileMetadata { get; set; } = new List<FileMetadata>();

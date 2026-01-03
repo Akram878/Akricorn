@@ -32,7 +32,7 @@ export class DashboardBooks implements OnInit {
   books: BookView[] = [];
   bookFiles: BookFileView[] = [];
 
-  // فورم إنشاء / تعديل كتاب
+  // Form to create/edit a book
   isLoading = false;
   isSaving = false;
   isEditorOpen = false;
@@ -75,7 +75,7 @@ export class DashboardBooks implements OnInit {
     });
   }
 
-  // فتح المودال لإنشاء كتاب جديد
+  // Open modal to create a new book
   openCreateEditor(): void {
     this.isEditorOpen = true;
     this.isCreateMode = true;
@@ -123,7 +123,7 @@ export class DashboardBooks implements OnInit {
     });
   }
 
-  // إرسال الفورم (إنشاء أو تعديل)
+  // Submit the form (create or edit)
   onSubmitEditor(): void {
     if (this.bookForm.invalid || this.isSaving) return;
 

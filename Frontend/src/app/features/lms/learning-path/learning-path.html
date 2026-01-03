@@ -93,7 +93,7 @@
                 *ngIf="p.completedAt"
                 (click)="openRatingModal(p)"
               >
-                تقييم المسار
+                Rate path
               </button>
             </div>
           </footer>
@@ -121,7 +121,7 @@
   <div class="path-rating__panel" role="dialog" aria-modal="true">
     <header class="path-rating__header">
       <div>
-        <h3>تقييم المسار</h3>
+        <h3>Rate path</h3>
         <p>{{ selectedPath?.title }}</p>
       </div>
       <button type="button" class="path-rating__close" (click)="closeRatingModal()">×</button>
@@ -145,7 +145,7 @@
       (click)="submitRating()"
       [disabled]="isSubmittingRating || ratingValue < 1"
     >
-      {{ isSubmittingRating ? 'جارٍ الإرسال...' : 'إرسال التقييم' }}
+      {{ isSubmittingRating ? 'Sending...' : 'Submit rating' }}
     </button>
   </div>
 </section>

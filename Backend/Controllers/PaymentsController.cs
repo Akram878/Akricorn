@@ -24,7 +24,7 @@ namespace Backend.Controllers
         }
 
         // ==============================
-        //   شراء كورس + تسجيل عملية دفع
+        //   Purchase course + record payment
         // ==============================
         [HttpPost("course/{courseId}")]
         public async Task<IActionResult> PurchaseCourseWithPayment(int courseId)
@@ -33,7 +33,7 @@ namespace Backend.Controllers
             if (userId == null)
                 return Unauthorized(new { message = "Unauthorized." });
 
-            // تأكد أن المستخدم موجود ومفعّل
+            // Ensure the user exists and is active
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId.Value);
             if (user == null)
                 return Unauthorized(new { message = "Unauthorized." });
@@ -41,21 +41,21 @@ namespace Backend.Controllers
             if (!user.IsActive)
                 return StatusCode(403, new { message = "Your account has been disabled." });
 
-            // تأكد أن الكورس موجود ومفعل
+            // Ensure the course exists and is active
             var course = await _context.Courses
                 .FirstOrDefaultAsync(c => c.Id == courseId && c.IsActive);
 
             if (course == null)
                 return NotFound(new { message = "Course not found." });
 
-            // هل المستخدم يملك الكورس أصلاً؟
+            // Does the user already own the course?
             var alreadyHasCourse = await _context.UserCourses
                 .AnyAsync(uc => uc.UserId == userId.Value && uc.CourseId == courseId);
 
             if (alreadyHasCourse)
                 return BadRequest(new { message = "You already own this course." });
 
-            // 🔹 دفع افتراضي ناجح (بدون بوابة دفع حقيقية)
+            // 🔹 Simulated successful payment (no real payment gateway)
 
             var amount = Backend.Helpers.PricingHelper.CalculateDiscountedPrice(course.Price, course.Discount);
 
@@ -76,7 +76,7 @@ namespace Backend.Controllers
 
             _context.Payments.Add(payment);
 
-            // إضافة الكورس للمستخدم (My Courses)
+            // Add the course to the user (My Courses)
             var userCourse = new UserCourse
             {
                 UserId = userId.Value,
@@ -119,7 +119,7 @@ namespace Backend.Controllers
         }
 
         // ==============================
-        //   سجل المدفوعات الخاص بالمستخدم
+        //   User payment history
         // ==============================
         [HttpGet("my")]
         public async Task<IActionResult> GetMyPayments()

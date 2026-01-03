@@ -62,7 +62,7 @@
   <div class="book-rating__backdrop" (click)="closeRatingModal()"></div>
   <div class="book-rating__panel" role="dialog" aria-modal="true">
     <header class="book-rating__header">
-      <h3>تقييم الكتاب</h3>
+      <h3>Rate book</h3>
       <p>{{ selectedBook?.title }}</p>
     </header>
     <div class="book-rating__stars">
@@ -82,7 +82,7 @@
       (click)="submitRating()"
       [disabled]="isSubmittingRating || ratingValue < 1"
     >
-      {{ isSubmittingRating ? 'جارِ الإرسال...' : 'إرسال التقييم' }}
+      {{ isSubmittingRating ? 'Sending...' : 'Submit rating' }}
     </button>
     <div class="book-rating__actions">
       <button
@@ -91,7 +91,7 @@
         (click)="closeRatingModal()"
         [disabled]="isSubmittingRating"
       >
-        إلغاء
+        Cancel
       </button>
     </div>
   </div>

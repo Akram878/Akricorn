@@ -15,12 +15,12 @@ export class UserStoreService {
   isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 
   constructor() {
-    // Auto-load من localStorage عند بدء التطبيق
+    // Auto-load from localStorage at app start
     const storedUserJson = localStorage.getItem(USER_STORAGE_KEY);
     if (storedUserJson) {
       try {
         const user: User = JSON.parse(storedUserJson);
-        // لو عندنا user في التخزين ⇒ اعتبره مسجّل
+        // If a user exists in storage ⇒ treat as logged in
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(!user.isGuest);
       } catch (e) {
@@ -32,7 +32,7 @@ export class UserStoreService {
     }
   }
 
-  // تعيين المستخدم الحالي
+  // Set the current user
   setUser(user: User | null, saveToStorage: boolean = true): void {
     if (!user) {
       this.setGuest();
@@ -52,7 +52,7 @@ export class UserStoreService {
     }
   }
 
-  // تحويل الوضع إلى ضيف
+  // Switch to guest mode
   setGuest(): void {
     const guestUser: User = {
       id: undefined,
@@ -68,7 +68,7 @@ export class UserStoreService {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(guestUser));
   }
 
-  // استرجاع المستخدم الحالي بشكل sync (استعمل بحذر)
+  // Retrieve the current user synchronously (use cautiously)
   getUser(): User {
     return (
       this.currentUserSubject.value ?? {
@@ -78,7 +78,7 @@ export class UserStoreService {
     );
   }
 
-  // توليد guestId بسيط
+  // Generate a simple guestId
   private generateGuestId(): string {
     return 'guest-' + Math.random().toString(36).substring(2, 11);
   }

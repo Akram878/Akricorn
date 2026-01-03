@@ -10,7 +10,7 @@ namespace Backend.Models
         Cancelled = 3
     }
 
-    // عملية دفع (افتراضية) لكورس / كتاب / مسار
+    // Payment (mock) for a course/book/path
     public class Payment
     {
         public int Id { get; set; }
@@ -31,10 +31,10 @@ namespace Backend.Models
 
         public string Description { get; set; }
 
-        // اسم مزوّد الدفع الافتراضي
+        // Default payment provider name
         public string Provider { get; set; } = "DemoPay";
 
-        // رقم مرجعي افتراضي للعملية
+        // Default reference number for the transaction
         public string ExternalReference { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

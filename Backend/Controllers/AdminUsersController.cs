@@ -31,7 +31,7 @@ namespace Backend.Controllers
         }
 
         // GET: /api/admin/users
-        // إرجاع جميع المستخدمين
+        // Return all users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AdminUserDto>>> GetAll()
         {
@@ -56,7 +56,7 @@ namespace Backend.Controllers
         }
 
         // GET: /api/admin/users/{id}
-        // إرجاع مستخدم واحد بالتفصيل
+        // Return a single user in detail
         [HttpGet("{id:int}")]
         public async Task<ActionResult<AdminUserDetailsDto>> GetById(int id)
         {
@@ -331,7 +331,7 @@ namespace Backend.Controllers
         }
 
         // PATCH: /api/admin/users/{id}/toggle
-        // تفعيل / تعطيل حساب المستخدم
+        // Enable/disable the user's account
         [HttpPatch("{id:int}/toggle")]
         public async Task<IActionResult> ToggleActive(int id)
         {
@@ -347,7 +347,7 @@ namespace Backend.Controllers
         }
 
         // PATCH: /api/admin/users/{id}/role
-        // تغيير دور المستخدم (Student, Premium, Moderator, ...)
+        // Change the user's role (Student, Premium, Moderator, ...)
         [HttpPatch("{id:int}/role")]
         public async Task<IActionResult> ChangeRole(int id, [FromBody] AdminUpdateUserRoleRequest request)
         {
@@ -417,7 +417,7 @@ namespace Backend.Controllers
         }
     }
 
-    // DTOs خاصة بلوحة تحكم الأدمن
+    // DTOs for the admin dashboard
     public class AdminUserDto
     {
         public int Id { get; set; }

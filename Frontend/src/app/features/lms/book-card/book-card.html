@@ -7,13 +7,13 @@
       <div class="lms-book-card__cover-fallback" aria-hidden="true">
         <svg class="logo__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 134 155">
           <defs>
-            <!-- تدرج قريب جدا من الخلفية -->
+            <!-- Gradient very close to the background -->
             <linearGradient id="softInsetGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stop-color="hsl(26, 65%, 48%)" />
               <stop offset="100%" stop-color="hsl(24, 60%, 42%)" />
             </linearGradient>
 
-            <!-- ظل داخلي خفيف جدا -->
+            <!-- Very subtle inner shadow -->
             <filter id="softInset">
               <feOffset dx="0" dy="1" />
               <feGaussianBlur stdDeviation="1" result="blur" />
@@ -75,7 +75,7 @@
       (click)="toggleDescription()"
       [attr.aria-expanded]="isExpanded"
     >
-      {{ isExpanded ? 'عرض أقل' : 'عرض المزيد' }}
+      {{ isExpanded ? 'Show less' : 'Show more' }}
     </button>
   </div>
 
@@ -94,7 +94,7 @@
         (click)="onRate()"
         [disabled]="rateDisabled"
       >
-        تقييم
+        Rate
       </button>
       <button
         type="button"

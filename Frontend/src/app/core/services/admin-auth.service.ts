@@ -25,7 +25,7 @@ interface AdminLoginResponse {
   providedIn: 'root',
 })
 export class AdminAuthService {
-  // عدّل الرابط إذا الباك إند عندك على بورت مختلف
+  // Adjust the URL if your backend is on a different port
   private apiUrl = `${API_BASE_URL}/api/admin`;
   isLoggedIn$: Observable<boolean>;
 

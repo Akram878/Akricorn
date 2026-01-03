@@ -1,8 +1,8 @@
 <div class="user-detail">
   <div class="user-detail__header">
     <div>
-      <a routerLink="/dashboard/users" class="back-link">← المستخدمون</a>
-      <h2>بيانات المستخدم</h2>
+      <a routerLink="/dashboard/users" class="back-link">← Users</a>
+      <h2>User details</h2>
     </div>
   </div>
 
@@ -12,15 +12,15 @@
 
   <ng-container *ngIf="overview && !isLoading">
     <section class="section">
-      <h3>المشتريات</h3>
+      <h3>Purchases</h3>
       <table class="data-table" *ngIf="purchaseRows.length; else noPurchases">
         <thead>
           <tr>
-            <th>نوع المنتج</th>
-            <th>اسم المنتج</th>
-            <th>المعرف</th>
-            <th>السعر</th>
-            <th>تقييم المستخدم</th>
+            <th>Product type</th>
+            <th>Product name</th>
+            <th>ID</th>
+            <th>Price</th>
+            <th>User rating</th>
           </tr>
         </thead>
         <tbody>
@@ -33,17 +33,17 @@
           </tr>
         </tbody>
       </table>
-      <ng-template #noPurchases><div class="empty">لا يوجد مشتريات.</div></ng-template>
+      <ng-template #noPurchases><div class="empty">No purchases.</div></ng-template>
     </section>
 
     <section class="section">
-      <h3>الكورسات</h3>
+      <h3>Courses</h3>
       <table class="data-table" *ngIf="courseStatusRows.length; else noCourses">
         <thead>
           <tr>
-            <th>اسم الكورس</th>
-            <th>المعرف</th>
-            <th>الحالة</th>
+            <th>Course name</th>
+            <th>ID</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -54,7 +54,7 @@
           </tr>
         </tbody>
       </table>
-      <ng-template #noCourses><div class="empty">لا يوجد كورسات.</div></ng-template>
+      <ng-template #noCourses><div class="empty">No courses.</div></ng-template>
     </section>
   </ng-container>
 </div>

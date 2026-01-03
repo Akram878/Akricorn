@@ -13,7 +13,7 @@ namespace Backend.Data
         // ========== LMS ==========
         public DbSet<Course> Courses { get; set; }
 
-        // كتب (ما زلنا بحاجة لها)
+        // Books (still needed)
         public DbSet<Book> Books { get; set; }
         public DbSet<UserBook> UserBooks { get; set; }
 

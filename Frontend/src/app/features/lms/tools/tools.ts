@@ -80,7 +80,7 @@ export class LmsTools implements OnInit {
     }
 
     if (!this.authService.isAuthenticated()) {
-      this.notification.showError('يرجى تسجيل الدخول للوصول إلى الملف.');
+      this.notification.showError('Please sign in to access the file.');
       return;
     }
 

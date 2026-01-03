@@ -41,17 +41,17 @@ export class PublicBooksService {
 
   constructor(private http: HttpClient) {}
 
-  // الكتب العامة (اللايبرري) — متاحة للجميع
+  // Public books (library) — available to everyone
   getBooks(): Observable<PublicBook[]> {
     return this.http.get<PublicBook[]>(`${this.baseUrl}/books`);
   }
 
-  // الكتب التي يملكها المستخدم
+  // Books owned by the user
   getMyBooks(): Observable<MyBook[]> {
     return this.http.get<MyBook[]>(`${this.baseUrl}/my-books`);
   }
 
-  // شراء كتاب واحد
+  // Purchase a single book
   purchaseBook(bookId: number): Observable<any> {
     return this.http.post(`${this.baseUrl}/books/${bookId}/purchase`, {});
   }

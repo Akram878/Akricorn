@@ -4,10 +4,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ThemeService {
-  private readonly key = 'theme'; // لتخزين الثيم في localStorage
+  private readonly key = 'theme'; // To store the theme in localStorage
 
   constructor() {
-    this.loadTheme(); // تحميل الثيم الحالي عند بدء التطبيق
+    this.loadTheme(); // Load the current theme at app start
   }
 
   toggleTheme(): void {

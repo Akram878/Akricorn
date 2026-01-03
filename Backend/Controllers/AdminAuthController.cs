@@ -104,7 +104,7 @@ namespace Backend.Controllers
     }
 
     // ==========================
-    //   DTOs (طلب / رد)
+    //   DTOs (request/response)
     // ==========================
 
     public class AdminLoginRequest

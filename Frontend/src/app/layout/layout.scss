@@ -12,7 +12,7 @@
     padding: 1rem 1.8rem;
     border-bottom: 1px solid #e6e8ef;
     @include flex(row, space-between, center);
-    position: relative; // عشان المنيو المنسدلة تتموضع تحته
+    position: relative; // So the dropdown menu positions beneath it
 
     .brand {
       @include flex(row, center, center);
@@ -26,7 +26,7 @@
       }
 
       .brand__text {
-        display: inline-block; /* 🔑 مهم جدًا */
+        display: inline-block; /* 🔑 Very important */
         background-image: linear-gradient(
           135deg,
           #f6d37a 0%,
@@ -80,9 +80,9 @@
       }
     }
 
-    /* زر التوغل (هامبرغر) */
+    /* Toggle button (hamburger) */
     .nav-toggle {
-      display: none; // ديفولت: مخفي على كل الشاشات
+      display: none; // Default: hidden on all screens
       margin-left: 0.75rem;
 
       width: 2.3rem;
@@ -105,7 +105,7 @@
       }
     }
 
-    /* حالة الفتح: nav--open يأتي من [class.nav--open] في الـ HTML */
+    /* Open state: nav--open comes from [class.nav--open] in the HTML */
     &.nav--open {
       .Navigation_buttons {
         max-height: 400px;
@@ -211,7 +211,7 @@
    Responsive
    ================================ */
 
-  /* منيو موبايل / تابلت */
+  /* Mobile / tablet menu */
   @media (max-width: 900px) {
     nav {
       padding: 0.75rem 1.25rem;
@@ -256,7 +256,7 @@
       }
 
       .nav-toggle {
-        display: flex; // يظهر في الموبايل
+        display: flex; // Visible on mobile
       }
     }
 
@@ -266,7 +266,7 @@
     }
   }
 
-  /* شاشات أصغر: تضييق المسافات */
+  /* Smaller screens: tighten spacing */
   @media (max-width: 600px) {
     nav {
       padding: 0.6rem 0.9rem;
@@ -288,7 +288,7 @@
   }
 }
 
-/* ضمان اختفاء زر التوغل على الشاشات الأكبر من 900px كطبقة أمان إضافية */
+/* Ensure the toggle button disappears on screens larger than 900px as an extra safety layer */
 @media (min-width: 901px) {
   .layout nav .nav-toggle {
     display: none !important;

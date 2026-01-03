@@ -76,7 +76,7 @@ export class MyCourses implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: () => {
-        this.error = 'حدث خطأ أثناء تحميل كورساتك. حاول مرة أخرى لاحقاً.';
+        this.error = 'An error occurred while loading your courses. Please try again later.';
         this.isLoading = false;
       },
     });

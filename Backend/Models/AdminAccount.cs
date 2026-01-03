@@ -12,7 +12,7 @@ namespace Backend.Models
     public class AdminAccount
     {
         public int Id { get; set; }
-        public string Username { get; set; }    // للدخول للداشبورد
+        public string Username { get; set; }    // For dashboard login
         public string PasswordHash { get; set; }
         public AdminRole Role { get; set; }
         public bool IsActive { get; set; } = true;

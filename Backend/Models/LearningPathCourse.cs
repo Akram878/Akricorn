@@ -1,6 +1,6 @@
 ﻿namespace Backend.Models
 {
-    // جدول ربط Many-to-Many بين مسار التعلّم والكورسات
+    // Many-to-many join table between a learning path and courses
     public class LearningPathCourse
     {
         public int LearningPathId { get; set; }
@@ -9,6 +9,6 @@
         public int CourseId { get; set; }
         public Course Course { get; set; }
 
-        public int StepOrder { get; set; } // ترتيب هذا الكورس داخل المسار
+        public int StepOrder { get; set; } // Order of this course within the path
     }
 }

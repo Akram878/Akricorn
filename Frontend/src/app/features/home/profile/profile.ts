@@ -126,7 +126,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     this.avatarUrl = trimmed;
 
-    // ✅ نتأكد أن الإيميل موجود، ثم نستخدمه كسلسلة نصية
+    // ✅ Ensure the email exists, then use it as a string
     const email = this.user.email ?? '';
     if (email) {
       this.storeAvatar(email, trimmed);
@@ -149,7 +149,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       city: this.user.city || '',
       birthDate: this.formatBirthDate(this.user.birthDate),
-      currentPassword: '', // كل مرة نفتح الفورم نفرّغ الباسورد
+      currentPassword: '', // Clear the password every time the form opens
     };
 
     this.editMode = true;
@@ -193,7 +193,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // 🔐 لازم يدخل كلمة السر في كل تعديل
+    // 🔐 Must enter the password for every update
     if (!this.editModel.currentPassword) {
       alert('Please enter your password to confirm the changes.');
       return;
@@ -252,7 +252,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       next: (updated: User) => {
         this.user = updated;
 
-        // نفرّغ الباسورد بعد الحفظ
+        // Clear the password after saving
         this.editModel.currentPassword = '';
 
         console.log('Profile updated:', updated);
@@ -277,7 +277,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // 🔐 أيضاً هنا: لا يُسمح بأي تعديل بدون كلمة السر الحالية
+    // 🔐 Also here: no changes allowed without the current password
     if (!this.accountSettingsModel.currentPassword) {
       alert('Please enter your current password to save changes.');
       return;
@@ -389,9 +389,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   closeProfile(): void {
-    // مثال لو في متغيّر showProfile في الأب:
-    // this.close.emit();  // لو عامل Output<EventEmitter> على الكومبوننت
-    // أو:
+    // Example if there is a showProfile variable in the parent:
+    // this.close.emit();  // If using Output<EventEmitter> on the component
+    // Or:
     // this.router.navigate(['/home']);
     console.log('closeProfile() clicked');
   }

@@ -15,7 +15,7 @@ $gold-500: #b9822f;
   max-width: 1100px;
   margin: 0 auto;
   padding: 2.4rem 1.5rem 3rem;
-  color: $gold-100;
+  color: #6b7280;
 }
 
 .profile__header {
@@ -52,9 +52,9 @@ $gold-500: #b9822f;
 }
 
 .profile__avatar-btn {
-  border: 1px solid hsl(165, 93%, 11%);
-  background-color: #041e16;
-  color: $gold-200;
+  border: none;
+  color: #f6f7fb;
+  background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
   border-radius: 0.3rem;
   padding: 0.35rem 1rem;
   font-size: 0.78rem;
@@ -139,7 +139,7 @@ $gold-500: #b9822f;
 }
 
 .profile__muted {
-  color: rgba($gold-200, 0.8);
+  color: #1f2937;
   font-size: 0.92rem;
   margin-bottom: 1.2rem;
 }
@@ -147,28 +147,33 @@ $gold-500: #b9822f;
 .profile__list {
   display: grid;
   gap: 0.75rem;
-}
-
-.profile__list-item {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
+  border: 1px solid #c8942e;
+  padding: 1rem;
   border-radius: 0.3rem;
-  border: 1px solid rgba(185, 130, 47, 0.3);
-  padding: 0.75rem;
-  background: rgba(2, 15, 12, 0.96);
-  color: #fff4cf;
-  outline: none;
 
-  span {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba($gold-200, 0.6);
-  }
+  .profile__list-item {
+    &:not(:last-child) {
+      border-bottom: 1px solid #c8942e;
+    }
 
-  strong {
-    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+
+    padding: 0.75rem;
+
+    outline: none;
+
+    span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6b7280;
+    }
+
+    strong {
+      font-size: 0.9rem;
+    }
   }
 }
 
@@ -183,7 +188,7 @@ $gold-500: #b9822f;
 
   p {
     margin: 0.35rem 0 0;
-    color: rgba($gold-200, 0.75);
+    color: #6b7280;
     font-size: 0.9rem;
   }
 }
@@ -204,12 +209,13 @@ $gold-500: #b9822f;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  margin-bottom: 1rem;
 
   span {
     font-size: 0.75rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba($gold-200, 0.7);
+    color: #6b7280;
   }
 
   input {
@@ -217,8 +223,8 @@ $gold-500: #b9822f;
     border-radius: 0.3rem;
     border: 1px solid rgba(185, 130, 47, 0.3);
     padding: 0.75rem;
-    background: rgba(2, 15, 12, 0.96);
-    color: #fff4cf;
+    background: linear-gradient(180deg, #ffffff 0%, #fff8e6 55%, #f6f7fb 100%);
+    color: #1f2937;
     outline: none;
     transition: border 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
       transform 0.08s ease;
@@ -241,7 +247,7 @@ $gold-500: #b9822f;
 
 .profile-form__note {
   font-size: 0.75rem;
-  color: rgba($gold-200, 0.8);
+  color: #f59696;
 }
 
 .profile-form__actions {
@@ -256,10 +262,12 @@ $gold-500: #b9822f;
 .btn-secondary,
 .btn-ghost,
 .btn-danger {
+  border: none;
   width: 10rem;
-  background-color: #041e16;
+  background-image: linear-gradient(135deg, #f6d37a 0%, #e9b85a 35%, #d9a74a 65%, #c8942e 100%);
   border-radius: 0.3rem;
-  border: 1px solid hsl(165, 93%, 11%);
+  color: #f6f7fb;
+  font-weight: 600;
   padding: 0.6rem 1.2rem;
   font-size: 0.9rem;
   cursor: pointer;
@@ -268,13 +276,6 @@ $gold-500: #b9822f;
 }
 
 .btn-primary {
-  background: linear-gradient(
-    180deg,
-    hsl(45, 48.78%, 67.84%) 0%,
-    hsl(43.33, 46.96%, 54.9%) 40%,
-    #c89445 100%
-  );
-  color: #031712;
   font-weight: 600;
   &:hover:not(:disabled) {
     transform: translateY(-1px);
@@ -282,27 +283,21 @@ $gold-500: #b9822f;
 }
 
 .btn-secondary {
-  color: $gold-200;
-
   &:hover:not(:disabled) {
-    border-color: rgba($gold-400, 0.9);
     transform: translateY(-1px);
   }
 }
 
 .btn-ghost {
-  color: rgba($gold-200, 0.9);
-
   &:hover:not(:disabled) {
-    border-color: rgba($gold-400, 0.8);
     transform: translateY(-1px);
   }
 }
 
 .btn-danger {
   background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(248, 113, 113, 0.6);
-  color: #fecaca;
+  border-color: rgba(252, 47, 47, 0.6);
+  color: rgba(252, 47, 47, 0.6);
 
   &:hover:not(:disabled) {
     background: rgba(239, 68, 68, 0.3);

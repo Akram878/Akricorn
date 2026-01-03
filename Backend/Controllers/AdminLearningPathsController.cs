@@ -28,7 +28,7 @@ namespace Backend.Controllers
 
         // =========================
         // GET: /api/admin/paths
-        // عرض كل المسارات
+        // List all paths
         // =========================
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LearningPathDto>>> GetAll()
@@ -66,7 +66,7 @@ namespace Backend.Controllers
 
         // =========================
         // POST: /api/admin/paths/{id}/upload-thumbnail
-        // رفع صورة المسار
+        // Upload path thumbnail
         // =========================
         [HttpPost("{id:int}/upload-thumbnail")]
         [DisableRequestSizeLimit]
@@ -112,7 +112,7 @@ namespace Backend.Controllers
 
         // =========================
         // GET: /api/admin/paths/{id}
-        // مسار واحد بالتفصيل
+        // Single path in detail
         // =========================
         [HttpGet("{id:int}")]
         public async Task<ActionResult<LearningPathDto>> GetById(int id)
@@ -154,7 +154,7 @@ namespace Backend.Controllers
 
         // =========================
         // POST: /api/admin/paths
-        // إنشاء مسار جديد
+        // Create a new path
         // =========================
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateLearningPathRequest request)
@@ -211,7 +211,7 @@ namespace Backend.Controllers
 
         // =========================
         // PUT: /api/admin/paths/{id}
-        // تعديل مسار موجود
+        // Update an existing path
         // =========================
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateLearningPathRequest request)
@@ -275,7 +275,7 @@ namespace Backend.Controllers
 
         // =========================
         // DELETE: /api/admin/paths/{id}
-        // حذف مسار
+        // Delete a path
         // =========================
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
@@ -300,7 +300,7 @@ namespace Backend.Controllers
 
         // =========================
         // PATCH: /api/admin/paths/{id}/toggle
-        // تفعيل/تعطيل مسار
+        // Enable/disable a path
         // =========================
         [HttpPatch("{id:int}/toggle")]
         public async Task<IActionResult> ToggleActive(int id)
@@ -318,7 +318,7 @@ namespace Backend.Controllers
     }
 
     // ==========================
-    //   DTOs لمسارات التعلم
+    //   DTOs for learning paths
     // ==========================
 
     public class LearningPathDto

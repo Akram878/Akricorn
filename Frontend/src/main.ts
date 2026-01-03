@@ -11,7 +11,7 @@ bootstrapApplication(App, {
   providers: [
     provideHttpClient(
       withFetch(),
-      withInterceptors([httpInterceptor]) // ✅ تفعيل الـ interceptor
+      withInterceptors([httpInterceptor]) // ✅ Enable the interceptor
     ),
     provideRouter(routes),
   ],
