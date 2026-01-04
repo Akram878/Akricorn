@@ -249,13 +249,12 @@
 }
 
 .privacy-modal {
+  background-color: #ffffff;
   position: relative;
   max-width: 540px;
   margin: 6vh auto;
-
   border-radius: 0.8rem;
   padding: 1.2rem 1.4rem 1.4rem;
-
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
   z-index: 1000;
 }
